@@ -505,10 +505,7 @@ window.RedGuide = (() => {
       }
     });
 
-    // 先显示SVG占位
-    createSimpleHeatmap(container, provinceData);
-
-    // 等ECharts加载完成后切换
+    // 等待ECharts加载后初始化
     function tryInit() {
       if (window.echarts) {
         initECharts(container, provinceData, provinceNames, venues);
@@ -516,7 +513,7 @@ window.RedGuide = (() => {
         setTimeout(tryInit, 300);
       }
     }
-    setTimeout(tryInit, 500);
+    setTimeout(tryInit, 200);
   }
 
   async function initECharts(container, provinceData, provinceNames, venues) {
