@@ -2,7 +2,7 @@
   "name": "赓续血脉・数绘红旅 — 红色文旅数字导览",
   "short_name": "数绘红旅",
   "description": "全国红色文旅场馆数字导览平台，AI智能导览助手，支持搜索、分类浏览、场馆详情。",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f7f3ed",
   "theme_color": "#b91c1c",
@@ -10,8 +10,8 @@
   "icons": [
     {
       "src": "assets/学院标识_四川农业大学信息工程学院.webp",
-      "sizes": "192x192",
-      "type": "image/png"
+      "sizes": "450x86",
+      "type": "image/webp"
     }
   ],
   "categories": ["education", "travel", "culture"]
