@@ -23,9 +23,9 @@ const ASSETS_TO_CACHE = [
   '/data/reflections.json',
   '/manifest.json',
   '/assets/页面通用图片/暂无图片.png',
-  '/assets/页面通用图片/时事政策模块封面.jpg',
-  '/assets/页面通用图片/学习留言墙模块封面.jpg',
-  '/assets/页面通用图片/社会实践成果横幅.jpg',
+  '/assets/页面通用图片/时事政策模块封面.webp',
+  '/assets/页面通用图片/学习留言墙模块封面.webp',
+  '/assets/页面通用图片/社会实践成果横幅.webp',
   '/assets/页面通用图片/默认头像.png',
 ];
 

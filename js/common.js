@@ -1031,7 +1031,7 @@ window.RedGuide = (() => {
     const bp = getBasePath();
     const fb = fallbackSrc();
     container.innerHTML = policies.map(p => {
-      const imgSrc = p.image ? resolveAssetPath(p.image, bp) : (bp + 'assets/页面通用图片/时事政策模块封面.jpg');
+      const imgSrc = p.image ? resolveAssetPath(p.image, bp) : (bp + 'assets/页面通用图片/时事政策模块封面.webp');
       const hasUrl = p.url && p.url.trim();
       return `
         <div class="policy-card">

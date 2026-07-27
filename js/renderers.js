@@ -59,7 +59,7 @@ window.RedRenderers = (() => {
    */
   function renderPolicyCard(policy, basePath) {
     const bp = basePath || getBasePath();
-    const imgSrc = resolveAssetPath(policy.image, bp) || (bp + 'assets/页面通用图片/时事政策模块封面.jpg');
+    const imgSrc = resolveAssetPath(policy.image, bp) || (bp + 'assets/页面通用图片/时事政策模块封面.webp');
     const fb = fallbackSrc();
     const hasUrl = policy.url && policy.url.trim();
     return `
