@@ -538,7 +538,7 @@ window.RedGuide = (() => {
     }));
 
     try {
-      const response = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
+      const response = await fetch(getBasePath() + 'data/china.json');
       const mapData = await response.json();
       echarts.registerMap('china', mapData);
 
