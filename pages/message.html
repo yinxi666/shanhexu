@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b91c1c">
+  <meta name="view-transition" content="same-origin">
+  <meta name="description" content="学习留言墙，记录红色文旅实践心得与感悟。">
+  <meta property="og:title" content="学习留言墙 - 赓续血脉・数绘红旅">
+  <meta property="og:description" content="红色文旅实践心得与学习感悟分享。">
+  <meta property="og:type" content="website">
+  <title>学习留言墙 - 赓续血脉・数绘红旅</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <!-- ===== 导航栏 ===== -->
+  <header class="site-header">
+    <nav class="navbar" aria-label="主导航">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">红</span>
+        <span>
+          <strong>赓续血脉・数绘红旅</strong>
+          <small>"青践红途・码绘山河"系列活动</small>
+        </span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="展开导航">☰</button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="guide.html">全国导览</a></li>
+        <li><a href="message.html">留言墙</a></li>
+        <li><a href="policy.html">时事政策</a></li>
+        <li><a href="practice.html">实践成果</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===== 页面 Hero ===== -->
+    <section class="subpage-hero">
+      <img class="hero-bg animate-ken-burns" src="../assets/页面通用图片/学习留言墙模块封面.jpg" alt="留言墙">
+      <div class="subpage-hero-content">
+        <h1 class="subpage-hero-title">学习留言墙</h1>
+        <p class="subpage-hero-subtitle">展示实践心得与学习感悟，支持前端模拟提交交互，你的声音将在这里被看到</p>
+      </div>
+    </section>
+
+    <!-- ===== 留言区：列表 + 表单 ===== -->
+    <section class="section">
+      <div class="message-layout">
+        <!-- 左侧：留言列表 -->
+        <div>
+          <div class="section-heading" style="text-align:left;">
+            <h2>💬 学习感悟</h2>
+            <p>来自参与红色文旅实践的同学们的真实心得与感悟</p>
+          </div>
+          <div class="message-list" id="message-list-container">
+            <div class="empty-state"><div class="empty-icon">⏳</div><h3>加载中…</h3></div>
+          </div>
+        </div>
+
+        <!-- 右侧：提交表单 -->
+        <div class="message-form-card">
+          <h3>✍️ 写下你的感悟</h3>
+          <div class="form-body">
+            <form id="msg-form">
+              <div class="form-group">
+                <label for="msg-author">姓名 <span class="required">*</span></label>
+                <input type="text" id="msg-author" placeholder="请输入你的姓名" required maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="msg-studentid">学号</label>
+                <input type="text" id="msg-studentid" placeholder="选填" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="msg-class">班级</label>
+                <select id="msg-class">
+                  <option value="">选择班级（选填）</option>
+                  <option value="计算机2025级01班">计算机2025级01班</option>
+                  <option value="计算机2025级02班">计算机2025级02班</option>
+                  <option value="计算机2025级03班">计算机2025级03班</option>
+                  <option value="物联网2025级01班">物联网2025级01班</option>
+                  <option value="大数据2025级01班">大数据2025级01班</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="msg-title">心得标题 <span class="required">*</span></label>
+                <input type="text" id="msg-title" placeholder="给你的感悟起个标题" required maxlength="50">
+              </div>
+              <div class="form-group">
+                <label for="msg-content">感悟内容 <span class="required">*</span></label>
+                <textarea id="msg-content" placeholder="分享你的实践心得、学习感悟或对红色文化的理解（至少20个字）…" required minlength="20"></textarea>
+              </div>
+              <button type="submit" class="form-submit">📤 提交感悟</button>
+            </form>
+          </div>
+          <div class="form-success">
+            <div class="success-icon">✅</div>
+            <h4>提交成功！</h4>
+            <p>你的感悟已提交（前端模拟），当前显示为"审核中"状态。</p>
+            <button class="btn primary" style="margin-top:16px;" onclick="document.querySelector('.form-body').style.display='';this.parentElement.classList.remove('show');document.getElementById('msg-form').reset();">✍️ 再写一条</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">赓续血脉・数绘红旅</div>
+        <p class="footer-desc">以数字技术传承红色基因，用实践行动践行青年使命。</p>
+      </div>
+      <div>
+        <h4>快速导航</h4>
+        <ul>
+          <li><a href="../index.html">首页</a></li>
+          <li><a href="guide.html">全国导览</a></li>
+          <li><a href="policy.html">时事政策</a></li>
+          <li><a href="practice.html">实践成果</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>隐私说明</h4>
+        <ul>
+          <li>本留言墙为前端模拟功能</li>
+          <li>用户数据仅存储于本地浏览器</li>
+          <li>正式上线前需完善隐私保护</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 赓续血脉・数绘红旅 · 四川农业大学信息工程学院</div>
+  </footer>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/renderers.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/features.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

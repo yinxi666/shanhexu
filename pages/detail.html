@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b91c1c">
+  <meta name="view-transition" content="same-origin">
+  <meta name="description" content="红色文旅场馆详情展示">
+  <meta property="og:title" content="场馆详情 - 赓续血脉・数绘红旅">
+  <meta property="og:description" content="红色文旅场馆详细介绍、历史背景与官方信息。">
+  <meta property="og:type" content="article">
+  <link rel="manifest" href="../manifest.json">
+  <title>场馆详情 - 赓续血脉・数绘红旅</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <!-- ===== 导航栏 ===== -->
+  <header class="site-header">
+    <nav class="navbar" aria-label="主导航">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">红</span>
+        <span>
+          <strong>赓续血脉・数绘红旅</strong>
+          <small>"青践红途・码绘山河"系列活动</small>
+        </span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="展开导航">☰</button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="guide.html">全国导览</a></li>
+        <li><a href="message.html">留言墙</a></li>
+        <li><a href="policy.html">时事政策</a></li>
+        <li><a href="practice.html">实践成果</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===== 页面 Hero（动态背景） ===== -->
+    <section class="subpage-hero">
+      <img class="hero-bg animate-ken-burns" id="detail-hero-bg" src="" alt="场馆背景">
+      <div class="subpage-hero-content">
+        <div class="detail-nav" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:1rem;">
+          <a href="guide.html" style="color:white;">← 返回导览列表</a>
+          <div>
+            <button class="share-btn" onclick="window.RedGuide.copyShareLink(document.getElementById('detail-name').textContent)" title="复制分享链接">🔗 分享</button>
+            <button class="share-btn" onclick="window.print()" title="打印场馆详情">🖨️ 打印</button>
+          </div>
+        </div>
+        <h1 class="subpage-hero-title" id="detail-name">场馆详情</h1>
+        <p class="subpage-hero-subtitle" id="detail-subtitle">红色场馆详情</p>
+      </div>
+    </section>
+
+    <!-- ===== 详情内容区 ===== -->
+    <section class="section">
+      <div id="detail-container">
+        <!-- JS 动态渲染 -->
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <h3>加载中…</h3>
+          <p>正在获取场馆信息</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">赓续血脉・数绘红旅</div>
+        <p class="footer-desc">以数字技术传承红色基因，用实践行动践行青年使命。</p>
+      </div>
+      <div>
+        <h4>快速导航</h4>
+        <ul>
+          <li><a href="../index.html">首页</a></li>
+          <li><a href="guide.html">全国导览</a></li>
+          <li><a href="message.html">留言墙</a></li>
+          <li><a href="policy.html">时事政策</a></li>
+          <li><a href="practice.html">实践成果</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>关于</h4>
+        <ul>
+          <li>场馆信息以官方发布为准</li>
+          <li>图片版权归原作者所有</li>
+          <li>正式上线前请核验信息</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 赓续血脉・数绘红旅 · 四川农业大学信息工程学院</div>
+  </footer>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/renderers.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/features.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

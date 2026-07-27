@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b91c1c">
+  <meta name="view-transition" content="same-origin">
+  <meta name="description" content="全国红色场馆导览，支持按地区、类别或关键词搜索。">
+  <meta property="og:title" content="全国红色场馆导览 - 赓续血脉・数绘红旅">
+  <meta property="og:description" content="覆盖全国34个省级行政区的红色文旅场馆导览。">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="../manifest.json">
+  <title>全国红色场馆导览 - 赓续血脉・数绘红旅</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script">
+  <style>
+    #map-container .leaflet-popup-content {
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    #map-container .leaflet-popup-content b {
+      color: var(--red);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== 导航栏 ===== -->
+  <header class="site-header">
+    <nav class="navbar" aria-label="主导航">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">红</span>
+        <span>
+          <strong>赓续血脉・数绘红旅</strong>
+          <small>"青践红途・码绘山河"系列活动</small>
+        </span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="展开导航">☰</button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="guide.html">全国导览</a></li>
+        <li><a href="message.html">留言墙</a></li>
+        <li><a href="policy.html">时事政策</a></li>
+        <li><a href="practice.html">实践成果</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===== Cinematic Hero ===== -->
+    <section class="subpage-hero">
+      <img class="hero-bg animate-ken-burns" src="../assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.jpg" alt="红色场馆">
+      <div class="subpage-hero-content">
+        <h1 class="subpage-hero-title">全国红色场馆导览</h1>
+        <p class="subpage-hero-subtitle">覆盖全国34个省级行政区的红色文旅场馆，支持按地区、类别或关键词进行内容查找</p>
+      </div>
+    </section>
+
+    <!-- ===== 搜索与筛选区 ===== -->
+    <section class="section">
+      <div class="search-toolbar">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="输入场馆名称、地区或关键词…" aria-label="搜索场馆">
+          <button id="guide-search-btn" type="button">搜索</button>
+        </div>
+        <select id="filter-province" aria-label="按地区筛选">
+          <option value="all">全部地区</option>
+        </select>
+        <select id="filter-category" aria-label="按类别筛选">
+          <option value="all">全部类别</option>
+        </select>
+        <button class="btn secondary small" id="toggle-view-btn" title="切换地图/列表视图" style="white-space:nowrap;">🗺️
+          地图视图</button>
+      </div>
+
+      <!-- 结果计数 + 视图切换 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div class="result-count" id="result-count"></div>
+      </div>
+
+      <!-- 网格视图 -->
+      <div class="venue-grid" id="venue-grid"></div>
+
+      <!-- 地图视图 -->
+      <div id="map-container"
+        style="display:none;height:520px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);">
+      </div>
+
+      <!-- 分页 -->
+      <div id="pagination-container"></div>
+    </section>
+  </main>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">赓续血脉・数绘红旅</div>
+        <p class="footer-desc">以数字技术传承红色基因，用实践行动践行青年使命。</p>
+      </div>
+      <div>
+        <h4>快速导航</h4>
+        <ul>
+          <li><a href="../index.html">首页</a></li>
+          <li><a href="message.html">留言墙</a></li>
+          <li><a href="policy.html">时事政策</a></li>
+          <li><a href="practice.html">实践成果</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>关于</h4>
+        <ul>
+          <li>四川农业大学信息工程学院</li>
+          <li>场馆数据持续更新中</li>
+          <li>信息以官方发布为准</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 赓续血脉・数绘红旅 · 四川农业大学信息工程学院</div>
+  </footer>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/renderers.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/features.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js').catch(() => { });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>码上红途——四川红色文化宣讲平台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+:root{--main-red:#c8102e;--white:#fff;--dark:#222;--light:#f8f8f8}
+body{color:var(--dark);background:var(--light)}
+
+/* 导航 */
+.navbar{
+background:linear-gradient(90deg,#900,#c8102e);
+color:var(--white);
+padding:1rem 2rem;
+position:sticky;top:0;z-index:99
+}
+.nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.5rem;font-weight:bold}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--white);text-decoration:none}
+.nav-links a:hover{text-decoration:underline}
+
+/* banner 纯色渐变背景 */
+.banner{
+height:420px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+color:var(--white);
+background:linear-gradient(135deg, #9e0b0b 0%, #c8102e 100%)
+}
+.banner h1{font-size:2.8rem;margin-bottom:1rem}
+.banner p{font-size:1.2rem}
+
+/* 内容 */
+.section{max-width:1200px;margin:3rem auto;padding:0 2rem}
+.section-title{
+font-size:2rem;
+color:var(--main-red);
+margin-bottom:1.5rem;
+border-left:5px solid var(--main-red);
+padding-left:1rem
+}
+
+/* 卡片 */
+.card-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+gap:1.5rem
+}
+.card{
+background:var(--white);
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 3px 10px rgba(0,0,0,0.1)
+}
+.card-img {
+  height: 200px;
+  background: #ddd;
+  background-size: cover;
+  background-position: center;
+}
+.card-body{padding:1.5rem}
+.card-title{font-size:1.2rem;color:var(--main-red);margin-bottom:.7rem}
+.card-text{font-size:.95rem;line-height:1.6;color:#444;margin-bottom:1rem}
+.card-tag{display:inline-block;background:#f1f1f1;padding:.3rem .6rem;border-radius:4px;font-size:.8rem;margin-right:.5rem}
+
+/* 底部 */
+footer{
+background:#222;
+color:var(--white);
+text-align:center;
+padding:2.5rem 0;
+margin-top:3rem
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+<div class="nav-container">
+<div class="logo">码上红途</div>
+<ul class="nav-links">
+<li><a href="#home">首页</a></li>
+<li><a href="#base">红色基地</a></li>
+<li><a href="#hero">英雄人物</a></li>
+<li><a href="#history">红色历史</a></li>
+</ul>
+</div>
+</nav>
+
+<section class="banner" id="home">
+<div>
+<h1>码上红途——四川红色文化宣讲平台</h1>
+<p>传承红色基因，赓续川蜀血脉</p>
+</div>
+</section>
+
+<section class="section" id="base">
+<h2 class="section-title">红色基地</h2>
+<div class="card-grid">
+
+<div class="card">
+  <div class="card-img" style="background-image: url('基地_绵阳_梓潼红军陈列馆.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">红军长征在梓潼陈列馆</h3>
+    <p class="card-text">1935年4月，红四方面军进入梓潼，建立苏维埃政权，是重要的红色教育阵地。</p>
+    <span class="card-tag">绵阳</span>
+    <span class="card-tag">免费</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('基地_南充_阆中红军纪念园.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">阆中红军烈士纪念园</h3>
+    <p class="card-text">红四方面军在此转战三年，安葬425名烈士，国家级烈士纪念设施。</p>
+    <span class="card-tag">南充</span>
+    <span class="card-tag">免费</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('基地_广安_邓小平故居.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">邓小平故居</h3>
+    <p class="card-text">伟人故里，展现邓小平光辉一生，全国红色旅游经典景区。</p>
+    <span class="card-tag">广安</span>
+    <span class="card-tag">免费</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('基地_巴中_川陕红军烈士陵园.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">川陕革命根据地红军烈士陵园</h3>
+    <p class="card-text">全国唯一由红军亲手修建的陵园，安埋25048名红军烈士。</p>
+    <span class="card-tag">巴中</span>
+    <span class="card-tag">免费</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('基地_甘孜_泸定桥陈列馆.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">泸定桥革命文物陈列馆</h3>
+    <p class="card-text">依托飞夺泸定桥战役而建，全方位再现战役历程。</p>
+    <span class="card-tag">甘孜</span>
+    <span class="card-tag">免费</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('基地_广安_建川博物馆.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">广安建川博物馆聚落</h3>
+    <p class="card-text">10个主题展览馆，聚焦四川革命奋斗历程。</p>
+    <span class="card-tag">广安</span>
+    <span class="card-tag">收费</span>
+  </div>
+</div>
+
+</div>
+</section>
+
+<section class="section" id="hero">
+<h2 class="section-title">英雄人物</h2>
+<div class="card-grid">
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_黄继光.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">黄继光</h3>
+    <p class="card-text">四川中江人，上甘岭战役用胸膛堵住敌人枪眼，特级战斗英雄。</p>
+    <span class="card-tag">抗美援朝</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_赵一曼.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">赵一曼</h3>
+    <p class="card-text">四川宜宾人，东北抗日联军女政委，坚贞不屈，英勇就义。</p>
+    <span class="card-tag">抗日英雄</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_江竹筠.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">江竹筠（江姐）</h3>
+    <p class="card-text">四川自贡人，狱中受尽酷刑仍严守秘密，革命意志坚定。</p>
+    <span class="card-tag">革命烈士</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_邱少云.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">邱少云</h3>
+    <p class="card-text">四川铜梁人，潜伏时为不暴露部队，强忍烈火直至牺牲。</p>
+    <span class="card-tag">抗美援朝</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_朱德.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">朱德</h3>
+    <p class="card-text">四川仪陇人，开国元勋，伟大的无产阶级革命家、军事家。</p>
+    <span class="card-tag">开国元勋</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_刘伯承.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">刘伯承</h3>
+    <p class="card-text">四川开县人，被誉为“军神”，功勋卓著。</p>
+    <span class="card-tag">开国元勋</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_陈毅.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">陈毅</h3>
+    <p class="card-text">四川乐至人，文武双全的无产阶级革命家、军事家、诗人。</p>
+    <span class="card-tag">开国元勋</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_罗瑞卿.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">罗瑞卿</h3>
+    <p class="card-text">四川南充人，被誉为“人民的忠诚卫士”。</p>
+    <span class="card-tag">开国元勋</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('英雄_张思德.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">张思德</h3>
+    <p class="card-text">四川仪陇人，“为人民服务”精神典范。</p>
+    <span class="card-tag">革命烈士</span>
+  </div>
+</div>
+
+</div>
+</section>
+
+<section class="section" id="history">
+<h2 class="section-title">红色历史</h2>
+<div class="card-grid">
+
+<div class="card">
+  <div class="card-img" style="background-image: url('历史_四渡赤水.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">四渡赤水</h3>
+    <p class="card-text">红军经典战例，灵活机动，突破重围，扭转长征局势。</p>
+    <span class="card-tag">1935年</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('历史_彝海结盟.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">彝海结盟</h3>
+    <p class="card-text">刘伯承与小叶丹结盟，红军顺利通过彝区，民族团结典范。</p>
+    <span class="card-tag">1935年</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('历史_飞夺泸定桥.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">飞夺泸定桥</h3>
+    <p class="card-text">22名勇士攀铁索冲锋，突破天险，为长征胜利奠定基础。</p>
+    <span class="card-tag">1935年</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('历史_翻越夹金山.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">翻越夹金山</h3>
+    <p class="card-text">红军翻越4930米夹金山，与红四方面军会师。</p>
+    <span class="card-tag">1935年</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-img" style="background-image: url('历史_川陕苏区建设.jpg')"></div>
+  <div class="card-body">
+    <h3 class="card-title">川陕苏区建设</h3>
+    <p class="card-text">1932-1935年，红四方面军建立全国第二大苏区。</p>
+    <span class="card-tag">1932-1935年</span>
+  </div>
+</div>
+
+</div>
+</section>
+
+<footer>
+<p>码上红途——四川红色文化宣讲平台 © 2026</p>
+<p>传承红色基因，赓续川蜀血脉</p>
+</footer>
+
+</body>
+</html>
