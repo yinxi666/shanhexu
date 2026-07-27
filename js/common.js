@@ -484,12 +484,11 @@ window.RedGuide = (() => {
     initHomeHeatmap(venues);
   }
 
-  // 首页热力图 - 懒加载ECharts，滚动到附近才初始化
+  // 首页热力图 - 轻量SVG，无需外部CDN
   async function initHomeHeatmap(venues) {
     const container = $('#home-heatmap');
     if (!container) return;
 
-    // 先用轻量SVG占位
     const provinceData = {};
     ['北京市','天津市','河北省','山西省','内蒙古自治区','辽宁省','吉林省','黑龙江省',
       '上海市','江苏省','浙江省','安徽省','福建省','江西省','山东省','河南省','湖北省','湖南省',
@@ -505,20 +504,10 @@ window.RedGuide = (() => {
       }
     });
     createSimpleHeatmap(container, provinceData);
-
-    // 滚动到热力图附近时才加载完整ECharts版
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          observer.disconnect();
-          loadEChartsHeatmap(container, provinceData, venues);
-        }
-      });
-    }, { rootMargin: '200px' });
-    observer.observe(container);
   }
 
-  async function loadEChartsHeatmap(container, provinceData, venues) {
+  // 以下ECharts版本的函数已弃用，保留createSimpleHeatmap即可
+  async function _loadEChartsHeatmap_deprecated(container, provinceData, venues) {
     // 动态加载 ECharts
     if (!window.echarts) {
       await new Promise((resolve, reject) => {
