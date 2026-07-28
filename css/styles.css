@@ -467,7 +467,7 @@ p {
   transform: translateX(-50%);
   z-index: 3;
   display: flex;
-  flex-direction: column;
+  flex-direction: column !important;
   align-items: center;
   gap: 0.5rem;
   opacity: 0.6;
@@ -698,7 +698,7 @@ p {
 }
 
 .hero-search input {
-  flex: 1;
+  flex: 1 !important;
   min-height: 52px;
   padding: 0 20px;
   border: 1px solid var(--card-border);
@@ -2832,7 +2832,7 @@ html.dark .msg-status.rejected {
   border-top: 1px solid var(--card-border);
   padding: 4px 2px;
   padding-bottom: max(4px, env(safe-area-inset-bottom));
-  justify-content: space-around;
+  justify-content: space-around !important;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
 }
 
@@ -2847,7 +2847,7 @@ html.dark .msg-status.rejected {
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-smooth);
   border-radius: 8px;
-  min-width: 0;
+  min-width: 0 !important;
   flex: 1;
   text-align: center;
 }
