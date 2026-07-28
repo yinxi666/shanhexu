@@ -474,7 +474,9 @@ window.RedGuide = (() => {
     const featuredContainer = $('#featured-venues');
     if (featuredContainer && venues.length > 0) {
       const featured = venues.slice(0, 4);
-      featuredContainer.innerHTML = featured.map(v => renderVenueCard(v)).join('');
+      featuredContainer.innerHTML = featured.map((v, i) => {
+        return renderVenueCard(v).replace('class="venue-card"', 'class="venue-card scroll-animate scroll-animate-delay-' + (i+1) + '"');
+      }).join('');
     }
 
     // 最近浏览
