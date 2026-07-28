@@ -2,7 +2,7 @@
    赓续血脉・数绘红旅 — Service Worker (离线缓存)
    ============================================================ */
 
-const CACHE_NAME = 'redguide-v2';
+const CACHE_NAME = 'redguide-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
