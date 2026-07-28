@@ -613,7 +613,7 @@ window.RedGuide = (() => {
           const opt = chart.getOption();
           const cz = opt.series[0].zoom || 1.7;
           const cc = opt.series[0].center || [105, 36];
-          const nz = a === 'in' ? Math.min(8, cz + 0.5) : Math.max(0.5, cz - 0.5);
+          const nz = a === 'in' ? Math.min(8, cz + 1) : Math.max(0.5, cz - 1);
           chart.setOption({ series: [{ zoom: nz, center: cc }] });
         });
       }

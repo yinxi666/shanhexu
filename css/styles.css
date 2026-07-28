@@ -2828,6 +2828,14 @@ html.dark .msg-status.rejected {
     height: 380px !important;
   }
 
+  /* 缩放按钮确保可点击 */
+  #heatmap-zoom-bar {
+    pointer-events: auto !important;
+  }
+  #heatmap-zoom-bar button {
+    pointer-events: auto !important;
+  }
+
   .chat-input-row input {
     font-size: 14px;
     padding: 8px 12px;
