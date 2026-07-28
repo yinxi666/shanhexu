@@ -480,9 +480,6 @@ window.RedGuide = (() => {
       rescanScrollAnimations();
     }
 
-    // 最近浏览
-    renderRecentChips(venues);
-
     // 初始化热力图
     initHomeHeatmap(venues);
   }
