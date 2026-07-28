@@ -571,7 +571,7 @@ window.RedGuide = (() => {
           name: '红色场馆数量',
           type: 'map',
           map: 'china',
-          roam: 'scale',
+          roam: true,
           zoom: 1.7,
           center: [105, 36],
           scaleLimit: { min: 1, max: 5 },
