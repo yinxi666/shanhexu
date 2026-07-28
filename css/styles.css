@@ -355,7 +355,7 @@ p {
 }
 
 .hero-title {
-  font-family: "SimHei", "黑体", "STHeiti", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: "PingFang SC", "Microsoft YaHei UI", "STHeiti", sans-serif;
   font-size: calc(var(--hero-title-size) * 1.15);
   font-weight: 900;
   line-height: 1.05;
