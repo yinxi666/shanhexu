@@ -17,9 +17,21 @@
   <title>赓续血脉・数绘红旅 — 红色文旅数字导览</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
+  <style>
+    html.entrance-active, html.entrance-active body { overflow: hidden; height: 100%; }
+    #entrance-overlay {
+      position: fixed; inset: 0; z-index: 99999; background: #0a0604;
+      transition: opacity 0.8s ease;
+    }
+    #entrance-overlay.fade-out { opacity: 0; pointer-events: none; }
+    #entrance-canvas { display: block; }
+  </style>
 </head>
 
 <body>
+  <div id="entrance-overlay">
+    <canvas id="entrance-canvas"></canvas>
+  </div>
   <!-- ===== 导航栏 ===== -->
   <header class="site-header">
     <nav class="navbar" aria-label="主导航">
@@ -268,6 +280,207 @@
     <div class="footer-bottom">© 2026 赓续血脉・数绘红旅 · 四川农业大学信息工程学院 · 静态网页竞赛作品</div>
   </footer>
 
+  <!-- 红色江山·电影级开场动画 -->
+  <script>
+  (function() {
+    if (sessionStorage.getItem('entrance_done_v2')) {
+      var el = document.getElementById('entrance-overlay');
+      if (el) el.remove();
+      return;
+    }
+    document.documentElement.classList.add('entrance-active');
+
+    var canvas = document.getElementById('entrance-canvas');
+    var ctx = canvas.getContext('2d');
+    var W, H;
+    var t = 0, totalDuration = 5.2; // 总时长（秒）
+    var lastTime = performance.now();
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // ========== 缓动函数 ==========
+    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+    function easeInOutCubic(x) { return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x+2, 3)/2; }
+    function easeOutExpo(x) { return x >= 1 ? 1 : 1 - Math.pow(2, -10*x); }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    // ========== 山脉生成 ==========
+    var mountains = [];
+    function generateMountains() {
+      var count = 12;
+      for (var i = 0; i < count; i++) {
+        var points = [];
+        var segs = 30;
+        var baseY = H * 0.55;
+        var amp = H * 0.35 * (1 - i * 0.06);
+        for (var j = 0; j <= segs; j++) {
+          var x = (j / segs) * W;
+          var noise = Math.sin(j * 0.3 + i * 2.5) * amp * 0.5
+                    + Math.sin(j * 0.7 + i * 1.7) * amp * 0.3
+                    + Math.sin(j * 1.2 + i * 0.8) * amp * 0.2;
+          points.push({ x: x, y: baseY + amp * 0.2 - noise });
+        }
+        mountains.push(points);
+      }
+    }
+    generateMountains();
+
+    // ========== 发光粒子 ==========
+    var particles = [];
+    function initParticles() {
+      for (var i = 0; i < 120; i++) {
+        particles.push({
+          x: W * 0.2 + Math.random() * W * 0.6,
+          baseY: H * 0.3 + Math.random() * H * 0.15,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.3 + Math.random() * 0.8,
+          size: 1.5 + Math.random() * 3,
+          opacity: 0.4 + Math.random() * 0.6
+        });
+      }
+    }
+    initParticles();
+
+    // ========== 主绘制 ==========
+    function draw(now) {
+      var dt = (now - lastTime) / 1000;
+      lastTime = now;
+      t = Math.min(t + dt, totalDuration);
+      var progress = t / totalDuration;
+      ctx.clearRect(0, 0, W, H);
+
+      // --- 背景 ---
+      var bgAlpha = clamp(progress * 5, 0, 1);
+      var bgGrad = ctx.createRadialGradient(W*0.5, H*0.35, 0, W*0.5, H*0.5, Math.max(W,H)*0.8);
+      bgGrad.addColorStop(0, 'rgba(30,8,4,' + bgAlpha + ')');
+      bgGrad.addColorStop(0.5, 'rgba(15,3,2,' + bgAlpha + ')');
+      bgGrad.addColorStop(1, 'rgba(8,1,0,' + bgAlpha + ')');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // --- 远山剪影（先画远处） ---
+      var farMountains = mountains.slice(8);
+      drawMountainLayer(farMountains, '#1a0503', progress, 0.15, H*0.08);
+      var midMountains = mountains.slice(4, 8);
+      drawMountainLayer(midMountains, '#2d0a05', progress, 0.3, H*0.15);
+      var nearMountains = mountains.slice(0, 4);
+      drawMountainLayer(nearMountains, '#3d0f06', progress, 0.5, H*0.22);
+
+      // --- 天际线金光 ---
+      if (progress > 0.2) {
+        var glowP = clamp((progress - 0.2) / 0.6, 0, 1);
+        var glowGrad = ctx.createLinearGradient(0, H*0.35, 0, H*0.65);
+        var a = glowP * 0.6;
+        glowGrad.addColorStop(0, 'rgba(255,180,50,' + a + ')');
+        glowGrad.addColorStop(0.3, 'rgba(255,120,30,' + (a*0.5) + ')');
+        glowGrad.addColorStop(0.7, 'rgba(255,60,10,' + (a*0.15) + ')');
+        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glowGrad;
+        ctx.fillRect(0, H*0.3, W, H*0.4);
+      }
+
+      // --- 金色粒子 ---
+      particles.forEach(function(p) {
+        var pAlpha = p.opacity * clamp(progress * 3 - 0.1, 0, 1) * clamp((1-progress) * 5, 0, 1);
+        if (pAlpha <= 0) return;
+        var pY = p.baseY + Math.sin(p.phase + t * p.speed * 8) * 40;
+        var pX = p.x + Math.cos(p.phase + t * p.speed * 3) * 15;
+        var pGrad = ctx.createRadialGradient(pX, pY, 0, pX, pY, p.size * 5);
+        pGrad.addColorStop(0, 'rgba(255,220,120,' + pAlpha + ')');
+        pGrad.addColorStop(0.3, 'rgba(255,180,60,' + (pAlpha*0.7) + ')');
+        pGrad.addColorStop(1, 'rgba(255,100,20,0)');
+        ctx.fillStyle = pGrad;
+        ctx.fillRect(pX - p.size*5, pY - p.size*5, p.size*10, p.size*10);
+      });
+
+      // --- 主标题 ---
+      if (progress > 0.55) {
+        var titleP = clamp((progress - 0.55) / 0.35, 0, 1);
+        var titleEP = easeOutExpo(titleP);
+        var titleY = H * 0.45 - titleEP * 20;
+        var titleAlpha = titleEP;
+        var titleSize = Math.min(W * 0.13, 100);
+
+        ctx.save();
+        ctx.globalAlpha = titleAlpha;
+        ctx.font = '900 ' + titleSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 标题辉光
+        ctx.shadowColor = 'rgba(255,200,60,' + (titleAlpha*0.8) + ')';
+        ctx.shadowBlur = titleSize * 0.5;
+        ctx.fillStyle = '#ffd700';
+        ctx.fillText('赓续血脉', W*0.5, titleY);
+
+        // 副标题
+        if (progress > 0.72) {
+          var subP = clamp((progress - 0.72) / 0.25, 0, 1);
+          var subEP = easeOutExpo(subP);
+          ctx.globalAlpha = subEP;
+          ctx.shadowColor = 'rgba(255,80,50,' + (subEP*0.9) + ')';
+          ctx.shadowBlur = titleSize * 0.35;
+          ctx.fillStyle = '#ff4d4d';
+          ctx.fillText('数绘红旅', W*0.5, titleY + titleSize * 1.2);
+        }
+        ctx.restore();
+      }
+
+      // --- 底部红线 ---
+      if (progress > 0.82) {
+        var lineP = clamp((progress - 0.82) / 0.15, 0, 1);
+        var lineW = W * 0.25 * easeOutCubic(lineP);
+        var lineGrad = ctx.createLinearGradient(W*0.5 - lineW/2, 0, W*0.5 + lineW/2, 0);
+        lineGrad.addColorStop(0, 'rgba(255,215,0,0)');
+        lineGrad.addColorStop(0.3, 'rgba(255,215,0,' + lineP*0.9 + ')');
+        lineGrad.addColorStop(0.5, 'rgba(255,80,50,' + lineP + ')');
+        lineGrad.addColorStop(0.7, 'rgba(255,215,0,' + lineP*0.9 + ')');
+        lineGrad.addColorStop(1, 'rgba(255,215,0,0)');
+        ctx.fillStyle = lineGrad;
+        ctx.fillRect(W*0.5 - lineW/2, H*0.75, lineW, 3);
+      }
+
+      // --- 循环或结束 ---
+      if (t < totalDuration) {
+        requestAnimationFrame(draw);
+      } else {
+        // 淡出
+        var overlay = document.getElementById('entrance-overlay');
+        overlay.classList.add('fade-out');
+        document.documentElement.classList.remove('entrance-active');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        setTimeout(function() { overlay.remove(); }, 800);
+        sessionStorage.setItem('entrance_done_v2', '1');
+      }
+    }
+
+    function drawMountainLayer(mts, color, progress, delay, yOffset) {
+      var p = clamp((progress - delay) / 0.4, 0, 1);
+      if (p <= 0) return;
+      var ep = easeOutCubic(p);
+      ctx.save();
+      ctx.globalAlpha = ep;
+      ctx.fillStyle = color;
+      ctx.translate(0, yOffset * (1 - ep));
+      ctx.beginPath();
+      mts.forEach(function(mt) {
+        ctx.moveTo(mt[0].x, H + 100);
+        mt.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+        ctx.lineTo(mt[mt.length-1].x, H + 100);
+      });
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    requestAnimationFrame(draw);
+  })();
+  </script>
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <script src="js/data.js"></script>
   <script src="js/renderers.js"></script>
