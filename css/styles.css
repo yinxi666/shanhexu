@@ -82,6 +82,31 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 全局滚动条 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #b0b7c3, #7c8794, #5c6670);
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #6b7280 transparent;
+}
+
 body {
   margin: 0;
   color: var(--ink);
@@ -2256,6 +2281,18 @@ html.dark .nav-links li a.active {
 
 html.dark .page-hero::before {
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.5));
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6b7280, #4b5563, #374151);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
+}
+
+html.dark {
+  scrollbar-color: #6b7280 transparent;
 }
 
 html.dark .site-footer {
