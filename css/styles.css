@@ -2780,6 +2780,17 @@ html.dark .msg-status.rejected {
 
   .chat-widget {
     bottom: 86px;
+    right: 8px;
+  }
+
+  .chat-panel {
+    width: calc(100vw - 16px);
+    max-width: 380px;
+    right: 0;
+  }
+
+  .chat-messages {
+    max-height: 240px;
   }
 
   .dark-toggle {
