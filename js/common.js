@@ -994,7 +994,9 @@ window.RedGuide = (() => {
           <div class="sidebar-card">
             <h3>🗺️ 位置信息</h3>
             ${venue.coordinates && venue.coordinates.lat
-        ? `<div class="map-placeholder">📍 坐标: ${venue.coordinates.lat.toFixed(4)}, ${venue.coordinates.lng.toFixed(4)}<br>${venue.province} ${venue.city} ${venue.district}</div>`
+        ? `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${venue.coordinates.lng-0.015}%2C${venue.coordinates.lat-0.01}%2C${venue.coordinates.lng+0.015}%2C${venue.coordinates.lat+0.01}&layer=mapnik&marker=${venue.coordinates.lat}%2C${venue.coordinates.lng}"
+              style="width:100%;height:200px;border:none;border-radius:6px;" loading="lazy"></iframe>
+            <small style="color:var(--muted);">${venue.province} ${venue.city || ''} ${venue.district || ''}</small>`
         : `<div class="map-placeholder">📍 ${venue.province || ''} ${venue.city || ''} ${venue.district || ''}<br><small>详细地址请以官方发布为准</small></div>`
       }
           </div>
