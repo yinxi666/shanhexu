@@ -517,7 +517,7 @@ p {
 
 .subpage-hero-title {
   font-family: "HongLeiZhuoShu", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: calc(var(--section-title-size) * 1.4);
+  font-size: calc(var(--section-title-size) * 1.45);
   font-weight: 900;
   line-height: 1.35;
   margin-bottom: 0.5rem;
