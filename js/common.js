@@ -571,18 +571,19 @@ window.RedGuide = (() => {
           name: '红色场馆数量',
           type: 'map',
           map: 'china',
-          roam: false,
+          roam: 'scale',
           zoom: 1.7,
-          center: [110, 35],
+          center: [105, 36],
+          scaleLimit: { min: 1, max: 5 },
           label: {
             show: true,
-            fontSize: 10,
+            fontSize: window.innerWidth < 768 ? 7 : 10,
             color: '#64748b'
           },
           emphasis: {
             label: {
               show: true,
-              fontSize: 12,
+              fontSize: window.innerWidth < 768 ? 10 : 12,
               fontWeight: 'bold',
               color: '#b91c1c'
             },

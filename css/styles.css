@@ -2823,6 +2823,11 @@ html.dark .msg-status.rejected {
     padding: 4px 7px;
   }
 
+  /* 热力图移动端高度 */
+  #home-heatmap {
+    height: 380px !important;
+  }
+
   .chat-input-row input {
     font-size: 14px;
     padding: 8px 12px;
