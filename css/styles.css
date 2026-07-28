@@ -2774,31 +2774,37 @@ html.dark .msg-status.rejected {
     padding-bottom: 76px;
   }
 
-  /* 浮动按钮：底部横向排列，不挡内容 */
-  .back-to-top {
-    bottom: 70px;
-    right: 8px;
-    width: 36px;
-    height: 36px;
+  /* 浮动按钮：横向一排，深色左边，其余右边 */
+  .back-to-top,
+  .dark-toggle,
+  .quiz-fab {
+    bottom: 64px;
+    width: 32px;
+    height: 32px;
     font-size: 14px;
   }
 
   .dark-toggle {
-    bottom: 70px;
     left: 8px;
-    width: 36px;
-    height: 36px;
+  }
+
+  .quiz-fab {
+    right: 84px;
+  }
+
+  .back-to-top {
+    right: 44px;
   }
 
   .chat-widget {
-    bottom: 112px;
-    right: 8px;
+    bottom: 64px;
+    right: 4px;
   }
 
   .chat-fab {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 
   .chat-panel {
@@ -2820,14 +2826,6 @@ html.dark .msg-status.rejected {
   .chat-input-row input {
     font-size: 14px;
     padding: 8px 12px;
-  }
-
-  .quiz-fab {
-    bottom: 156px;
-    right: 8px;
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
   }
 
   /* quiz弹窗适配 */
