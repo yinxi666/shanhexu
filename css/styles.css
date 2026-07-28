@@ -504,6 +504,7 @@ p {
 .subpage-hero {
   position: relative;
   height: 50vh;
+  height: 50dvh;
   min-height: 300px;
   display: flex;
   align-items: flex-end;
