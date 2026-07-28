@@ -356,7 +356,7 @@ p {
 
 .hero-title {
   font-family: "HongLeiZhuoShu", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: calc(var(--hero-title-size) * 1.35);
+  font-size: calc(var(--hero-title-size) * 1.45);
   font-weight: 900;
   line-height: 1.35;
   margin-bottom: 1rem;
