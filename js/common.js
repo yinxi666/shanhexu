@@ -544,11 +544,6 @@ window.RedGuide = (() => {
 
       const exist = echarts.getInstanceByDom(container);
       if (exist) exist.dispose();
-      // 热力图区域滚轮缩放地图，阻止页面滚动
-      container.addEventListener('wheel', function(e) {
-        e.preventDefault();
-      }, { passive: false });
-
       const chart = echarts.init(container);
       const option = {
         backgroundColor: '#ffffff',
@@ -578,7 +573,7 @@ window.RedGuide = (() => {
           name: '红色场馆数量',
           type: 'map',
           map: 'china',
-          roam: true,
+          roam: 'move',
           zoom: 1.7,
           center: [105, 36],
           scaleLimit: { min: 1, max: 5 },
@@ -606,6 +601,30 @@ window.RedGuide = (() => {
       };
 
       chart.setOption(option);
+
+      // 添加缩放按钮
+      let zoomLevel = 1.7;
+      const btnStyle = 'width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;color:#64748b;display:flex;align-items:center;justify-content:center;';
+      const btnBar = document.createElement('div');
+      btnBar.style.cssText = 'position:absolute;top:8px;right:8px;z-index:10;display:flex;flex-direction:column;gap:4px;';
+      btnBar.innerHTML = `
+        <button id="heatmap-zoom-in" style="${btnStyle}">+</button>
+        <button id="heatmap-zoom-out" style="${btnStyle}">−</button>
+        <button id="heatmap-zoom-reset" style="${btnStyle}font-size:12px;" title="重置">↺</button>
+      `;
+      container.style.position = 'relative';
+      container.appendChild(btnBar);
+
+      function updateZoom(delta) {
+        zoomLevel = Math.max(0.5, Math.min(8, zoomLevel + delta));
+        chart.setOption({ series: [{ zoom: zoomLevel }] });
+      }
+      btnBar.querySelector('#heatmap-zoom-in').onclick = function() { updateZoom(0.3); };
+      btnBar.querySelector('#heatmap-zoom-out').onclick = function() { updateZoom(-0.3); };
+      btnBar.querySelector('#heatmap-zoom-reset').onclick = function() {
+        zoomLevel = 1.7;
+        chart.setOption({ series: [{ zoom: 1.7, center: [105, 36] }] });
+      };
 
       window.addEventListener('resize', function () {
         chart.resize();
