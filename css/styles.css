@@ -362,6 +362,7 @@ p {
   margin-bottom: 1.2rem;
   letter-spacing: 0.18em;
   color: #fff;
+  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.2);
   text-shadow:
     0 0 6px rgba(255, 215, 0, 0.6),
     0 0 20px rgba(255, 180, 0, 0.25),
@@ -371,6 +372,7 @@ p {
 
 .hero-title .accent {
   color: #ff3333;
+  -webkit-text-stroke: 1px rgba(255, 80, 80, 0.2);
   text-shadow:
     0 0 6px rgba(255, 60, 60, 0.6),
     0 0 20px rgba(220, 30, 30, 0.25),
