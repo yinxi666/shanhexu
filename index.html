@@ -85,18 +85,8 @@
         <h2>全国红色场馆分布</h2>
         <p>基于场馆地理坐标生成的热力图，直观展示红色资源的地域分布特征</p>
       </div>
-      <div style="position:relative;">
-        <div id="home-heatmap"
-          style="height:600px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);margin-bottom:0;">
-        </div>
-        <div style="position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px;z-index:10;">
-          <button onclick="var c=echarts.getInstanceByDom(document.getElementById('home-heatmap'));if(c){var o=c.getOption();o.series[0].zoom=(o.series[0].zoom||1.7)+0.3;c.setOption(o);}"
-            style="width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;">+</button>
-          <button onclick="var c=echarts.getInstanceByDom(document.getElementById('home-heatmap'));if(c){var o=c.getOption();o.series[0].zoom=Math.max(1,(o.series[0].zoom||1.7)-0.3);c.setOption(o);}"
-            style="width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;">−</button>
-          <button onclick="var c=echarts.getInstanceByDom(document.getElementById('home-heatmap'));if(c){c.setOption({series:[{zoom:1.7,center:[105,36]}]});}"
-            style="width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:12px;line-height:1;" title="重置">↺</button>
-        </div>
+      <div id="home-heatmap"
+        style="height:600px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);margin-bottom:16px;">
       </div>
       <div class="heatmap-legend">
         <span class="legend-label">场馆密度:</span>
