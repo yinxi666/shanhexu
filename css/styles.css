@@ -355,36 +355,29 @@ p {
 }
 
 .hero-title {
-  font-family: "STZhongsong", "SimSun", "Noto Serif SC", serif;
-  font-size: var(--hero-title-size);
-  font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.12em;
+  font-family: "SimSun", "STSong", "Noto Serif SC", serif;
+  font-size: calc(var(--hero-title-size) * 1.15);
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 1.2rem;
+  letter-spacing: 0.18em;
   color: #fff;
+  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.25);
   text-shadow:
-    0 0 10px rgba(255, 215, 0, 0.8),
-    0 0 40px rgba(255, 180, 0, 0.4),
-    0 0 80px rgba(255, 150, 0, 0.2),
-    0 4px 4px rgba(0, 0, 0, 0.8);
+    0 0 12px rgba(255, 215, 0, 0.8),
+    0 0 45px rgba(255, 180, 0, 0.4),
+    0 0 90px rgba(255, 150, 0, 0.2),
+    0 6px 8px rgba(0, 0, 0, 0.8);
 }
 
 .hero-title .accent {
-  color: #ff4444;
+  color: #ff3333;
+  -webkit-text-stroke: 1px rgba(255, 80, 80, 0.3);
   text-shadow:
-    0 0 10px rgba(255, 60, 60, 0.9),
-    0 0 40px rgba(220, 30, 30, 0.5),
-    0 0 80px rgba(180, 20, 20, 0.3),
-    0 4px 4px rgba(0, 0, 0, 0.8);
-}
-
-.hero-title::after {
-  content: '';
-  display: block;
-  width: 100px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #fff, #ff4444, #ffd700, transparent);
-  margin: 1.5rem auto 0;
+    0 0 12px rgba(255, 60, 60, 0.9),
+    0 0 45px rgba(220, 30, 30, 0.5),
+    0 0 90px rgba(180, 20, 20, 0.3),
+    0 6px 8px rgba(0, 0, 0, 0.8);
 }
 
 .hero-subtitle {
