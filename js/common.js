@@ -602,29 +602,21 @@ window.RedGuide = (() => {
 
       chart.setOption(option);
 
-      // 添加缩放按钮
+      // 缩放按钮事件
       let zoomLevel = 1.7;
-      const btnStyle = 'width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;color:#64748b;display:flex;align-items:center;justify-content:center;';
-      const btnBar = document.createElement('div');
-      btnBar.style.cssText = 'position:absolute;top:8px;right:8px;z-index:10;display:flex;flex-direction:column;gap:4px;';
-      btnBar.innerHTML = `
-        <button id="heatmap-zoom-in" style="${btnStyle}">+</button>
-        <button id="heatmap-zoom-out" style="${btnStyle}">−</button>
-        <button id="heatmap-zoom-reset" style="${btnStyle}font-size:12px;" title="重置">↺</button>
-      `;
-      container.style.position = 'relative';
-      container.appendChild(btnBar);
-
-      function updateZoom(delta) {
-        zoomLevel = Math.max(0.5, Math.min(8, zoomLevel + delta));
-        chart.setOption({ series: [{ zoom: zoomLevel }] });
+      const bar = document.getElementById('heatmap-zoom-bar');
+      if (bar) {
+        bar.addEventListener('click', function(e) {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          const action = btn.dataset.zoom;
+          if (action === 'in') zoomLevel = Math.min(8, zoomLevel + 0.4);
+          else if (action === 'out') zoomLevel = Math.max(0.5, zoomLevel - 0.4);
+          else { zoomLevel = 1.7; chart.setOption({ series: [{ zoom: 1.7, center: [105, 36] }] }); return; }
+          const opt = chart.getOption();
+          chart.setOption({ series: [{ zoom: zoomLevel, center: opt.series[0].center }] });
+        });
       }
-      btnBar.querySelector('#heatmap-zoom-in').onclick = function() { updateZoom(0.3); };
-      btnBar.querySelector('#heatmap-zoom-out').onclick = function() { updateZoom(-0.3); };
-      btnBar.querySelector('#heatmap-zoom-reset').onclick = function() {
-        zoomLevel = 1.7;
-        chart.setOption({ series: [{ zoom: 1.7, center: [105, 36] }] });
-      };
 
       window.addEventListener('resize', function () {
         chart.resize();
