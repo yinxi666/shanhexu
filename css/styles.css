@@ -355,46 +355,36 @@ p {
 }
 
 .hero-title {
-  font-family: "Noto Serif SC", "SimSun", serif;
+  font-family: "STZhongsong", "SimSun", "Noto Serif SC", serif;
   font-size: var(--hero-title-size);
-  font-weight: 900;
-  line-height: 1.15;
+  font-weight: 700;
+  line-height: 1.1;
   margin-bottom: 1.5rem;
-  letter-spacing: 0.08em;
-  animation: title-glow 3s ease-in-out infinite;
-  /* 金色光芒多层阴影 */
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))
-          drop-shadow(0 0 30px rgba(251, 191, 36, 0.5))
-          drop-shadow(0 0 80px rgba(251, 191, 36, 0.3));
+  letter-spacing: 0.12em;
+  color: #fff;
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 40px rgba(255, 180, 0, 0.4),
+    0 0 80px rgba(255, 150, 0, 0.2),
+    0 4px 4px rgba(0, 0, 0, 0.8);
 }
 
-@keyframes title-glow {
-  0%, 100% {
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))
-            drop-shadow(0 0 30px rgba(251, 191, 36, 0.5))
-            drop-shadow(0 0 80px rgba(251, 191, 36, 0.3));
-  }
-  50% {
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))
-            drop-shadow(0 0 50px rgba(251, 191, 36, 0.8))
-            drop-shadow(0 0 120px rgba(251, 191, 36, 0.5));
-  }
+.hero-title .accent {
+  color: #ff4444;
+  text-shadow:
+    0 0 10px rgba(255, 60, 60, 0.9),
+    0 0 40px rgba(220, 30, 30, 0.5),
+    0 0 80px rgba(180, 20, 20, 0.3),
+    0 4px 4px rgba(0, 0, 0, 0.8);
 }
 
 .hero-title::after {
   content: '';
   display: block;
-  width: 160px;
+  width: 100px;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #fbbf24, #dc2626, #fbbf24, transparent);
+  background: linear-gradient(90deg, transparent, #fff, #ff4444, #ffd700, transparent);
   margin: 1.5rem auto 0;
-  border-radius: 2px;
-  animation: line-pulse 2s ease-in-out infinite;
-}
-
-@keyframes line-pulse {
-  0%, 100% { opacity: 0.6; width: 160px; }
-  50% { opacity: 1; width: 260px; }
 }
 
 .hero-subtitle {
