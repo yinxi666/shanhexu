@@ -602,19 +602,19 @@ window.RedGuide = (() => {
 
       chart.setOption(option);
 
-      // 缩放按钮事件
-      let zoomLevel = 1.7;
+      // 缩放按钮
       const bar = document.getElementById('heatmap-zoom-bar');
       if (bar) {
         bar.addEventListener('click', function(e) {
           const btn = e.target.closest('button');
           if (!btn) return;
-          const action = btn.dataset.zoom;
-          if (action === 'in') zoomLevel = Math.min(8, zoomLevel + 0.4);
-          else if (action === 'out') zoomLevel = Math.max(0.5, zoomLevel - 0.4);
-          else { zoomLevel = 1.7; chart.setOption({ series: [{ zoom: 1.7, center: [105, 36] }] }); return; }
+          const a = btn.dataset.zoom;
+          if (a === 'reset') { chart.setOption({ series: [{ zoom: 1.7, center: [105, 36] }] }); return; }
           const opt = chart.getOption();
-          chart.setOption({ series: [{ zoom: zoomLevel, center: opt.series[0].center }] });
+          const cz = opt.series[0].zoom || 1.7;
+          const cc = opt.series[0].center || [105, 36];
+          const nz = a === 'in' ? Math.min(8, cz + 0.5) : Math.max(0.5, cz - 0.5);
+          chart.setOption({ series: [{ zoom: nz, center: cc }] });
         });
       }
 
