@@ -2925,14 +2925,27 @@ html.dark .msg-status.rejected {
   }
 
   .chat-panel {
-    width: calc(100vw - 16px);
-    max-width: 360px;
-    max-height: 65vh;
+    width: calc(100vw - 24px);
+    max-width: 320px;
+    max-height: 50vh;
     right: 0;
   }
 
   .chat-messages {
-    max-height: 40vh;
+    max-height: 30vh;
+  }
+
+  .chat-header {
+    padding: 10px 12px;
+  }
+
+  .chat-header strong {
+    font-size: 13px;
+  }
+
+  .chat-bubble {
+    font-size: 12px;
+    padding: 8px 10px;
   }
 
   .chat-quick-btns button {
