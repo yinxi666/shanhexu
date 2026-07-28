@@ -994,9 +994,13 @@ window.RedGuide = (() => {
           <div class="sidebar-card">
             <h3>🗺️ 位置信息</h3>
             ${venue.coordinates && venue.coordinates.lat
-        ? `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${venue.coordinates.lng-0.015}%2C${venue.coordinates.lat-0.01}%2C${venue.coordinates.lng+0.015}%2C${venue.coordinates.lat+0.01}&layer=mapnik&marker=${venue.coordinates.lat}%2C${venue.coordinates.lng}"
-              style="width:100%;height:200px;border:none;border-radius:6px;" loading="lazy"></iframe>
-            <small style="color:var(--muted);">${venue.province} ${venue.city || ''} ${venue.district || ''}</small>`
+        ? `<a href="https://uri.amap.com/marker?position=${venue.coordinates.lng},${venue.coordinates.lat}&name=${encodeURIComponent(venue.name)}" target="_blank" style="display:block;text-decoration:none;border:1px solid var(--line);border-radius:6px;overflow:hidden;">
+            <div style="background:#f3f4f6;height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+              <span style="font-size:32px;">📍</span>
+              <span style="color:var(--red);font-weight:600;">在高德地图中查看</span>
+              <span style="font-size:12px;color:var(--muted);">${venue.province} ${venue.city || ''} ${venue.district || ''}</span>
+            </div>
+          </a>`
         : `<div class="map-placeholder">📍 ${venue.province || ''} ${venue.city || ''} ${venue.district || ''}<br><small>详细地址请以官方发布为准</small></div>`
       }
           </div>
