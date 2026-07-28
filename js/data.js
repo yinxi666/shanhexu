@@ -26,7 +26,7 @@ window.RedData = (() => {
   /* ---- 数据加载 ---- */
   async function loadJSON(filename) {
     try {
-      const res = await fetch(getBasePath() + filename + '?v=20260729');
+      const res = await fetch(getBasePath() + filename + '?v=20260729020757');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
