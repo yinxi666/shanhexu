@@ -544,6 +544,11 @@ window.RedGuide = (() => {
 
       const exist = echarts.getInstanceByDom(container);
       if (exist) exist.dispose();
+      // 热力图区域滚轮缩放地图，阻止页面滚动
+      container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+      }, { passive: false });
+
       const chart = echarts.init(container);
       const option = {
         backgroundColor: '#ffffff',
