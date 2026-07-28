@@ -518,11 +518,19 @@ p {
 }
 
 .subpage-hero-title {
-  font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: var(--section-title-size);
-  font-weight: 700;
-  line-height: 1.2;
+  font-family: "HongLeiZhuoShu", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: calc(var(--section-title-size) * 1.1);
+  font-weight: 900;
+  line-height: 1.35;
   margin-bottom: 0.5rem;
+  letter-spacing: 0.12em;
+  color: #fff;
+  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.15);
+  text-shadow:
+    0 0 5px rgba(255, 215, 0, 0.4),
+    0 0 15px rgba(255, 180, 0, 0.15),
+    0 0 35px rgba(255, 150, 0, 0.06),
+    0 3px 4px rgba(0, 0, 0, 0.5);
 }
 
 .subpage-hero-subtitle {
