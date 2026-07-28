@@ -477,6 +477,7 @@ window.RedGuide = (() => {
       featuredContainer.innerHTML = featured.map((v, i) => {
         return renderVenueCard(v).replace('class="venue-card"', 'class="venue-card scroll-animate scroll-animate-delay-' + (i+1) + '"');
       }).join('');
+      rescanScrollAnimations();
     }
 
     // 最近浏览
@@ -1164,8 +1165,11 @@ window.RedGuide = (() => {
   }
 
   /* ---------- Intersection Observer 滚动动画 ---------- */
+  let _scrollObserver = null;
+
   function initScrollAnimations() {
-    const observer = new IntersectionObserver((entries) => {
+    if (_scrollObserver) _scrollObserver.disconnect();
+    _scrollObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
@@ -1177,7 +1181,15 @@ window.RedGuide = (() => {
     });
 
     document.querySelectorAll('.scroll-animate').forEach(el => {
-      observer.observe(el);
+      _scrollObserver.observe(el);
+    });
+  }
+
+  // 重新扫描新加入 DOM 的元素
+  function rescanScrollAnimations() {
+    if (!_scrollObserver) return;
+    document.querySelectorAll('.scroll-animate:not(.visible)').forEach(el => {
+      _scrollObserver.observe(el);
     });
   }
 
@@ -1188,6 +1200,7 @@ window.RedGuide = (() => {
     initCommon,
     initHeaderScroll,
     initScrollAnimations,
+    rescanScrollAnimations,
     autoInit,
     goToDetail,
     openVideo,
