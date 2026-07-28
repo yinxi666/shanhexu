@@ -2092,21 +2092,29 @@ p {
 /* ---------- Responsive: Mobile ---------- */
 @media (max-width: 768px) {
   .nav-toggle {
-    display: grid;
+    display: grid !important;
     place-items: center;
     flex-shrink: 0;
+    margin-left: 4px;
+  }
+
+  .brand {
+    overflow: hidden;
+    max-width: 70%;
+    flex-shrink: 1;
   }
 
   .brand img {
-    height: 28px !important;
+    height: 22px !important;
+    max-width: 70px !important;
   }
 
   .brand strong {
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
 
   .brand small {
-    font-size: 10px !important;
+    font-size: 9px !important;
   }
 
   .nav-links {
