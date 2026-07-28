@@ -358,19 +358,43 @@ p {
   font-family: "Noto Serif SC", "SimSun", serif;
   font-size: var(--hero-title-size);
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.15;
   margin-bottom: 1.5rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 60px rgba(251, 191, 36, 0.4);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  animation: title-glow 3s ease-in-out infinite;
+  /* 金色光芒多层阴影 */
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))
+          drop-shadow(0 0 30px rgba(251, 191, 36, 0.5))
+          drop-shadow(0 0 80px rgba(251, 191, 36, 0.3));
+}
+
+@keyframes title-glow {
+  0%, 100% {
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))
+            drop-shadow(0 0 30px rgba(251, 191, 36, 0.5))
+            drop-shadow(0 0 80px rgba(251, 191, 36, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6))
+            drop-shadow(0 0 50px rgba(251, 191, 36, 0.8))
+            drop-shadow(0 0 120px rgba(251, 191, 36, 0.5));
+  }
 }
 
 .hero-title::after {
   content: '';
   display: block;
-  width: 120px;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, var(--hero-accent), transparent);
+  width: 160px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #fbbf24, #dc2626, #fbbf24, transparent);
   margin: 1.5rem auto 0;
+  border-radius: 2px;
+  animation: line-pulse 2s ease-in-out infinite;
+}
+
+@keyframes line-pulse {
+  0%, 100% { opacity: 0.6; width: 160px; }
+  50% { opacity: 1; width: 260px; }
 }
 
 .hero-subtitle {
