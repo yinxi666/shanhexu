@@ -2774,9 +2774,9 @@ html.dark .msg-status.rejected {
     padding-bottom: 76px;
   }
 
-  /* 浮动按钮重新排列，避免重叠 */
+  /* 浮动按钮从上到下排列：问答 → AI → 返回顶部，左侧深色切换 */
   .back-to-top {
-    bottom: 86px;
+    bottom: 76px;
     right: 8px;
     width: 40px;
     height: 40px;
@@ -2784,28 +2784,28 @@ html.dark .msg-status.rejected {
   }
 
   .dark-toggle {
-    bottom: 86px;
+    bottom: 76px;
     left: 8px;
     width: 40px;
     height: 40px;
   }
 
   .chat-widget {
-    bottom: 86px;
-    right: 56px;
+    bottom: 124px;
+    right: 8px;
   }
 
   .chat-fab {
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 
   .chat-panel {
     width: calc(100vw - 16px);
     max-width: 360px;
     max-height: 65vh;
-    right: -32px;
+    right: 0;
   }
 
   .chat-messages {
@@ -2823,7 +2823,7 @@ html.dark .msg-status.rejected {
   }
 
   .quiz-fab {
-    bottom: 136px;
+    bottom: 172px;
     right: 8px;
     width: 40px;
     height: 40px;
