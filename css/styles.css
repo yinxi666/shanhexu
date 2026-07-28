@@ -2090,7 +2090,7 @@ p {
 }
 
 /* ---------- Responsive: Mobile ---------- */
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .nav-toggle {
     display: grid !important;
     place-items: center;
@@ -2891,7 +2891,7 @@ html.dark .msg-status.rejected {
   color: var(--red);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .mobile-nav {
     display: flex;
   }
@@ -3541,7 +3541,7 @@ html.dark .share-btn.copied {
   color: #fff;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .tl-node {
     padding: 0 14px;
     min-width: 60px;
@@ -3555,7 +3555,7 @@ html.dark .share-btn.copied {
 }
 
 /* ---------- 响应式补充 ---------- */
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .timeline {
     padding-left: 24px;
   }
