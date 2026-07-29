@@ -523,23 +523,41 @@
       ctx.fillStyle='#D4B87A';ctx.beginPath();ctx.arc(2+poleW/2,8,6,0,Math.PI*2);ctx.fill();
       ctx.fillStyle='#E8D5A3';ctx.beginPath();ctx.arc(2+poleW/2-1,7,3,0,Math.PI*2);ctx.fill();
 
-      // 3D cloth: z(x,y) = amplitude * sin(kx * x - ωt) * sin(ky * y)
-      // Then project back: pixel(x,y) on screen comes from (x - z*nx, y - z*ny) on flat flag
-      var A=18, kx=0.022, ky=0.065, omega=2.2;
+      // ===== 真实旗帜物理 =====
+      // 振幅从旗杆(0)到自由边(FW)递增，模拟旗杆固定、自由端大幅舞动
+      // 多频叠加产生湍流质感
       var dst=ctx.createImageData(FW,FH);
 
       for(var y=0;y<FH;y++){
-        var localA=A*(0.7+0.3*Math.sin(y*0.01+t*0.5));
+        var ty=t+y*0.0004; // 微小垂直相位差，避免全同步
         for(var x=0;x<FW;x++){
-          var z=localA*Math.sin(kx*x-omega*t)*Math.sin(ky*y);
-          var dzdx=localA*kx*Math.cos(kx*x-omega*t)*Math.sin(ky*y);
-          var dzdy=localA*ky*Math.sin(kx*x-omega*t)*Math.cos(ky*y);
-          var sx=Math.round(x-z*dzdx*0.15);
-          var sy=Math.round(y-z*dzdy*0.15);
+          // 振幅Ramp: 旗杆处几乎不动，自由端大幅飘动
+          var ramp=Math.pow(x/FW,1.6);
+          var Amax=22*ramp;
+
+          // 多频率叠加的复合波
+          var w1=Math.sin(x*0.018-ty*2.8);
+          var w2=Math.sin(x*0.032-ty*1.7)*0.7;
+          var w3=Math.sin(x*0.008-ty*3.5)*0.4;
+          var w4=Math.cos(x*0.025-ty*2.1)*Math.sin(y*0.04+ty)*0.35;
+          var wave=w1+w2+w3+w4;
+          var z=Amax*wave;
+
+          // 导数用于像素位移
+          var d1=0.018*Math.cos(x*0.018-ty*2.8);
+          var d2=0.032*0.7*Math.cos(x*0.032-ty*1.7);
+          var d3=0.008*0.4*Math.cos(x*0.008-ty*3.5);
+          var dx=Amax*(d1+d2+d3)*0.7;
+          var dy=Math.cos(x*0.025-ty*2.1)*Math.cos(y*0.04+ty)*0.04*Amax*0.35*0.7;
+
+          var sx=Math.round(x+dx);
+          var sy=Math.round(y+dy);
           if(sx<0)sx=0;if(sx>=FW)sx=FW-1;if(sy<0)sy=0;if(sy>=FH)sy=FH-1;
           var si=(sy*FW+sx)*4,di=(y*FW+x)*4;
-          // Shading from surface normal: darker where facing away
-          var shade=z>0?0.92+0.08*(1-z/A):1.08+0.12*(z/A);
+
+          // 法线光照
+          var nz=Amax>0.01?Math.abs(z)/Amax:0;
+          var shade=z>0?0.88+0.12*(1-nz):1.05+0.15*nz;
           dst.data[di]=Math.min(255,Math.max(0,Math.round(src.data[si]*shade)));
           dst.data[di+1]=Math.min(255,Math.max(0,Math.round(src.data[si+1]*shade)));
           dst.data[di+2]=Math.min(255,Math.max(0,Math.round(src.data[si+2]*shade)));
