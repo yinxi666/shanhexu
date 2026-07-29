@@ -3,7 +3,6 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>history.scrollRestoration="manual"</script>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta name="theme-color" content="#b91c1c">
   <meta name="view-transition" content="same-origin">
@@ -30,18 +29,19 @@
     }
     #entrance-overlay.fade-out { opacity: 0; pointer-events: none; }
     #entrance-canvas { display: block; }
+    /* 页切帷幕 */
+    #nav-curtain{position:fixed;inset:0;z-index:99999;pointer-events:none;transform:translateX(100%);transition:transform .5s cubic-bezier(.6,0,.3,1);
+      background:
+        linear-gradient(160deg,transparent 0%,rgba(0,0,0,.35) 100%),
+        linear-gradient(180deg,#6b0f0f 0%,#a01818 30%,#c0392b 50%,#8b1515 80%,#5a0a0a 100%);
+      box-shadow:inset -8px 0 24px rgba(0,0,0,.4),inset -2px 0 0 rgba(255,215,0,.15)}
+    #nav-curtain.go{transform:translateX(0)}
+    #nav-curtain::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffd700,#b8860b,#ffd700,#8b6914,#ffd700);opacity:.7}
   </style>
 </head>
 
 <body>
-  <script>
-  (function scrollTop(){
-    window.scrollTo(0,0);
-    requestAnimationFrame(scrollTop);
-    setTimeout(function(){requestAnimationFrame(scrollTop);}, 200);
-    setTimeout(function(){requestAnimationFrame(scrollTop);}, 600);
-  })();
-  </script>
+  <div id="nav-curtain"></div>
   <div id="entrance-overlay">
     <canvas id="entrance-canvas"></canvas>
   </div>
@@ -292,11 +292,8 @@
   <script>
   (function() {
     if (sessionStorage.getItem('entrance_done_v2')) {
-      var overlay = document.getElementById('entrance-overlay');
-      var canvas = document.getElementById('entrance-canvas');
-      if (canvas) { canvas.remove(); }
-      if (overlay) { overlay.remove(); }
-      window.scrollTo(0, 0);
+      var el = document.getElementById('entrance-overlay');
+      if (el) el.remove();
       return;
     }
     document.documentElement.classList.add('entrance-active');
@@ -490,6 +487,22 @@
     }
 
     requestAnimationFrame(draw);
+  })();
+  </script>
+  <!-- 帷幕切换 -->
+  <script>
+  (function(){
+    var curtain=document.getElementById('nav-curtain');
+    if(!curtain)return;
+    document.addEventListener('click',function(e){
+      var a=e.target.closest('a');
+      if(!a||curtain.classList.contains('go'))return;
+      var href=a.getAttribute('href');
+      if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript'))return;
+      e.preventDefault();
+      curtain.classList.add('go');
+      setTimeout(function(){location.href=href},550);
+    });
   })();
   </script>
   <!-- Hero背景轮播 -->

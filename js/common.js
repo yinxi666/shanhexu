@@ -1246,8 +1246,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-/* 禁用浏览器自动恢复滚动位置 */
-if ('scrollRestoration' in history) {
-  history.scrollRestoration = 'manual';
-}
