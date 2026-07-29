@@ -113,7 +113,7 @@ window.RedRenderers = (() => {
         </div>
         <div class="practice-footer">
           <span class="practice-date">📅 ${practice.createdAt || ''}</span>
-          <span class="practice-likes" onclick="event.stopPropagation();window.RedGuide.likePractice(this, '${practice.id}')">❤️ <span class="like-count">${practice.likes || 0}</span></span>
+          <span class="practice-likes" onclick="event.stopPropagation();window.RedGuide.likePractice(this, '${practice.id}')">❤️ <span class="like-count">${(function(){try{var v=sessionStorage.getItem('redguide_likecount_'+practice.id);return v?v:practice.likes||0}catch(e){return practice.likes||0}})()}</span></span>
         </div>
       </div>
     `;

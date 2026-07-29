@@ -222,7 +222,7 @@ window.RedGuide = (() => {
           </div>` : ''}
           <div style="display:flex;justify-content:space-between;margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);">
             <span>📅 ${p.createdAt || ''}</span>
-            <span class="practice-likes" style="cursor:pointer;user-select:none;" onclick="event.stopPropagation();window.RedGuide.likePractice(this,'${p.id}')">❤️ <span class="like-count">${p.likes || 0}</span> 赞</span>
+            <span class="practice-likes" style="cursor:pointer;user-select:none;" onclick="event.stopPropagation();window.RedGuide.likePractice(this,'${p.id}')">❤️ <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
           </div>
         </div>
       </div>
@@ -260,13 +260,26 @@ window.RedGuide = (() => {
         return;
       }
       sessionStorage.setItem(key, '1');
-    } catch (e) {
-      // sessionStorage 不可用，仅本次会话有效
-    }
+    } catch (e) {}
     const newCount = parseInt(countEl.textContent) + 1;
     countEl.textContent = newCount;
+    // 同步更新页面上所有同名实践的点赞数
+    document.querySelectorAll('.practice-likes .like-count').forEach(function(c) {
+      if (c !== countEl) c.textContent = newCount;
+    });
+    // 存下最新数值
+    try { sessionStorage.setItem('redguide_likecount_' + id, String(newCount)); } catch(e) {}
     el.style.transform = 'scale(1.2)';
     setTimeout(() => el.style.transform = '', 200);
+  }
+
+  // 获取点赞数（优先sessionStorage）
+  function getLikeCount(id, fallback) {
+    try {
+      var c = sessionStorage.getItem('redguide_likecount_' + id);
+      if (c) return parseInt(c);
+    } catch(e) {}
+    return fallback;
   }
 
   // 跳转详情
@@ -1204,6 +1217,7 @@ window.RedGuide = (() => {
     openPracticeDetail,
     openLightbox,
     likePractice,
+    getLikeCount,
     searchFromHome,
     showToast,
     renderVenueCard,
