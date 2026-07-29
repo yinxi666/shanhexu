@@ -267,7 +267,7 @@ window.RedGuide = (() => {
     var allLikes = document.querySelectorAll('.practice-likes');
     allLikes.forEach(function(like) {
       var onclick = like.getAttribute('onclick') || '';
-      if (onclick.includes(\"' + id + '\")) {
+      if (onclick.indexOf(id) >= 0) {
         var c = like.querySelector('.like-count');
         if (c && c !== countEl) c.textContent = newCount;
       }
