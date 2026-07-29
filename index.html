@@ -60,7 +60,7 @@
   <main>
     <!-- ===== Cinematic Hero 区域 ===== -->
     <section class="cinematic-hero" id="home">
-      <canvas class="waving-flag" id="flag-canvas" aria-hidden="true"></canvas>
+      <div class="flag-3d" id="flag-3d" aria-hidden="true"></div>
       <img class="hero-bg animate-ken-burns hero-bg-active" src="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;">
       <img class="hero-bg animate-ken-burns hero-bg-next" src="assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;" style="opacity:0;">
       <div class="hero-content">
@@ -480,85 +480,55 @@
     requestAnimationFrame(draw);
   })();
   </script>
-  <!-- 五星红旗飘动动画 -->
+  <!-- 五星红旗3D飘动 -->
   <script>
   (function(){
-    var c=document.getElementById('flag-canvas');
-    var ctx=c.getContext('2d');
-    var W=200,H=133;
-    var poleW=8;
-    c.width=W+poleW+4;c.height=H+6;
-    var t=0;
+    var SEGS=24, W=200, H=133, segW=W/SEGS;
+    var container=document.getElementById('flag-3d');
+    container.style.cssText='position:absolute;top:24px;left:28px;z-index:4;perspective:400px;display:flex;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.3));';
+    // Pole
+    var pole=document.createElement('div');
+    pole.style.cssText='width:8px;height:'+(H+6)+'px;background:linear-gradient(90deg,#8B7355,#D4B87A 30%,#C4A265 60%,#6B5335);border-radius:2px;flex-shrink:0;position:relative;margin-top:6px;';
+    var ball=document.createElement('div');
+    ball.style.cssText='position:absolute;top:-4px;left:0;width:10px;height:10px;background:#D4B87A;border-radius:50%;';
+    pole.appendChild(ball);
+    container.appendChild(pole);
 
-    function drawStar(ctx,cx,cy,or,ir,rot){
-      ctx.beginPath();
-      for(var i=0;i<10;i++){
-        var r=i%2===0?or:ir;
-        var a=rot+Math.PI*2*i/10-Math.PI/2;
-        var x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
-        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      }
-      ctx.closePath();ctx.fill();
+    // Flag segments
+    for(var i=0;i<SEGS;i++){
+      var seg=document.createElement('div');
+      var bgX=-i*segW;
+      seg.style.cssText='width:'+segW+'px;height:'+H+'px;background:#DE2910;margin-top:6px;transform-origin:left center;animation:flag-seg 1.8s ease-in-out infinite;animation-delay:'+(i*-0.07)+'s;position:relative;';
+      container.appendChild(seg);
     }
 
-    // Offscreen canvas: static flag (red+stars)
-    var off=document.createElement('canvas');
-    off.width=W;off.height=H;
-    var octx=off.getContext('2d');
-    octx.fillStyle='#DE2910';octx.fillRect(0,0,W,H);
-    octx.fillStyle='#FFDE00';
-    drawStar(octx,W*0.15,H*0.24,20,8,Math.PI*0.5);
-    var ss=[
-      {x:W*0.32,y:H*0.08,a:Math.PI*0.7},
-      {x:W*0.36,y:H*0.17,a:Math.PI*0.55},
-      {x:W*0.36,y:H*0.28,a:Math.PI*0.35},
-      {x:W*0.32,y:H*0.37,a:Math.PI*0.15},
-    ];
-    ss.forEach(function(s){drawStar(octx,s.x,s.y,7,3,s.a);});
-
-    function frame(){
-      t+=0.025;
-      ctx.clearRect(0,0,c.width,c.height);
-
-      // Pole
-      var pg=ctx.createLinearGradient(0,0,poleW,0);
-      pg.addColorStop(0,'#8B7355');pg.addColorStop(0.3,'#D4B87A');
-      pg.addColorStop(0.6,'#C4A265');pg.addColorStop(1,'#6B5335');
-      ctx.fillStyle=pg;ctx.fillRect(2,6,poleW,H+2);
-      ctx.fillStyle='#D4B87A';ctx.beginPath();ctx.arc(2+poleW/2,4,5,0,Math.PI*2);ctx.fill();
-
-      // Get static flag pixels and apply wave
-      var srcData=octx.getImageData(0,0,W,H);
-      var dstData=ctx.createImageData(W,H);
-      for(var y=0;y<H;y++){
-        var ox=Math.sin(y*0.055+t)*10+Math.sin(y*0.11+t*1.3)*6+Math.sin(y*0.18+t*0.7)*3;
-        for(var x=0;x<W;x++){
-          var sx=Math.round(x-ox);
-          if(sx<0)sx=0;if(sx>=W)sx=W-1;
-          var si=(y*W+sx)*4,di=(y*W+x)*4;
-          dstData.data[di]=srcData.data[si];
-          dstData.data[di+1]=srcData.data[si+1];
-          dstData.data[di+2]=srcData.data[si+2];
-          dstData.data[di+3]=255;
-        }
-      }
-      ctx.putImageData(dstData,poleW+4,6);
-
-      // Fold shading
-      for(var y=0;y<H;y++){
-        var s=Math.sin(y*0.055+t)*0.12+0.06;
-        ctx.fillStyle='rgba(0,0,0,'+s+')';
-        ctx.fillRect(poleW+4,y+6,W,1);
-      }
-      // Highlight
-      for(var y=0;y<H;y+=3){
-        var hl=Math.sin(y*0.055+t+1.5)*0.08;
-        if(hl>0){ctx.fillStyle='rgba(255,255,255,'+hl+')';ctx.fillRect(poleW+4,y+6,W,1);}
-      }
-
-      requestAnimationFrame(frame);
+    // Stars overlay (drawn once via canvas, set as background on segments)
+    var sc=document.createElement('canvas');sc.width=W;sc.height=H;
+    var sctx=sc.getContext('2d');
+    sctx.fillStyle='#DE2910';sctx.fillRect(0,0,W,H);
+    sctx.fillStyle='#FFDE00';
+    function star(cx,cy,or,ir,rot){
+      sctx.beginPath();
+      for(var i=0;i<10;i++){var r=i%2===0?or:ir,a=rot+Math.PI*2*i/10-Math.PI/2;sctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);}
+      sctx.closePath();sctx.fill();
     }
-    frame();
+    star(W*0.15,H*0.24,20,8,Math.PI*0.5);
+    [{x:W*0.32,y:H*0.08,a:Math.PI*0.7},{x:W*0.36,y:H*0.17,a:Math.PI*0.55},{x:W*0.36,y:H*0.28,a:Math.PI*0.35},{x:W*0.32,y:H*0.37,a:Math.PI*0.15}].forEach(function(s){star(s.x,s.y,7,3,s.a);});
+    var flagImg=sc.toDataURL();
+
+    container.querySelectorAll('div:not(:first-child)').forEach(function(seg,i){
+      seg.style.backgroundImage='url('+flagImg+')';
+      seg.style.backgroundPosition=(-i*segW)+'px 0';
+      seg.style.backgroundSize=W+'px '+H+'px';
+    });
+
+    // Inject keyframes
+    var style=document.createElement('style');
+    style.textContent='@keyframes flag-seg{0%,100%{transform:rotateY(0deg)}25%{transform:rotateY(-8deg)}50%{transform:rotateY(0deg)}75%{transform:rotateY(8deg)}}';
+    document.head.appendChild(style);
+
+    // Mobile adjust
+    if(window.innerWidth<=860){container.style.transform='scale(0.6)';container.style.top='6px';container.style.left='4px';}
   })();
   </script>
   <!-- Hero背景轮播 -->
