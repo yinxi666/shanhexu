@@ -60,7 +60,7 @@
   <main>
     <!-- ===== Cinematic Hero 区域 ===== -->
     <section class="cinematic-hero" id="home">
-      <div class="waving-flag" aria-hidden="true"><div class="flag-inner"></div></div>
+      <canvas class="waving-flag" id="flag-canvas" aria-hidden="true"></canvas>
       <img class="hero-bg animate-ken-burns hero-bg-active" src="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;">
       <img class="hero-bg animate-ken-burns hero-bg-next" src="assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;" style="opacity:0;">
       <div class="hero-content">
@@ -478,6 +478,115 @@
     }
 
     requestAnimationFrame(draw);
+  })();
+  </script>
+  <!-- 五星红旗飘动动画 -->
+  <script>
+  (function(){
+    var c=document.getElementById('flag-canvas');
+    var ctx=c.getContext('2d');
+    var W=180,H=120; // flag dimensions
+    var poleW=6;
+    c.width=W+poleW;c.height=H+4;
+    var t=0;
+
+    // Star drawing: center (cx,cy), outer radius, inner radius, points=5, rotation
+    function drawStar(ctx,cx,cy,outerR,innerR,rotation){
+      ctx.beginPath();
+      for(var i=0;i<10;i++){
+        var r=i%2===0?outerR:innerR;
+        var angle=rotation+Math.PI*2*i/10-Math.PI/2;
+        var x=cx+Math.cos(angle)*r;
+        var y=cy+Math.sin(angle)*r;
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.closePath();ctx.fill();
+    }
+
+    function drawFlag(phase){
+      // Red background
+      ctx.fillStyle='#DE2910';
+      ctx.fillRect(poleW,0,W,H);
+
+      // Pole
+      var poleGrad=ctx.createLinearGradient(0,0,poleW,0);
+      poleGrad.addColorStop(0,'#8B7355');
+      poleGrad.addColorStop(0.3,'#C4A265');
+      poleGrad.addColorStop(0.5,'#D4B87A');
+      poleGrad.addColorStop(0.7,'#C4A265');
+      poleGrad.addColorStop(1,'#8B7355');
+      ctx.fillStyle=poleGrad;
+      ctx.fillRect(0,0,poleW,H+4);
+      // Pole top ball
+      ctx.fillStyle='#D4B87A';
+      ctx.beginPath();ctx.arc(poleW/2,2,4,0,Math.PI*2);ctx.fill();
+
+      // ---- Wave distortion ----
+      var imageData=ctx.getImageData(poleW,0,W,H);
+      var data=imageData.data;
+      var src=ctx.createImageData(W,H);
+
+      for(var y=0;y<H;y++){
+        var offset=Math.sin(y*0.06+phase)*8 + Math.sin(y*0.12+phase*1.4)*5;
+        for(var x=0;x<W;x++){
+          var srcX=Math.round(x-offset);
+          if(srcX<0)srcX=0;if(srcX>=W)srcX=W-1;
+          var si=(y*W+srcX)*4;
+          var di=(y*W+x)*4;
+          src.data[di]=data[si];
+          src.data[di+1]=data[si+1];
+          src.data[di+2]=data[si+2];
+          src.data[di+3]=data[si+3];
+        }
+      }
+      ctx.putImageData(src,poleW,0);
+
+      // Fold shadow
+      for(var y=0;y<H;y++){
+        var shadow=Math.sin(y*0.06+phase)*0.15+0.05;
+        ctx.fillStyle='rgba(0,0,0,'+shadow+')';
+        ctx.fillRect(poleW,y,W,1);
+      }
+    }
+
+    // Pre-render stars onto the red canvas
+    function prerender(){
+      ctx.fillStyle='#DE2910';ctx.fillRect(poleW,0,W,H);
+      // Big star
+      ctx.fillStyle='#FFDE00';
+      drawStar(ctx,poleW+W*0.16,H*0.25,18,7,Math.PI*0.5);
+      // 4 small stars (arc toward top-right from big star)
+      var smallStars=[
+        {x:W*0.34,y:H*0.08,a:Math.PI*0.65},
+        {x:W*0.38,y:H*0.18,a:Math.PI*0.55},
+        {x:W*0.38,y:H*0.30,a:Math.PI*0.4},
+        {x:W*0.34,y:H*0.40,a:Math.PI*0.25},
+      ];
+      smallStars.forEach(function(s){
+        drawStar(ctx,poleW+s.x,s.y,6,2.5,s.a);
+      });
+    }
+    prerender();
+
+    function animate(){
+      t+=0.03;
+      // Redraw base first
+      ctx.fillStyle='#DE2910';ctx.fillRect(poleW,0,W,H);
+      // Big star
+      ctx.fillStyle='#FFDE00';
+      drawStar(ctx,poleW+W*0.16,H*0.25,18,7,Math.PI*0.5);
+      // 4 small stars
+      var ss=[
+        {x:W*0.34,y:H*0.08,a:Math.PI*0.65},
+        {x:W*0.38,y:H*0.18,a:Math.PI*0.55},
+        {x:W*0.38,y:H*0.30,a:Math.PI*0.4},
+        {x:W*0.34,y:H*0.40,a:Math.PI*0.25},
+      ];
+      ss.forEach(function(s){drawStar(ctx,poleW+s.x,s.y,6,2.5,s.a);});
+      drawFlag(t);
+      requestAnimationFrame(animate);
+    }
+    animate();
   })();
   </script>
   <!-- Hero背景轮播 -->
