@@ -17,11 +17,13 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="stylesheet" href="../css/styles.css?v=20260729020757">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
-  <style>.nc-front,.nc-back{position:absolute;inset:0;transform:translateX(100%);transition:transform .4s cubic-bezier(.5,0,.3,1)}.nc-front{background:rgba(245,210,210,.7);backdrop-filter:blur(2px);z-index:2}.nc-back{background:linear-gradient(180deg,#f2c4c4 0%,#e8a8a8 50%,#f2c4c4 100%);z-index:1;transition-delay:.12s}#nav-curtain{position:fixed;inset:0;z-index:99999;pointer-events:none}#nav-curtain.go .nc-front,#nav-curtain.go .nc-back{transform:translateX(0)}.nc-back::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,rgba(185,28,28,.4),rgba(185,28,28,.15),rgba(185,28,28,.4))}</style>
-<style>.nc-front,.nc-back{position:absolute;inset:0;transform:translateX(100%);transition:transform .4s cubic-bezier(.5,0,.3,1)}.nc-front{background:rgba(245,210,210,.7);backdrop-filter:blur(2px);z-index:2}.nc-back{background:linear-gradient(180deg,#f2c4c4 0%,#e8a8a8 50%,#f2c4c4 100%);z-index:1;transition-delay:.12s}#nav-curtain{position:fixed;inset:0;z-index:99999;pointer-events:none}#nav-curtain.go .nc-front,#nav-curtain.go .nc-back{transform:translateX(0)}.nc-back::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,rgba(185,28,28,.4),rgba(185,28,28,.15),rgba(185,28,28,.4))}</style>
+  
+
+<style>.nc-front,.nc-back{position:absolute;inset:0;transform:translateX(100%);transition:transform .4s cubic-bezier(.5,0,.3,1)}.nc-front{background:rgba(245,210,210,.7);backdrop-filter:blur(2px);z-index:2}.nc-back{background:linear-gradient(180deg,#f2c4c4 0%,#e8a8a8 50%,#f2c4c4 100%);z-index:1;transition-delay:.12s}#nav-curtain{position:fixed;inset:0;z-index:99999;pointer-events:none}#nav-curtain.go .nc-front,#nav-curtain.go .nc-back{transform:translateX(0)}.nc-back::after{content:"7";position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,rgba(185,28,28,.4),rgba(185,28,28,.15),rgba(185,28,28,.4))}</style>
 </head>
 
 <body>
+  <div id="nav-curtain"><div class="nc-front"></div><div class="nc-back"></div></div>
   <div id="nav-curtain"><div class="nc-front"></div><div class="nc-back"></div></div>
   <!-- ===== 导航栏 ===== -->
   <header class="site-header">
@@ -103,6 +105,7 @@
   <script src="../js/renderers.js?v=20260729020757"></script>
   <script src="../js/common.js?v=20260729020757"></script>
   <script src="../js/features.js?v=20260729020757"></script>
+<script>!function(){var c=document.getElementById("nav-curtain");if(!c)return;document.addEventListener("click",function(e){var a=e.target.closest("a");if(!a||c.classList.contains("go"))return;var h=a.getAttribute("href");if(!h||h.startsWith("http")||h.startsWith("#")||h.startsWith("javascript"))return;e.preventDefault();c.classList.add("go");setTimeout(function(){location.href=h},550)})}();</script>
 </body>
 
 </html>
