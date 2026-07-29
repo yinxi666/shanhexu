@@ -485,108 +485,80 @@
   (function(){
     var c=document.getElementById('flag-canvas');
     var ctx=c.getContext('2d');
-    var W=180,H=120; // flag dimensions
-    var poleW=6;
-    c.width=W+poleW;c.height=H+4;
+    var W=200,H=133;
+    var poleW=8;
+    c.width=W+poleW+4;c.height=H+6;
     var t=0;
 
-    // Star drawing: center (cx,cy), outer radius, inner radius, points=5, rotation
-    function drawStar(ctx,cx,cy,outerR,innerR,rotation){
+    function drawStar(ctx,cx,cy,or,ir,rot){
       ctx.beginPath();
       for(var i=0;i<10;i++){
-        var r=i%2===0?outerR:innerR;
-        var angle=rotation+Math.PI*2*i/10-Math.PI/2;
-        var x=cx+Math.cos(angle)*r;
-        var y=cy+Math.sin(angle)*r;
-        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+        var r=i%2===0?or:ir;
+        var a=rot+Math.PI*2*i/10-Math.PI/2;
+        var x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
       }
       ctx.closePath();ctx.fill();
     }
 
-    function drawFlag(phase){
-      // Red background
-      ctx.fillStyle='#DE2910';
-      ctx.fillRect(poleW,0,W,H);
+    // Offscreen canvas: static flag (red+stars)
+    var off=document.createElement('canvas');
+    off.width=W;off.height=H;
+    var octx=off.getContext('2d');
+    octx.fillStyle='#DE2910';octx.fillRect(0,0,W,H);
+    octx.fillStyle='#FFDE00';
+    drawStar(octx,W*0.15,H*0.24,20,8,Math.PI*0.5);
+    var ss=[
+      {x:W*0.32,y:H*0.08,a:Math.PI*0.7},
+      {x:W*0.36,y:H*0.17,a:Math.PI*0.55},
+      {x:W*0.36,y:H*0.28,a:Math.PI*0.35},
+      {x:W*0.32,y:H*0.37,a:Math.PI*0.15},
+    ];
+    ss.forEach(function(s){drawStar(octx,s.x,s.y,7,3,s.a);});
+
+    function frame(){
+      t+=0.025;
+      ctx.clearRect(0,0,c.width,c.height);
 
       // Pole
-      var poleGrad=ctx.createLinearGradient(0,0,poleW,0);
-      poleGrad.addColorStop(0,'#8B7355');
-      poleGrad.addColorStop(0.3,'#C4A265');
-      poleGrad.addColorStop(0.5,'#D4B87A');
-      poleGrad.addColorStop(0.7,'#C4A265');
-      poleGrad.addColorStop(1,'#8B7355');
-      ctx.fillStyle=poleGrad;
-      ctx.fillRect(0,0,poleW,H+4);
-      // Pole top ball
-      ctx.fillStyle='#D4B87A';
-      ctx.beginPath();ctx.arc(poleW/2,2,4,0,Math.PI*2);ctx.fill();
+      var pg=ctx.createLinearGradient(0,0,poleW,0);
+      pg.addColorStop(0,'#8B7355');pg.addColorStop(0.3,'#D4B87A');
+      pg.addColorStop(0.6,'#C4A265');pg.addColorStop(1,'#6B5335');
+      ctx.fillStyle=pg;ctx.fillRect(2,6,poleW,H+2);
+      ctx.fillStyle='#D4B87A';ctx.beginPath();ctx.arc(2+poleW/2,4,5,0,Math.PI*2);ctx.fill();
 
-      // ---- Wave distortion ----
-      var imageData=ctx.getImageData(poleW,0,W,H);
-      var data=imageData.data;
-      var src=ctx.createImageData(W,H);
-
+      // Get static flag pixels and apply wave
+      var srcData=octx.getImageData(0,0,W,H);
+      var dstData=ctx.createImageData(W,H);
       for(var y=0;y<H;y++){
-        var offset=Math.sin(y*0.06+phase)*8 + Math.sin(y*0.12+phase*1.4)*5;
+        var ox=Math.sin(y*0.055+t)*10+Math.sin(y*0.11+t*1.3)*6+Math.sin(y*0.18+t*0.7)*3;
         for(var x=0;x<W;x++){
-          var srcX=Math.round(x-offset);
-          if(srcX<0)srcX=0;if(srcX>=W)srcX=W-1;
-          var si=(y*W+srcX)*4;
-          var di=(y*W+x)*4;
-          src.data[di]=data[si];
-          src.data[di+1]=data[si+1];
-          src.data[di+2]=data[si+2];
-          src.data[di+3]=data[si+3];
+          var sx=Math.round(x-ox);
+          if(sx<0)sx=0;if(sx>=W)sx=W-1;
+          var si=(y*W+sx)*4,di=(y*W+x)*4;
+          dstData.data[di]=srcData.data[si];
+          dstData.data[di+1]=srcData.data[si+1];
+          dstData.data[di+2]=srcData.data[si+2];
+          dstData.data[di+3]=255;
         }
       }
-      ctx.putImageData(src,poleW,0);
+      ctx.putImageData(dstData,poleW+4,6);
 
-      // Fold shadow
+      // Fold shading
       for(var y=0;y<H;y++){
-        var shadow=Math.sin(y*0.06+phase)*0.15+0.05;
-        ctx.fillStyle='rgba(0,0,0,'+shadow+')';
-        ctx.fillRect(poleW,y,W,1);
+        var s=Math.sin(y*0.055+t)*0.12+0.06;
+        ctx.fillStyle='rgba(0,0,0,'+s+')';
+        ctx.fillRect(poleW+4,y+6,W,1);
       }
-    }
+      // Highlight
+      for(var y=0;y<H;y+=3){
+        var hl=Math.sin(y*0.055+t+1.5)*0.08;
+        if(hl>0){ctx.fillStyle='rgba(255,255,255,'+hl+')';ctx.fillRect(poleW+4,y+6,W,1);}
+      }
 
-    // Pre-render stars onto the red canvas
-    function prerender(){
-      ctx.fillStyle='#DE2910';ctx.fillRect(poleW,0,W,H);
-      // Big star
-      ctx.fillStyle='#FFDE00';
-      drawStar(ctx,poleW+W*0.16,H*0.25,18,7,Math.PI*0.5);
-      // 4 small stars (arc toward top-right from big star)
-      var smallStars=[
-        {x:W*0.34,y:H*0.08,a:Math.PI*0.65},
-        {x:W*0.38,y:H*0.18,a:Math.PI*0.55},
-        {x:W*0.38,y:H*0.30,a:Math.PI*0.4},
-        {x:W*0.34,y:H*0.40,a:Math.PI*0.25},
-      ];
-      smallStars.forEach(function(s){
-        drawStar(ctx,poleW+s.x,s.y,6,2.5,s.a);
-      });
+      requestAnimationFrame(frame);
     }
-    prerender();
-
-    function animate(){
-      t+=0.03;
-      // Redraw base first
-      ctx.fillStyle='#DE2910';ctx.fillRect(poleW,0,W,H);
-      // Big star
-      ctx.fillStyle='#FFDE00';
-      drawStar(ctx,poleW+W*0.16,H*0.25,18,7,Math.PI*0.5);
-      // 4 small stars
-      var ss=[
-        {x:W*0.34,y:H*0.08,a:Math.PI*0.65},
-        {x:W*0.38,y:H*0.18,a:Math.PI*0.55},
-        {x:W*0.38,y:H*0.30,a:Math.PI*0.4},
-        {x:W*0.34,y:H*0.40,a:Math.PI*0.25},
-      ];
-      ss.forEach(function(s){drawStar(ctx,poleW+s.x,s.y,6,2.5,s.a);});
-      drawFlag(t);
-      requestAnimationFrame(animate);
-    }
-    animate();
+    frame();
   })();
   </script>
   <!-- Hero背景轮播 -->
