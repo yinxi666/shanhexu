@@ -222,7 +222,7 @@ window.RedGuide = (() => {
           </div>` : ''}
           <div style="display:flex;justify-content:space-between;margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);">
             <span>📅 ${p.createdAt || ''}</span>
-            <span>❤️ ${p.likes || 0} 赞</span>
+            <span class="practice-likes" style="cursor:pointer;user-select:none;" onclick="event.stopPropagation();window.RedGuide.likePractice(this,'${p.id}')">❤️ <span class="like-count">${p.likes || 0}</span> 赞</span>
           </div>
         </div>
       </div>
