@@ -370,6 +370,14 @@ p {
   animation-duration: 25s;
 }
 
+.hero-bg-next {
+  transition: opacity 1.5s ease-in-out;
+}
+
+.hero-bg-active {
+  transition: opacity 1.5s ease-in-out;
+}
+
 .hero-content {
   position: relative;
   z-index: 3;

@@ -60,7 +60,8 @@
   <main>
     <!-- ===== Cinematic Hero 区域 ===== -->
     <section class="cinematic-hero" id="home">
-      <img class="hero-bg animate-ken-burns" src="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;">
+      <img class="hero-bg animate-ken-burns hero-bg-active" src="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;">
+      <img class="hero-bg animate-ken-burns hero-bg-next" src="assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp" alt="红色场馆背景" draggable="false" oncontextmenu="return false;" style="opacity:0;">
       <div class="hero-content">
         <p class="hero-subtitle animate-fade-in-up" style="animation-delay: 0.2s;">红色文旅数字导览平台</p>
         <h1 class="hero-title animate-fade-in-up" style="animation-delay: 0.4s;">赓续血脉<br><span class="accent">数绘红旅</span></h1>
@@ -476,6 +477,34 @@
     }
 
     requestAnimationFrame(draw);
+  })();
+  </script>
+  <!-- Hero背景轮播 -->
+  <script>
+  (function(){
+    var images = [
+      'assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp',
+      'assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp',
+      'assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp',
+      'assets/全国红色场馆图片/场馆06_陕西_延安革命纪念馆.webp',
+      'assets/全国红色场馆图片/场馆05_河北_西柏坡纪念馆.webp',
+      'assets/全国红色场馆图片/场馆07_贵州_遵义会议会址.webp',
+    ];
+    var current = 0;
+    var active = document.querySelector('.hero-bg-active');
+    var next = document.querySelector('.hero-bg-next');
+    if (!active || !next) return;
+    setInterval(function(){
+      current = (current + 1) % images.length;
+      next.src = images[current];
+      next.style.opacity = '1';
+      active.style.opacity = '0';
+      // swap roles
+      var tmp = active; active = next; next = tmp;
+      active.className = 'hero-bg animate-ken-burns hero-bg-active';
+      next.className = 'hero-bg animate-ken-burns hero-bg-next';
+      next.style.opacity = '0';
+    }, 5000);
   })();
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
