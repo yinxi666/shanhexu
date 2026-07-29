@@ -378,6 +378,20 @@ p {
   transition: opacity 1.5s ease-in-out;
 }
 
+/* Hero 国旗视频 */
+.flag-video {
+  position: absolute;
+  top: 16px; left: 20px;
+  width: 200px;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.4);
+}
+@media (max-width: 860px) {
+  .flag-video { width: 120px; top: 8px; left: 8px; }
+}
+
 .hero-content {
   position: relative;
   z-index: 3;
