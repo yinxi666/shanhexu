@@ -263,9 +263,14 @@ window.RedGuide = (() => {
     } catch (e) {}
     const newCount = parseInt(countEl.textContent) + 1;
     countEl.textContent = newCount;
-    // 同步更新页面上所有同名实践的点赞数
-    document.querySelectorAll('.practice-likes .like-count').forEach(function(c) {
-      if (c !== countEl) c.textContent = newCount;
+    // 同步更新页面上相同实践的所有点赞数（卡片+弹窗）
+    var allLikes = document.querySelectorAll('.practice-likes');
+    allLikes.forEach(function(like) {
+      var onclick = like.getAttribute('onclick') || '';
+      if (onclick.includes(\"' + id + '\")) {
+        var c = like.querySelector('.like-count');
+        if (c && c !== countEl) c.textContent = newCount;
+      }
     });
     // 存下最新数值
     try { sessionStorage.setItem('redguide_likecount_' + id, String(newCount)); } catch(e) {}
