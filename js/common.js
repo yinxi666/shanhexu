@@ -452,11 +452,6 @@ window.RedGuide = (() => {
   async function initHomePage() {
     await initCommon();
 
-    // 强制回到顶部
-    window.scrollTo(0, 0);
-    setTimeout(function() { window.scrollTo(0, 0); }, 100);
-    setTimeout(function() { window.scrollTo(0, 0); }, 500);
-
     // 搜索框
     const searchInput = $('#hero-search-input');
     const searchBtn = $('#hero-search-btn');

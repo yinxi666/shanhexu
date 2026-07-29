@@ -34,6 +34,14 @@
 </head>
 
 <body>
+  <script>
+  (function scrollTop(){
+    window.scrollTo(0,0);
+    requestAnimationFrame(scrollTop);
+    setTimeout(function(){requestAnimationFrame(scrollTop);}, 200);
+    setTimeout(function(){requestAnimationFrame(scrollTop);}, 600);
+  })();
+  </script>
   <div id="entrance-overlay">
     <canvas id="entrance-canvas"></canvas>
   </div>
@@ -284,8 +292,11 @@
   <script>
   (function() {
     if (sessionStorage.getItem('entrance_done_v2')) {
-      var el = document.getElementById('entrance-overlay');
-      if (el) el.remove();
+      var overlay = document.getElementById('entrance-overlay');
+      var canvas = document.getElementById('entrance-canvas');
+      if (canvas) { canvas.remove(); }
+      if (overlay) { overlay.remove(); }
+      window.scrollTo(0, 0);
       return;
     }
     document.documentElement.classList.add('entrance-active');
