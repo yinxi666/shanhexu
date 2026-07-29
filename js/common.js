@@ -1246,3 +1246,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* 返回首页时强制滚回顶部 */
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted || performance.navigation.type === 2) {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+});
