@@ -1247,9 +1247,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* 返回首页时强制滚回顶部 */
-window.addEventListener('pageshow', function(e) {
-  if (e.persisted || performance.navigation.type === 2) {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-});
+/* 禁用浏览器自动恢复滚动位置 */
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
