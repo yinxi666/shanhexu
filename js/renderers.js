@@ -25,10 +25,20 @@ window.RedRenderers = (() => {
    * @param {string} [basePath] - 基础路径
    * @returns {string} HTML字符串
    */
+  function isFavorite(id) {
+    try {
+      const favs = JSON.parse(localStorage.getItem('redguide_favs') || '[]');
+      return favs.includes(String(id));
+    } catch (e) { return false; }
+  }
+
   function renderVenueCard(venue, basePath) {
     const bp = basePath || getBasePath();
     const imgSrc = resolveAssetPath(venue.image, bp);
     const fb = fallbackSrc();
+    const favActive = isFavorite(venue.id);
+    const favClass = favActive ? 'active' : '';
+    const favIcon = favActive ? '❤️' : '🤍';
     return `
       <div class="venue-card" data-id="${venue.id}" onclick="window.RedGuide.goToDetail('${venue.id}')">
         <div class="card-img">
@@ -45,7 +55,10 @@ window.RedRenderers = (() => {
         </div>
         <div class="card-footer">
           <span>${venue.officialVerificationStatus || ''}</span>
-          <span class="card-link">查看详情 →</span>
+          <span>
+            <button class="fav-btn ${favClass}" title="收藏场馆" onclick="event.stopPropagation(); window.RedFeatures.toggleFavorite('${venue.id}'); this.innerHTML = window.RedFeatures.isFavorite('${venue.id}') ? '❤️' : '🤍'; this.classList.toggle('active', window.RedFeatures.isFavorite('${venue.id}'));">${favIcon}</button>
+            <span class="card-link">查看详情 →</span>
+          </span>
         </div>
       </div>
     `;
@@ -112,11 +125,28 @@ window.RedRenderers = (() => {
           <p>${practice.summary || ''}</p>
         </div>
         <div class="practice-footer">
-          <span class="practice-date">📅 ${practice.createdAt || ''}</span>
+          <span class="practice-date"><span class="pd-year">${(practice.createdAt || '').slice(0,4)}</span><span class="pd-month">${parseInt((practice.createdAt || '').slice(5,7),10)}</span><span class="pd-day">${parseInt((practice.createdAt || '').slice(8,10),10)}</span></span>
           <span class="practice-likes" onclick="event.stopPropagation();window.RedGuide.likePractice(this, '${practice.id}')">❤️ <span class="like-count">${(function(){try{var v=sessionStorage.getItem('redguide_likecount_'+practice.id);return v?v:practice.likes||0}catch(e){return practice.likes||0}})()}</span></span>
         </div>
       </div>
     `;
+  }
+
+  /**
+   * 根据名字 hash 生成稳定的头像颜色
+   */
+  function avatarColor(name) {
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // 限定暖色段：红 0-20° + 橙金 25-45° + 紫红 330-360°
+    var zones = [[0, 20], [25, 45], [330, 360]];
+    var zone = zones[Math.abs(hash) % zones.length];
+    var hue = zone[0] + (Math.abs(hash * 7) % (zone[1] - zone[0]));
+    var sat = 50 + (Math.abs(hash * 3) % 20);  // 50-70%
+    var lit = 38 + (Math.abs(hash * 5) % 14);  // 38-52%
+    return 'hsl(' + hue + ',' + sat + '%,' + lit + '%)';
   }
 
   /**
@@ -127,10 +157,20 @@ window.RedRenderers = (() => {
   function renderMessageCard(msg) {
     const statusMap = { approved: '已发布', pending: '审核中', rejected: '未通过' };
     const initials = (msg.author || '匿').charAt(0);
+    const bg = avatarColor(msg.author || '匿名');
+    const pinColor = avatarColor((msg.author || '匿') + 'pin');
+    // 基于 id + 标题 hash 保证每条留言旋转角度不同且稳定
+    var rotSeed = String(msg.id || '') + (msg.title || '');
+    var rotHash = 0;
+    for (var ri = 0; ri < rotSeed.length; ri++) {
+      rotHash = rotSeed.charCodeAt(ri) + ((rotHash << 5) - rotHash);
+    }
+    var rotation = ((Math.abs(rotHash) % 51) - 25) / 10; // -2.5° ~ 2.5°
     return `
-      <div class="message-card">
+      <div class="message-card" style="transform:rotate(${rotation}deg)">
+        <div class="msg-pin" style="background:${pinColor}"></div>
         <div class="msg-header">
-          <div class="msg-avatar">${initials}</div>
+          <div class="msg-avatar" style="background:${bg}">${initials}</div>
           <div class="msg-author-info">
             <h4>${msg.author || '匿名用户'}</h4>
             <span>${msg.className || ''} · ${msg.submitTime || ''}</span>

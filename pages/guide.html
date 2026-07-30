@@ -31,6 +31,54 @@
     #map-container .leaflet-popup-content b {
       color: var(--red);
     }
+
+    /* ---- 自定义红色五角星 Marker ---- */
+    .red-star-marker {
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer;
+    }
+
+    .red-star-marker .rsm-inner {
+      position: relative;
+      width: 32px;
+      height: 38px;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+      transition: filter 0.25s ease, transform 0.25s ease;
+    }
+
+    .red-star-marker:hover .rsm-inner {
+      filter: drop-shadow(0 3px 6px rgba(185, 28, 28, 0.55)) drop-shadow(0 0 8px rgba(255, 180, 50, 0.5));
+      transform: scale(1.15);
+    }
+
+    /* 地面投影圆点 */
+    .red-star-marker .rsm-shadow {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.25);
+      transition: all 0.25s ease;
+    }
+
+    .red-star-marker:hover .rsm-shadow {
+      width: 16px;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    /* 高亮态 marker 呼吸动画 */
+    .red-star-marker.marker-highlight .rsm-inner {
+      animation: marker-pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes marker-pulse {
+      0%, 100% { transform: scale(1.2); }
+      50% { transform: scale(1.45); }
+    }
   </style>
   
 
@@ -87,25 +135,24 @@
         <select id="filter-category" aria-label="按类别筛选">
           <option value="all">全部类别</option>
         </select>
-        <button class="btn secondary small" id="toggle-view-btn" title="切换地图/列表视图" style="white-space:nowrap;">🗺️
-          地图视图</button>
+        <button class="btn secondary small" id="toggle-view-btn" title="切换地图/列表视图" style="white-space:nowrap;display:none;">🗺️ 地图视图</button>
       </div>
 
-      <!-- 结果计数 + 视图切换 -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <div class="result-count" id="result-count"></div>
+      <!-- 结果计数 -->
+      <div class="result-count" id="result-count"></div>
+
+      <!-- 分栏布局：左列表 + 右地图 -->
+      <div class="guide-layout">
+        <div class="guide-list">
+          <div class="venue-grid" id="venue-grid"></div>
+          <div id="pagination-container"></div>
+        </div>
+        <div class="guide-map">
+          <div class="guide-map-sticky">
+            <div id="map-container"></div>
+          </div>
+        </div>
       </div>
-
-      <!-- 网格视图 -->
-      <div class="venue-grid" id="venue-grid"></div>
-
-      <!-- 地图视图 -->
-      <div id="map-container"
-        style="display:none;height:520px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);">
-      </div>
-
-      <!-- 分页 -->
-      <div id="pagination-container"></div>
     </section>
   </main>
 

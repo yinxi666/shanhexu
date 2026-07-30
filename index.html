@@ -37,6 +37,10 @@
     #nav-curtain.go .nc-front{transform:translateX(0)}
     #nav-curtain.go .nc-back{transform:translateX(0)}
     .nc-back::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,rgba(185,28,28,.4),rgba(185,28,28,.15),rgba(185,28,28,.4))}
+    #skip{position:fixed;top:40px;right:80px;z-index:100000;background:#8b1a1a;border:1px solid #ffcc88;color:#fff;padding:0 20px;height:56px;line-height:56px;font-family:"HongLeiZhuoShu","STZhongsong","SimSun",serif;font-size:28px;font-weight:700;letter-spacing:.15em;cursor:pointer;border-radius:28px;transition:all .3s;box-shadow:0 0 12px rgba(255,120,80,.4);display:inline-block;box-sizing:border-box}
+    #skip:hover{background:#a52020;border-color:#ffe0b0;box-shadow:0 0 20px rgba(255,120,80,.6);transform:translateY(-1px)}
+    #skip:active{transform:translateY(0)}
+    @media (max-width:640px){#skip{top:16px;right:16px;padding:0 14px;height:40px;line-height:40px;font-size:18px;border-radius:20px}}
   </style>
 </head>
 
@@ -44,6 +48,7 @@
   <div id="nav-curtain"><div class="nc-front"></div><div class="nc-back"></div></div>
   <div id="entrance-overlay">
     <canvas id="entrance-canvas"></canvas>
+    <button id="skip">跳过→</button>
   </div>
   <!-- ===== 导航栏 ===== -->
   <header class="site-header">
@@ -288,9 +293,9 @@
     <div class="footer-bottom">© 2026 赓续血脉・数绘红旅 · 四川农业大学信息工程学院 · 静态网页竞赛作品</div>
   </footer>
 
-  <!-- 红色江山·电影级开场动画 -->
+  <!-- 红色江山·电影级开场动画（增强版） -->
   <script>
-  (function() {
+  (function () {
     if (sessionStorage.getItem('entrance_done_v2')) {
       var el = document.getElementById('entrance-overlay');
       if (el) el.remove();
@@ -300,171 +305,1112 @@
 
     var canvas = document.getElementById('entrance-canvas');
     var ctx = canvas.getContext('2d');
-    var W, H;
-    var t = 0, totalDuration = 5.2; // 总时长（秒）
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var W = 0, H = 0;
+
+    // ===== 叙事时间线 =====
+    var TL = {
+      spark: 0.3,
+      spread: 1.2,
+      dawn: 2.0,
+      mountains: 2.2,
+      mountainsEnd: 3.4,
+      tiananmen: 3.4,
+      titleCrack: 4.2,
+      titleReveal: 4.6,
+      subtitle: 5.2,
+      sweep: 5.8,
+      end: 6.4
+    };
+    var totalDuration = TL.end;
+    var t = 0;
     var lastTime = performance.now();
 
+    // ===== 缓动函数 =====
+    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+    function easeOutExpo(x) { return x >= 1 ? 1 : 1 - Math.pow(2, -10 * x); }
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    // ===== DPR 适配 =====
     function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     }
     resize();
-    window.addEventListener('resize', resize);
 
-    // ========== 缓动函数 ==========
-    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
-    function easeInOutCubic(x) { return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x+2, 3)/2; }
-    function easeOutExpo(x) { return x >= 1 ? 1 : 1 - Math.pow(2, -10*x); }
-    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    // ===== 粒子贴图预渲染（性能优化） =====
+    function makeSprite(inner, mid) {
+      var c = document.createElement('canvas');
+      c.width = 64; c.height = 64;
+      var cx = c.getContext('2d');
+      var g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, inner);
+      g.addColorStop(0.3, mid);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      cx.fillStyle = g;
+      cx.fillRect(0, 0, 64, 64);
+      return c;
+    }
+    var sparkSprite = makeSprite('rgba(255,220,120,1)', 'rgba(255,160,50,0.5)');
+    var emberSprite = makeSprite('rgba(255,140,40,1)', 'rgba(220,60,20,0.4)');
+    var starSprite = makeSprite('rgba(255,240,200,0.8)', 'rgba(200,180,150,0.2)');
 
-    // ========== 山脉生成 ==========
+    // ===== 山脉生成 =====
     var mountains = [];
     function generateMountains() {
+      mountains = [];
       var count = 12;
       for (var i = 0; i < count; i++) {
         var points = [];
-        var segs = 30;
-        var baseY = H * 0.55;
-        var amp = H * 0.35 * (1 - i * 0.06);
+        var segs = 40;
+        var baseY = H * 0.58;
+        var amp = H * 0.32 * (1 - i * 0.06);
         for (var j = 0; j <= segs; j++) {
           var x = (j / segs) * W;
-          var noise = Math.sin(j * 0.3 + i * 2.5) * amp * 0.5
-                    + Math.sin(j * 0.7 + i * 1.7) * amp * 0.3
-                    + Math.sin(j * 1.2 + i * 0.8) * amp * 0.2;
-          points.push({ x: x, y: baseY + amp * 0.2 - noise });
+          var noise = Math.sin(j * 0.25 + i * 2.3) * amp * 0.45
+            + Math.sin(j * 0.6 + i * 1.5) * amp * 0.3
+            + Math.sin(j * 1.1 + i * 0.7) * amp * 0.25;
+          points.push({ x: x, y: baseY + amp * 0.15 - noise });
         }
         mountains.push(points);
       }
     }
     generateMountains();
 
-    // ========== 发光粒子 ==========
-    var particles = [];
-    function initParticles() {
-      for (var i = 0; i < 120; i++) {
-        particles.push({
-          x: W * 0.2 + Math.random() * W * 0.6,
-          baseY: H * 0.3 + Math.random() * H * 0.15,
-          phase: Math.random() * Math.PI * 2,
-          speed: 0.3 + Math.random() * 0.8,
-          size: 1.5 + Math.random() * 3,
-          opacity: 0.4 + Math.random() * 0.6
+    // ===== 天安门本地图片 + 火焰蔓延效果 =====
+    var tiananmenImg = new Image();
+    var tiananmenCanvas = null;
+    var tiananmenReady = false;
+    tiananmenImg.onload = function () {
+      try {
+        var oc = document.createElement('canvas');
+        var iw = tiananmenImg.naturalWidth || tiananmenImg.width;
+        var ih = tiananmenImg.naturalHeight || tiananmenImg.height;
+        oc.width = iw; oc.height = ih;
+        var octx = oc.getContext('2d');
+        octx.drawImage(tiananmenImg, 0, 0);
+        var imgData = octx.getImageData(0, 0, iw, ih);
+        var d = imgData.data;
+        var edgeFade = Math.round(Math.min(iw, ih) * 0.15);
+        for (var y = 0; y < ih; y++) {
+          for (var x = 0; x < iw; x++) {
+            var idx = (y * iw + x) * 4;
+            var lum = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
+            var distL = x, distR = iw - x, distT = y;
+            var minDist = Math.min(distL, distR, distT);
+            var edgeAlpha = minDist < edgeFade ? Math.pow(minDist / edgeFade, 1.5) : 1;
+            if (lum > 140) {
+              d[idx + 3] = 0;
+            } else if (lum > 85) {
+              var fade = (140 - lum) / 55;
+              var dark = Math.pow(lum / 255, 1.2) * 80;
+              d[idx] = Math.round(dark * 2.2 + 15);
+              d[idx + 1] = Math.round(dark * 0.45);
+              d[idx + 2] = Math.round(dark * 0.28);
+              d[idx + 3] = Math.round(255 * fade * edgeAlpha);
+            } else {
+              lum = ((lum - 35) * 1.6) + 35;
+              lum = Math.max(0, Math.min(255, lum));
+              var dark2 = Math.pow(lum / 255, 1.2) * 80;
+              d[idx] = Math.round(dark2 * 2.2 + 15);
+              d[idx + 1] = Math.round(dark2 * 0.45);
+              d[idx + 2] = Math.round(dark2 * 0.28);
+              d[idx + 3] = Math.round(255 * edgeAlpha);
+            }
+          }
+        }
+        octx.putImageData(imgData, 0, 0);
+        tiananmenCanvas = oc;
+        tiananmenReady = true;
+      } catch (e) {
+        tiananmenReady = true;
+      }
+    };
+    tiananmenImg.onerror = function () { tiananmenReady = false; };
+    tiananmenImg.src = '天安门.webp';
+
+    var taFireCanvas = document.createElement('canvas');
+    var taFireCtx = taFireCanvas.getContext('2d');
+    var taEmbers = [];
+
+    function drawTiananmen(cx, baseY, scale, alpha, time) {
+      var s = scale;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      if (tiananmenReady && tiananmenCanvas) {
+        var imgW = 680 * s;
+        var imgH = imgW * (tiananmenCanvas.height / tiananmenCanvas.width);
+        var imgX = cx - imgW / 2;
+        var imgY = baseY - imgH;
+
+        var fireT = Math.max(0, Math.min(1, (time - TL.tiananmen - 0.3) / 1.8));
+        var fireEase = 1 - Math.pow(1 - fireT, 3);
+        var fireR = Math.max(1, Math.hypot(imgW, imgH) * 0.6 * fireEase);
+
+        taFireCanvas.width = Math.max(1, Math.round(imgW));
+        taFireCanvas.height = Math.max(1, Math.round(imgH));
+        var fc = taFireCtx;
+        fc.setTransform(1, 0, 0, 1, 0, 0);
+        fc.clearRect(0, 0, taFireCanvas.width, taFireCanvas.height);
+        fc.drawImage(tiananmenCanvas, 0, 0, taFireCanvas.width, taFireCanvas.height);
+
+        var taAlphaData = fc.getImageData(0, 0, taFireCanvas.width, taFireCanvas.height);
+        var taAlpha = new Uint8ClampedArray(taAlphaData.data.length / 4);
+        for (var ai = 0; ai < taAlphaData.data.length; ai += 4) {
+          taAlpha[ai / 4] = taAlphaData.data[ai + 3];
+        }
+
+        fc.globalCompositeOperation = 'lighter';
+        var srcX = taFireCanvas.width / 2;
+        var srcY = taFireCanvas.height;
+
+        if (fireEase > 0) {
+          var fg = fc.createRadialGradient(srcX, srcY, 0, srcX, srcY, fireR);
+          fg.addColorStop(0, 'rgba(255,220,160,0.5)');
+          fg.addColorStop(0.25, 'rgba(240,190,120,0.32)');
+          fg.addColorStop(0.6, 'rgba(200,160,90,0.14)');
+          fg.addColorStop(1, 'rgba(0,0,0,0)');
+          fc.fillStyle = fg;
+          fc.fillRect(0, 0, taFireCanvas.width, taFireCanvas.height);
+
+          if (fireEase > 0.4) {
+            var fl = 0.9 + 0.1 * Math.sin(time * 4);
+            fc.globalAlpha = (fireEase - 0.4) * 0.07 * fl;
+            fc.fillStyle = 'rgba(255,210,140,1)';
+            fc.fillRect(0, 0, taFireCanvas.width, taFireCanvas.height);
+            fc.globalAlpha = 1;
+          }
+        }
+
+        fc.globalCompositeOperation = 'source-over';
+        var currentData = fc.getImageData(0, 0, taFireCanvas.width, taFireCanvas.height);
+        var cd = currentData.data;
+        for (var ci = 0; ci < cd.length; ci += 4) {
+          var idx2 = ci / 4;
+          cd[ci + 3] = Math.min(cd[ci + 3], taAlpha[idx2]);
+        }
+        fc.putImageData(currentData, 0, 0);
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        var backG = ctx.createRadialGradient(cx, baseY - imgH * 0.4, 0, cx, baseY - imgH * 0.4, Math.max(1, imgW * 0.5));
+        backG.addColorStop(0, 'rgba(255,220,160,' + (alpha * 0.3) + ')');
+        backG.addColorStop(0.5, 'rgba(220,180,130,' + (alpha * 0.16) + ')');
+        backG.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = backG;
+        ctx.fillRect(imgX - 40, imgY - 20, imgW + 80, imgH + 40);
+        ctx.restore();
+
+        ctx.drawImage(taFireCanvas, imgX, imgY);
+
+        if (fireEase > 0) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = alpha * 0.1 * fireEase;
+          ctx.shadowColor = '#fff0cc';
+          ctx.shadowBlur = 5 * s;
+          ctx.drawImage(taFireCanvas, imgX, imgY);
+          ctx.restore();
+        }
+
+        if (fireEase > 0) {
+          if (fireEase < 1) {
+            if (Math.random() < 0.3) {
+              var ang = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.6;
+              var dist = fireR * (0.5 + Math.random() * 0.3);
+              taEmbers.push({
+                x: cx + Math.cos(ang) * dist * 0.6,
+                y: baseY + Math.sin(ang) * dist,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: -Math.random() * 1.0 - 0.2,
+                life: 1, decay: 0.012 + Math.random() * 0.01,
+                size: Math.random() * 1.0 + 0.4,
+                hue: 25 + Math.random() * 25,
+                flicker: Math.random() * Math.PI * 2
+              });
+            }
+          }
+          else if (Math.random() < 0.15) {
+            taEmbers.push({
+              x: imgX + Math.random() * imgW,
+              y: imgY + imgH * 0.2,
+              vx: (Math.random() - 0.5) * 0.2,
+              vy: -Math.random() * 0.8 - 0.15,
+              life: 1, decay: 0.015 + Math.random() * 0.01,
+              size: Math.random() * 0.8 + 0.3,
+              hue: 30 + Math.random() * 20,
+              flicker: Math.random() * Math.PI * 2
+            });
+          }
+        }
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        for (var ei = taEmbers.length - 1; ei >= 0; ei--) {
+          var e = taEmbers[ei];
+          e.x += e.vx; e.y += e.vy; e.vy *= 0.98;
+          e.vx += (Math.random() - 0.5) * 0.05;
+          e.life -= e.decay; e.flicker += 0.15;
+          if (e.life <= 0) { taEmbers.splice(ei, 1); continue; }
+          var ea = e.life * (0.7 + 0.3 * Math.sin(e.flicker));
+          var er = Math.max(0.5, e.size * 3.5);
+          var eg = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, er);
+          eg.addColorStop(0, 'hsla(' + e.hue + ',100%,75%,' + ea + ')');
+          eg.addColorStop(0.4, 'hsla(' + e.hue + ',100%,55%,' + (ea * 0.6) + ')');
+          eg.addColorStop(1, 'hsla(' + e.hue + ',100%,40%,0)');
+          ctx.fillStyle = eg;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, er, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        if (fireEase > 0) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          var refl = ctx.createRadialGradient(cx, baseY, 0, cx, baseY, imgW * 0.38);
+          var reflPulse = 0.8 + 0.2 * Math.sin(time * 3);
+          refl.addColorStop(0, 'rgba(255,220,160,' + (0.07 * fireEase * reflPulse) + ')');
+          refl.addColorStop(0.5, 'rgba(220,190,140,' + (0.035 * fireEase) + ')');
+          refl.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = refl;
+          ctx.fillRect(cx - imgW * 0.5, baseY - 10, imgW, 30);
+          ctx.restore();
+        }
+
+        ctx.fillStyle = 'rgba(0,0,0,' + (alpha * 0.4) + ')';
+        ctx.beginPath();
+        ctx.ellipse(cx, baseY + 3 * s, imgW * 0.42, 5 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        return;
+      }
+
+      // Fallback: 极简剪影
+      ctx.fillStyle = '#0f0303';
+      ctx.fillRect(cx - 95 * s, baseY - 8 * s, 190 * s, 8 * s);
+      ctx.fillRect(cx - 88 * s, baseY - 38 * s, 176 * s, 30 * s);
+      ctx.fillRect(cx - 60 * s, baseY - 66 * s, 120 * s, 28 * s);
+      ctx.beginPath();
+      ctx.moveTo(cx - 100 * s, baseY - 38 * s);
+      ctx.lineTo(cx - 108 * s, baseY - 48 * s);
+      ctx.lineTo(cx + 108 * s, baseY - 48 * s);
+      ctx.lineTo(cx + 100 * s, baseY - 38 * s);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx - 72 * s, baseY - 66 * s);
+      ctx.lineTo(cx - 85 * s, baseY - 78 * s);
+      ctx.lineTo(cx + 85 * s, baseY - 78 * s);
+      ctx.lineTo(cx + 72 * s, baseY - 66 * s);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, baseY - 100 * s);
+      ctx.lineTo(cx - 12 * s, baseY - 78 * s);
+      ctx.lineTo(cx + 12 * s, baseY - 78 * s);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ===== 预生成裂缝路径 =====
+    var crackPaths = [];
+    var crackSparks = [];
+    function generateCracks() {
+      crackPaths = [];
+      var cx = W * 0.5;
+      var cy = H * 0.38;
+      var mainPts = [];
+      var steps = 60;
+      var crackLen = W * 0.35;
+      var dir = Math.random() > 0.5 ? 1 : -1;
+      for (var i = 0; i <= steps; i++) {
+        var prog = i / steps;
+        var x = cx + dir * prog * crackLen;
+        var wobble = Math.sin(prog * 20) * 3 + (Math.random() - 0.5) * 4;
+        var y = cy + wobble;
+        mainPts.push({ x: x, y: y, w: 1 + Math.random() * 2 });
+      }
+      crackPaths.push({ points: mainPts, grow: 0 });
+      for (var b = 0; b < 4; b++) {
+        var branchPts = [];
+        var startIdx = 10 + Math.floor(Math.random() * 40);
+        var bp = mainPts[startIdx];
+        var bDir = Math.random() > 0.5 ? 1 : -1;
+        var bSteps = 15 + Math.floor(Math.random() * 10);
+        for (var j = 0; j <= bSteps; j++) {
+          var bProg = j / bSteps;
+          var bx = bp.x + bDir * bProg * 60;
+          var by = bp.y + bProg * 30 + (Math.random() - 0.5) * 6;
+          branchPts.push({ x: bx, y: by, w: 0.5 + Math.random() });
+        }
+        crackPaths.push({ points: branchPts, grow: 0, delay: 0.1 + b * 0.05 });
+      }
+      crackSparks = [];
+      for (var k = 0; k < 20; k++) {
+        crackSparks.push({
+          x: cx + (Math.random() - 0.5) * crackLen * 2,
+          y: cy + (Math.random() - 0.5) * 20,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          life: 0.5 + Math.random() * 0.5,
+          decay: 0.02 + Math.random() * 0.02,
+          size: 1 + Math.random() * 2
         });
       }
     }
-    initParticles();
+    generateCracks();
 
-    // ========== 主绘制 ==========
+    // ===== 大气颗粒（胶片颗粒） =====
+    var grainCanvas;
+    function initGrain() {
+      try {
+        grainCanvas = document.createElement('canvas');
+        grainCanvas.width = W; grainCanvas.height = H;
+        var gc = grainCanvas.getContext('2d');
+        var imgData = gc.createImageData(W, H);
+        for (var i = 0; i < imgData.data.length; i += 4) {
+          var n = Math.random() * 30;
+          imgData.data[i] = n; imgData.data[i + 1] = n; imgData.data[i + 2] = n;
+          imgData.data[i + 3] = 255;
+        }
+        gc.putImageData(imgData, 0, 0);
+      } catch (e) { grainCanvas = null; }
+    }
+    initGrain();
+
+    // ===== 山雾层 =====
+    var fogLayers = [];
+    function initFog() {
+      fogLayers = [];
+      for (var i = 0; i < 3; i++) {
+        fogLayers.push({
+          y: H * (0.5 + i * 0.05),
+          speed: 0.05 + i * 0.03,
+          offset: Math.random() * W,
+          alpha: 0.04 + i * 0.02,
+          height: 30 + i * 15
+        });
+      }
+    }
+    initFog();
+
+    // ===== 五角星（光芒四射） =====
+    function drawStarShining(cx, cy, size, time, alpha) {
+      if (alpha <= 0) return;
+      var a = clamp(alpha, 0, 1);
+      var breathe = 0.92 + 0.08 * (0.5 + 0.5 * Math.sin(time * 3.5 + 0.3));
+      var twinkle = 0.97 + 0.03 * (0.5 + 0.5 * Math.sin(time * 10));
+      var s = size * breathe * twinkle;
+      var rot = time * 0.25;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      var haloR = s * 5.5;
+      var haloGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, haloR);
+      haloGrad.addColorStop(0, 'rgba(255,230,150,' + (a * 0.28) + ')');
+      haloGrad.addColorStop(0.25, 'rgba(255,200,90,' + (a * 0.18) + ')');
+      haloGrad.addColorStop(0.6, 'rgba(220,130,40,' + (a * 0.07) + ')');
+      haloGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, haloR, 0, Math.PI * 2);
+      ctx.fill();
+      var rayAlpha = a * 0.38;
+      for (var k = 0; k < 5; k++) {
+        var ang = -Math.PI / 2 + rot + k * (Math.PI * 2 / 5);
+        var rayLen = s * (3.5 + 0.8 * (0.5 + 0.5 * Math.sin(time * 2.5 + k)));
+        var rayW = s * 0.10;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(ang);
+        var rayGrad = ctx.createLinearGradient(-rayLen, 0, rayLen, 0);
+        rayGrad.addColorStop(0, 'rgba(255,220,140,0)');
+        rayGrad.addColorStop(0.5, 'rgba(255,240,180,' + rayAlpha + ')');
+        rayGrad.addColorStop(1, 'rgba(255,220,140,0)');
+        ctx.fillStyle = rayGrad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rayLen, rayW, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      var shortAlpha = a * 0.22;
+      for (var kk = 0; kk < 5; kk++) {
+        var sang = -Math.PI / 2 + rot * 1.15 + kk * (Math.PI * 2 / 5) + Math.PI / 5;
+        var sLen = s * (1.6 + 0.5 * (0.5 + 0.5 * Math.sin(time * 4 + kk * 0.7)));
+        var sW = s * 0.05;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(sang);
+        var sg = ctx.createLinearGradient(-sLen, 0, sLen, 0);
+        sg.addColorStop(0, 'rgba(255,210,120,0)');
+        sg.addColorStop(0.5, 'rgba(255,235,170,' + shortAlpha + ')');
+        sg.addColorStop(1, 'rgba(255,210,120,0)');
+        ctx.fillStyle = sg;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sLen, sW, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      var crossA = a * 0.42;
+      var crossLen = s * 6;
+      var cw = s * 0.12;
+      var cgH = ctx.createLinearGradient(cx - crossLen, cy, cx + crossLen, cy);
+      cgH.addColorStop(0, 'rgba(255,255,220,0)');
+      cgH.addColorStop(0.5, 'rgba(255,255,230,' + crossA + ')');
+      cgH.addColorStop(1, 'rgba(255,255,220,0)');
+      ctx.fillStyle = cgH;
+      ctx.fillRect(cx - crossLen, cy - cw / 2, crossLen * 2, cw);
+      var cgV = ctx.createLinearGradient(cx, cy - crossLen, cx, cy + crossLen);
+      cgV.addColorStop(0, 'rgba(255,255,220,0)');
+      cgV.addColorStop(0.5, 'rgba(255,255,230,' + crossA + ')');
+      cgV.addColorStop(1, 'rgba(255,255,220,0)');
+      ctx.fillStyle = cgV;
+      ctx.fillRect(cx - cw / 2, cy - crossLen, cw, crossLen * 2);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot * 0.1);
+      ctx.beginPath();
+      for (var si = 0; si < 10; si++) {
+        var ang2 = -Math.PI / 2 + si * Math.PI / 5;
+        var r2 = (si % 2 === 0) ? s : s * 0.4;
+        var px2 = Math.cos(ang2) * r2;
+        var py2 = Math.sin(ang2) * r2;
+        if (si === 0) ctx.moveTo(px2, py2); else ctx.lineTo(px2, py2);
+      }
+      ctx.closePath();
+      var coreGrad = ctx.createRadialGradient(-s * 0.08, -s * 0.12, 0, 0, 0, s * 1.1);
+      coreGrad.addColorStop(0, 'rgba(255,245,210,' + (a * 0.92) + ')');
+      coreGrad.addColorStop(0.3, 'rgba(255,210,80,' + (a * 0.85) + ')');
+      coreGrad.addColorStop(0.7, 'rgba(240,160,30,' + (a * 0.78) + ')');
+      coreGrad.addColorStop(1, 'rgba(200,100,15,' + (a * 0.75) + ')');
+      ctx.fillStyle = coreGrad;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,250,225,' + (a * 0.55) + ')';
+      ctx.lineWidth = s * 0.045;
+      ctx.lineJoin = 'miter';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ===== 三层粒子系统 =====
+    var stars = [];
+    function initStars() {
+      stars = [];
+      for (var i = 0; i < 170; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H * 0.7,
+          size: 0.4 + Math.random() * 1.7,
+          twinkle: Math.random() * Math.PI * 2,
+          twinkleSpeed: 0.5 + Math.random() * 1.8
+        });
+      }
+    }
+    var sparks = [];
+    function initSparks() {
+      sparks = [];
+      for (var i = 0; i < 50; i++) {
+        sparks.push({
+          x: Math.random() * W,
+          y: H * 0.7 + Math.random() * H * 0.3,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: -0.3 - Math.random() * 0.8,
+          size: 1 + Math.random() * 2.5,
+          life: Math.random(),
+          decay: 0.003 + Math.random() * 0.005,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    var trails = [];
+    function spawnTrail() {
+      if (trails.length >= 8) return;
+      trails.push({
+        x: Math.random() * W,
+        y: H * 0.2 + Math.random() * H * 0.3,
+        vx: (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 3),
+        vy: (Math.random() - 0.5) * 1,
+        size: 3 + Math.random() * 4,
+        life: 1,
+        decay: 0.008 + Math.random() * 0.005,
+        trail: []
+      });
+    }
+    initStars();
+    initSparks();
+
+    // ===== 雁阵剪影 =====
+    var geeseFormations = [];
+    function initGeese() {
+      geeseFormations = [];
+      for (var f = 0; f < 2; f++) {
+        var birds = 7 - f * 2;
+        var arr = [];
+        for (var b = 0; b < birds; b++) {
+          var side = (b % 2 === 1) ? -1 : 1;
+          var tier = Math.ceil(b / 2);
+          arr.push({
+            tier: tier,
+            side: side,
+            wingPhase: Math.random() * Math.PI * 2,
+            wingSpeed: 4 + Math.random() * 2
+          });
+        }
+        geeseFormations.push({
+          birds: arr,
+          baseSize: 4 + f * 1.2,
+          startT: 1.2 + f * 0.8,
+          duration: 4.2 + f * 0.4,
+          startX: W * 1.15,
+          startY: H * (0.10 + f * 0.08),
+          endX: -W * 0.15,
+          endY: H * (0.04 + f * 0.03),
+          spacingX: 18 + f * 3,
+          spacingY: 7 + f * 1.2
+        });
+      }
+    }
+    initGeese();
+
+    function drawGeese(time) {
+      for (var f = 0; f < geeseFormations.length; f++) {
+        var gf = geeseFormations[f];
+        var lifeT = clamp((time - gf.startT) / gf.duration, 0, 1);
+        if (lifeT <= 0) continue;
+        var fadeIn = clamp((time - gf.startT) / 0.35, 0, 1);
+        var fadeOut = clamp((gf.startT + gf.duration - time) / 0.4, 0, 1);
+        var formAlpha = fadeIn * fadeOut * 0.28;
+        var curX = gf.startX + (gf.endX - gf.startX) * lifeT;
+        var curY = gf.startY + (gf.endY - gf.startY) * lifeT;
+        for (var b = 0; b < gf.birds.length; b++) {
+          var bird = gf.birds[b];
+          var bx = curX - bird.side * bird.tier * gf.spacingX;
+          var by = curY + bird.tier * gf.spacingY;
+          var bs = gf.baseSize;
+          bird.wingPhase += bird.wingSpeed * 0.016;
+          var flap = Math.sin(bird.wingPhase);
+          var wingUp = 0.6 + 0.4 * (1 + flap) * 0.5;
+          var wingDown = 0.35 + 0.35 * (1 - flap) * 0.5;
+          ctx.save();
+          ctx.translate(bx, by);
+          ctx.fillStyle = 'rgba(20,5,5,' + formAlpha + ')';
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(-bs * 0.9, -bs * wingUp * 1.7, -bs * 1.9, -bs * 0.4 * wingUp);
+          ctx.quadraticCurveTo(-bs * 1.1, bs * wingDown * 0.5, -bs * 0.3, bs * wingDown * 0.25);
+          ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(bs * 0.9, -bs * wingUp * 1.7, bs * 1.9, -bs * 0.4 * wingUp);
+          ctx.quadraticCurveTo(bs * 1.1, bs * wingDown * 0.5, bs * 0.3, bs * wingDown * 0.25);
+          ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(0, 0, bs * 0.35, bs * 0.12, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+
+    // ===== 水墨云纹理 =====
+    var inkClouds = [];
+    function initInkClouds() {
+      inkClouds = [];
+      for (var i = 0; i < 4; i++) {
+        inkClouds.push({
+          x: Math.random() * W * 1.2 - W * 0.1,
+          y: H * (0.08 + Math.random() * 0.42),
+          w: W * (0.35 + Math.random() * 0.3),
+          h: H * (0.08 + Math.random() * 0.08),
+          speedX: (Math.random() > 0.5 ? 1 : -1) * (3 + Math.random() * 6),
+          alpha: 0.04 + Math.random() * 0.045,
+          hueShift: Math.random()
+        });
+      }
+    }
+    initInkClouds();
+
+    function drawInkClouds(time, intensity) {
+      if (intensity <= 0) return;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      for (var i = 0; i < inkClouds.length; i++) {
+        var c = inkClouds[i];
+        c.x += c.speedX * 0.016;
+        if (c.speedX > 0 && c.x - c.w > W) c.x = -c.w - 10;
+        if (c.speedX < 0 && c.x + c.w < 0) c.x = W + c.w + 10;
+        var a = c.alpha * intensity;
+        var r = 255;
+        var g = Math.round(245 - c.hueShift * 20);
+        var bCol = Math.round(230 - c.hueShift * 40);
+        var blobs = 5;
+        for (var k = 0; k < blobs; k++) {
+          var kr = k / (blobs - 1);
+          var bx = c.x - c.w * 0.5 + c.w * kr;
+          var by = c.y + Math.sin(kr * Math.PI * 2 + time * 0.5 + i) * c.h * 0.15;
+          var bw = c.w * (0.35 + 0.15 * Math.sin(kr * 5 + i));
+          var bh = c.h * (0.55 + 0.25 * Math.cos(kr * 3 + i * 2));
+          var balpha = a * Math.sin(kr * Math.PI);
+          if (balpha <= 0.001) continue;
+          var cg = ctx.createRadialGradient(bx, by, 0, bx, by, Math.max(bw, bh));
+          cg.addColorStop(0, 'rgba(' + r + ',' + g + ',' + bCol + ',' + balpha + ')');
+          cg.addColorStop(0.6, 'rgba(' + r + ',' + g + ',' + bCol + ',' + (balpha * 0.3) + ')');
+          cg.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = cg;
+          ctx.beginPath();
+          ctx.ellipse(bx, by, bw, bh, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    // ===== 星火 =====
+    var sparkX, sparkY;
+    function updateSparkPos() { sparkX = W * 0.5; sparkY = H * 0.72; }
+    updateSparkPos();
+
+    var embers = [];
+    function spawnEmber(x, y, count) {
+      for (var i = 0; i < count; i++) {
+        embers.push({
+          x: x + (Math.random() - 0.5) * 10,
+          y: y + (Math.random() - 0.5) * 10,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: -0.5 - Math.random() * 1.5,
+          size: 1 + Math.random() * 2,
+          life: 1,
+          decay: 0.01 + Math.random() * 0.015,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    // ===== 山雾 =====
+    function drawFog(time, intensity) {
+      if (intensity <= 0) return;
+      ctx.save();
+      for (var i = 0; i < fogLayers.length; i++) {
+        var fl = fogLayers[i];
+        fl.offset += fl.speed;
+        var alpha = fl.alpha * intensity;
+        if (alpha <= 0) continue;
+        var grad = ctx.createLinearGradient(0, fl.y - fl.height / 2, 0, fl.y + fl.height / 2);
+        grad.addColorStop(0, 'rgba(120,60,40,0)');
+        grad.addColorStop(0.5, 'rgba(140,80,50,' + alpha + ')');
+        grad.addColorStop(1, 'rgba(100,50,30,0)');
+        ctx.fillStyle = grad;
+        var yo = (fl.offset % W + W) % W;
+        ctx.fillRect(-yo, fl.y - fl.height / 2, W, fl.height);
+        ctx.fillRect(W - yo, fl.y - fl.height / 2, W, fl.height);
+      }
+      ctx.restore();
+    }
+
+    // ===== 暗角 =====
+    function drawVignette() {
+      var grad = ctx.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.3, W * 0.5, H * 0.5, Math.max(W, H) * 0.7);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(0.7, 'rgba(0,0,0,0.15)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.4)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // ===== 胶片颗粒 =====
+    function drawGrain(time, intensity) {
+      if (!grainCanvas || intensity <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = intensity * 0.04;
+      var offsetX = (time * 5) % 4;
+      var offsetY = (time * 3) % 4;
+      ctx.drawImage(grainCanvas, -offsetX, -offsetY);
+      ctx.restore();
+    }
+
+    // ===== 地面余烬层 =====
+    var groundEmbers = [];
+    function initGroundEmbers() {
+      groundEmbers = [];
+      for (var i = 0; i < 25; i++) {
+        groundEmbers.push({
+          x: Math.random() * W,
+          y: H * 0.65 + Math.random() * H * 0.3,
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: -0.1 - Math.random() * 0.3,
+          size: 0.5 + Math.random() * 1.5,
+          life: Math.random(),
+          decay: 0.002 + Math.random() * 0.004,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    initGroundEmbers();
+
+    // ===== 主绘制 =====
     function draw(now) {
-      var dt = (now - lastTime) / 1000;
+      var dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
       t = Math.min(t + dt, totalDuration);
-      var progress = t / totalDuration;
+
       ctx.clearRect(0, 0, W, H);
 
-      // --- 背景 ---
-      var bgAlpha = clamp(progress * 5, 0, 1);
-      var bgGrad = ctx.createRadialGradient(W*0.5, H*0.35, 0, W*0.5, H*0.5, Math.max(W,H)*0.8);
-      bgGrad.addColorStop(0, 'rgba(30,8,4,' + bgAlpha + ')');
-      bgGrad.addColorStop(0.5, 'rgba(15,3,2,' + bgAlpha + ')');
-      bgGrad.addColorStop(1, 'rgba(8,1,0,' + bgAlpha + ')');
+      // ===== 1. 背景渐变 =====
+      var bgP = clamp(t / 1.5, 0, 1);
+      var bgGrad = ctx.createRadialGradient(W * 0.5, H * 0.75, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.9);
+      bgGrad.addColorStop(0, interpColor([30, 12, 6], [90, 40, 20], bgP));
+      bgGrad.addColorStop(0.4, interpColor([18, 6, 4], [50, 18, 10], bgP));
+      bgGrad.addColorStop(1, interpColor([10, 3, 2], [22, 8, 6], bgP));
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, W, H);
 
-      // --- 远山剪影（先画远处） ---
-      var farMountains = mountains.slice(8);
-      drawMountainLayer(farMountains, '#1a0503', progress, 0.15, H*0.08);
-      var midMountains = mountains.slice(4, 8);
-      drawMountainLayer(midMountains, '#2d0a05', progress, 0.3, H*0.15);
-      var nearMountains = mountains.slice(0, 4);
-      drawMountainLayer(nearMountains, '#3d0f06', progress, 0.5, H*0.22);
-
-      // --- 天际线金光 ---
-      if (progress > 0.2) {
-        var glowP = clamp((progress - 0.2) / 0.6, 0, 1);
-        var glowGrad = ctx.createLinearGradient(0, H*0.35, 0, H*0.65);
-        var a = glowP * 0.6;
-        glowGrad.addColorStop(0, 'rgba(255,180,50,' + a + ')');
-        glowGrad.addColorStop(0.3, 'rgba(255,120,30,' + (a*0.5) + ')');
-        glowGrad.addColorStop(0.7, 'rgba(255,60,10,' + (a*0.15) + ')');
-        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = glowGrad;
-        ctx.fillRect(0, H*0.3, W, H*0.4);
+      // ===== 星火光晕（全屏） =====
+      if (t >= TL.spark && t < TL.dawn + 0.3) {
+        var sparkT_full = t - TL.spark;
+        var breathe_full = 0.6 + 0.4 * Math.sin(t * 5);
+        var sparkR_full = Math.max(1, (1.5 + breathe_full * 1.8) * clamp(sparkT_full * 2, 0, 1));
+        var sparkGlow_full = Math.max(1, sparkR_full * 6);
+        var sparkAlpha_full = clamp(sparkT_full * 2, 0, 1) * clamp((TL.dawn + 0.3 - t), 0, 1);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = sparkAlpha_full * 0.3;
+        ctx.drawImage(emberSprite, sparkX - sparkGlow_full, sparkY - sparkGlow_full, sparkGlow_full * 2, sparkGlow_full * 2);
+        ctx.globalAlpha = sparkAlpha_full * 0.45;
+        ctx.drawImage(sparkSprite, sparkX - sparkGlow_full * 0.5, sparkY - sparkGlow_full * 0.5, sparkGlow_full, sparkGlow_full);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
       }
 
-      // --- 金色粒子 ---
-      particles.forEach(function(p) {
-        var pAlpha = p.opacity * clamp(progress * 3 - 0.1, 0, 1) * clamp((1-progress) * 5, 0, 1);
-        if (pAlpha <= 0) return;
-        var pY = p.baseY + Math.sin(p.phase + t * p.speed * 8) * 40;
-        var pX = p.x + Math.cos(p.phase + t * p.speed * 3) * 15;
-        var pGrad = ctx.createRadialGradient(pX, pY, 0, pX, pY, p.size * 5);
-        pGrad.addColorStop(0, 'rgba(255,220,120,' + pAlpha + ')');
-        pGrad.addColorStop(0.3, 'rgba(255,180,60,' + (pAlpha*0.7) + ')');
-        pGrad.addColorStop(1, 'rgba(255,100,20,0)');
-        ctx.fillStyle = pGrad;
-        ctx.fillRect(pX - p.size*5, pY - p.size*5, p.size*10, p.size*10);
-      });
-
-      // --- 主标题 ---
-      if (progress > 0.55) {
-        var titleP = clamp((progress - 0.55) / 0.35, 0, 1);
-        var titleEP = easeOutExpo(titleP);
-        var titleY = H * 0.45 - titleEP * 20;
-        var titleAlpha = titleEP;
-        var titleSize = Math.min(W * 0.13, 100);
-
+      // ===== 黎明体积光束（全屏） =====
+      if (t >= TL.spread) {
+        var dawnT_full = clamp((t - TL.spread) / (TL.mountains - TL.spread), 0, 1);
+        var dawnEase_full = easeOutCubic(dawnT_full);
         ctx.save();
-        ctx.globalAlpha = titleAlpha;
-        ctx.font = '900 ' + titleSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        // 标题辉光
-        ctx.shadowColor = 'rgba(255,200,60,' + (titleAlpha*0.8) + ')';
-        ctx.shadowBlur = titleSize * 0.5;
-        ctx.fillStyle = '#ffd700';
-        ctx.fillText('赓续血脉', W*0.5, titleY);
-
-        // 副标题
-        if (progress > 0.72) {
-          var subP = clamp((progress - 0.72) / 0.25, 0, 1);
-          var subEP = easeOutExpo(subP);
-          ctx.globalAlpha = subEP;
-          ctx.shadowColor = 'rgba(255,80,50,' + (subEP*0.9) + ')';
-          ctx.shadowBlur = titleSize * 0.35;
-          ctx.fillStyle = '#ff4d4d';
-          ctx.fillText('数绘红旅', W*0.5, titleY + titleSize * 1.2);
-        }
+        ctx.globalCompositeOperation = 'lighter';
+        var coreR_full = Math.max(1, dawnEase_full * W * 0.35);
+        var coreGrad_full = ctx.createRadialGradient(sparkX, sparkY, 0, sparkX, sparkY, coreR_full);
+        coreGrad_full.addColorStop(0, 'rgba(255,210,100,' + (0.5 * dawnT_full) + ')');
+        coreGrad_full.addColorStop(0.2, 'rgba(255,140,60,' + (0.3 * dawnT_full) + ')');
+        coreGrad_full.addColorStop(0.5, 'rgba(220,60,30,' + (0.12 * dawnT_full) + ')');
+        coreGrad_full.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = coreGrad_full;
+        ctx.fillRect(0, 0, W, H);
         ctx.restore();
+        var ha_full = dawnT_full * 0.5;
+        var hGrad_full = ctx.createRadialGradient(W * 0.5, H * 0.58, 0, W * 0.5, H * 0.58, Math.max(W, H) * 0.65);
+        hGrad_full.addColorStop(0, 'rgba(255,220,160,' + ha_full + ')');
+        hGrad_full.addColorStop(0.35, 'rgba(220,180,130,' + (ha_full * 0.6) + ')');
+        hGrad_full.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = hGrad_full;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'source-over';
       }
 
-      // --- 底部红线 ---
-      if (progress > 0.82) {
-        var lineP = clamp((progress - 0.82) / 0.15, 0, 1);
-        var lineW = W * 0.25 * easeOutCubic(lineP);
-        var lineGrad = ctx.createLinearGradient(W*0.5 - lineW/2, 0, W*0.5 + lineW/2, 0);
-        lineGrad.addColorStop(0, 'rgba(255,215,0,0)');
-        lineGrad.addColorStop(0.3, 'rgba(255,215,0,' + lineP*0.9 + ')');
-        lineGrad.addColorStop(0.5, 'rgba(255,80,50,' + lineP + ')');
-        lineGrad.addColorStop(0.7, 'rgba(255,215,0,' + lineP*0.9 + ')');
-        lineGrad.addColorStop(1, 'rgba(255,215,0,0)');
-        ctx.fillStyle = lineGrad;
-        ctx.fillRect(W*0.5 - lineW/2, H*0.75, lineW, 3);
+      // ===== 水墨云 =====
+      if (t >= TL.spread) {
+        var cloudIn = clamp((t - TL.spread) / 0.8, 0, 1);
+        var cloudOut = clamp((TL.end - t) / 1.2, 0, 1);
+        drawInkClouds(t, cloudIn * cloudOut);
       }
 
-      // --- 循环或结束 ---
+      // ===== 雁阵剪影 =====
+      drawGeese(t);
+
+      // 其余内容统一下移 5%
+      var globalOffsetY = H * 0.05;
+      ctx.save();
+      ctx.translate(0, globalOffsetY);
+
+      // ===== 远景星点 =====
+      if (t > 0.1) {
+        var starA = clamp((t - 0.1) * 2, 0, 1) * clamp((TL.end - t) / 1.5, 0, 1);
+        for (var si = 0; si < stars.length; si++) {
+          var s = stars[si];
+          var tw = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(s.twinkle + t * s.twinkleSpeed));
+          ctx.globalAlpha = starA * tw * 0.5;
+          var r = s.size * 8;
+          ctx.drawImage(starSprite, s.x - r, s.y - r, r * 2, r * 2);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // ===== 星火 =====
+      if (t >= TL.spark && t < TL.dawn + 0.3) {
+        var sparkT = t - TL.spark;
+        var breathe = 0.6 + 0.4 * Math.sin(t * 5);
+        var sparkR = Math.max(1, (1.5 + breathe * 1.8) * clamp(sparkT * 2, 0, 1));
+        var sparkAlpha = clamp(sparkT * 2, 0, 1) * clamp((TL.dawn + 0.3 - t), 0, 1);
+        ctx.fillStyle = 'rgba(255,230,170,' + (sparkAlpha * 0.5) + ')';
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, sparkR, 0, Math.PI * 2);
+        ctx.fill();
+        if (sparkT > 0.3 && Math.random() < 0.2) spawnEmber(sparkX, sparkY, 1);
+      }
+
+      // ===== 山脉 =====
+      if (t >= TL.mountains) {
+        var mtP = (t - TL.mountains) / (TL.mountainsEnd - TL.mountains);
+        drawMountainLayer(mountains.slice(9), '#0d0202', mtP, 0, H * 0.04);
+        drawMountainLayer(mountains.slice(5, 9), '#1a0504', mtP, 0.15, H * 0.1);
+        drawMountainLayer(mountains.slice(1, 5), '#260806', mtP, 0.3, H * 0.16);
+        drawMountainLayer(mountains.slice(0, 2), '#320c08', mtP, 0.45, H * 0.22);
+      }
+
+      // ===== 顶部五角星 =====
+      if (t >= TL.tiananmen + 0.3) {
+        var starAppear = clamp((t - (TL.tiananmen + 0.3)) / 0.4, 0, 1);
+        var starHold = clamp((TL.end - t) / 1.0, 0, 1);
+        var starAlpha = easeOutExpo(starAppear) * starHold * 0.85;
+        var starSize = Math.min(W, H) * 0.028;
+        var starX = W * 0.5;
+        var starY = H * 0.08;
+        drawStarShining(starX, starY, starSize, t, starAlpha);
+      }
+
+      // ===== 天安门剪影 =====
+      if (t >= TL.tiananmen) {
+        var taT = clamp((t - TL.tiananmen) / 0.8, 0, 1);
+        var taEase = easeOutCubic(taT);
+        if (taT > 0) {
+          var taScale = Math.min(W / 800, 4.5);
+          drawTiananmen(W * 0.5, H * 0.78 + H * 0.04 * (1 - taEase), taScale, taEase * 0.95, t);
+        }
+      }
+
+      // ===== 山雾 =====
+      if (t > TL.mountains + 0.3) {
+        drawFog(t, clamp((t - TL.mountains - 0.3) / 1.0, 0, 1));
+      }
+
+      // ===== 中景火星 =====
+      if (t > TL.spark) {
+        var sparkFade = clamp((TL.end - t) / 1.5, 0, 1);
+        for (var spi = 0; spi < sparks.length; spi++) {
+          var sp = sparks[spi];
+          sp.x += sp.vx; sp.y += sp.vy; sp.vy *= 0.99;
+          sp.life -= sp.decay; sp.phase += dt * 6;
+          if (sp.life <= 0 || sp.y < -10) {
+            sp.x = Math.random() * W;
+            sp.y = H * 0.8 + Math.random() * H * 0.2;
+            sp.vx = (Math.random() - 0.5) * 0.3;
+            sp.vy = -0.3 - Math.random() * 0.8;
+            sp.life = 1;
+          }
+          var sa = sp.life * sparkFade * (0.6 + 0.4 * Math.sin(sp.phase));
+          if (sa > 0) {
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = sa;
+            var sr = sp.size * 6;
+            ctx.drawImage(sparkSprite, sp.x - sr, sp.y - sr, sr * 2, sr * 2);
+          }
+        }
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      // ===== 近景拖尾粒子 =====
+      if (t > TL.dawn && Math.random() < 0.02) spawnTrail();
+      for (var tri = trails.length - 1; tri >= 0; tri--) {
+        var tr = trails[tri];
+        tr.trail.push({ x: tr.x, y: tr.y });
+        if (tr.trail.length > 14) tr.trail.shift();
+        tr.x += tr.vx; tr.y += tr.vy; tr.life -= tr.decay;
+        tr.vy += 0.02;
+        if (tr.life <= 0) { trails.splice(tri, 1); continue; }
+        ctx.globalCompositeOperation = 'lighter';
+        for (var j = 0; j < tr.trail.length; j++) {
+          var tp = tr.trail[j];
+          var ta = (j / tr.trail.length) * tr.life * 0.7;
+          ctx.globalAlpha = ta;
+          var trr = tr.size * 3 * (j / tr.trail.length);
+          ctx.drawImage(sparkSprite, tp.x - trr, tp.y - trr, trr * 2, trr * 2);
+        }
+        ctx.globalAlpha = tr.life;
+        var hr = tr.size * 5;
+        ctx.drawImage(sparkSprite, tr.x - hr, tr.y - hr, hr * 2, hr * 2);
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+
+      // ===== 余烬 =====
+      for (var ei = embers.length - 1; ei >= 0; ei--) {
+        var e = embers[ei];
+        e.x += e.vx; e.y += e.vy; e.vy *= 0.98;
+        e.vx += (Math.random() - 0.5) * 0.04; e.life -= e.decay;
+        if (e.life <= 0) { embers.splice(ei, 1); continue; }
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = e.life * 0.8;
+        var er = e.size * 5;
+        ctx.drawImage(emberSprite, e.x - er, e.y - er, er * 2, er * 2);
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+
+      // ===== 地面余烬 =====
+      if (t > TL.dawn) {
+        for (var gei = 0; gei < groundEmbers.length; gei++) {
+          var ge = groundEmbers[gei];
+          ge.x += ge.vx; ge.y += ge.vy;
+          ge.vy += Math.sin(ge.phase + t * 2) * 0.02;
+          ge.life -= ge.decay;
+          if (ge.life <= 0 || ge.y < 0) {
+            ge.x = Math.random() * W;
+            ge.y = H * 0.85 + Math.random() * H * 0.15;
+            ge.life = 1;
+          }
+          var ga = ge.life * 0.4;
+          if (ga > 0) {
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = ga;
+            var ger = ge.size * 3;
+            ctx.drawImage(emberSprite, ge.x - ger, ge.y - ger, ger * 2, ger * 2);
+          }
+        }
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      // ===== 标题逐字浮现 =====
+      if (t >= TL.titleCrack) {
+        var titleY = H * 0.38;
+        var titleSize = Math.min(W * 0.18, 150);
+        if (t >= TL.titleCrack) {
+          var revT = clamp((t - TL.titleCrack) / 1.2, 0, 1);
+          var revEase = easeOutExpo(revT);
+          var titleChars = ['赓', '续', '血', '脉'];
+          var charCount = titleChars.length;
+          var charDelay = 0.12;
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          for (var ci = 0; ci < charCount; ci++) {
+            var charStart = ci * charDelay;
+            var charProg = clamp((revT - charStart) / 0.4, 0, 1);
+            if (charProg <= 0) continue;
+            var charEase = easeOutExpo(charProg);
+            var charGap = titleSize * 1.00;
+            var charX = W * 0.5 - (charCount - 1) * charGap / 2 + ci * charGap;
+            var charY = titleY - (1 - charEase) * 15;
+            var scale = 0.3 + charEase * 0.7;
+            ctx.save();
+            ctx.translate(charX, charY);
+            ctx.scale(scale, scale);
+            ctx.globalAlpha = charEase;
+            ctx.font = '900 ' + titleSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.strokeStyle = '#3a0a0a';
+            ctx.lineWidth = Math.max(4, titleSize * 0.045);
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'rgba(0,0,0,0.7)';
+            ctx.shadowBlur = titleSize * 0.12;
+            ctx.strokeText(titleChars[ci], 0, 0);
+            ctx.shadowBlur = 0;
+            var strokeGrad = ctx.createLinearGradient(0, -titleSize / 2, 0, titleSize / 2);
+            strokeGrad.addColorStop(0, '#d87a2a');
+            strokeGrad.addColorStop(0.5, '#b91c1c');
+            strokeGrad.addColorStop(1, '#7a1010');
+            ctx.strokeStyle = strokeGrad;
+            ctx.lineWidth = Math.max(2.5, titleSize * 0.025);
+            ctx.strokeText(titleChars[ci], 0, 0);
+            ctx.shadowColor = 'rgba(255,210,110,' + (charEase * 0.95) + ')';
+            ctx.shadowBlur = titleSize * 0.42;
+            var coreGrad2 = ctx.createLinearGradient(0, -titleSize / 2, 0, titleSize / 2);
+            coreGrad2.addColorStop(0, '#fff3c0');
+            coreGrad2.addColorStop(0.25, '#ffe27a');
+            coreGrad2.addColorStop(0.55, '#ffc93d');
+            coreGrad2.addColorStop(0.85, '#e08a18');
+            coreGrad2.addColorStop(1, '#a05410');
+            ctx.fillStyle = coreGrad2;
+            ctx.fillText(titleChars[ci], 0, 0);
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(255,250,220,' + (charEase * 0.9) + ')';
+            ctx.lineWidth = Math.max(0.8, titleSize * 0.008);
+            ctx.strokeText(titleChars[ci], 0, 0);
+            ctx.restore();
+          }
+
+          // ===== 副标题 =====
+          if (t >= TL.subtitle) {
+            var subT = clamp((t - TL.subtitle) / 0.8, 0, 1);
+            var subEase = easeOutExpo(subT);
+            ctx.globalAlpha = subEase;
+            var subSize = titleSize * 0.75;
+            ctx.font = '700 ' + subSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            var subY = titleY + titleSize * 1.15;
+            var subChars = '数绘红旅';
+            var subGap = subSize * 0.96;
+            for (var sci = 0; sci < subChars.length; sci++) {
+              var subChar = subChars.charAt(sci);
+              var subX = W * 0.5 - (subChars.length - 1) * subGap / 2 + sci * subGap;
+              ctx.strokeStyle = '#3a0a0a';
+              ctx.lineWidth = Math.max(3, subSize * 0.045);
+              ctx.lineJoin = 'round';
+              ctx.shadowColor = 'rgba(0,0,0,0.55)';
+              ctx.shadowBlur = subSize * 0.1;
+              ctx.strokeText(subChar, subX, subY);
+              ctx.shadowBlur = 0;
+              ctx.strokeStyle = '#9a1414';
+              ctx.lineWidth = Math.max(2, subSize * 0.022);
+              ctx.strokeText(subChar, subX, subY);
+              ctx.shadowColor = 'rgba(255,80,50,' + (subEase * 0.9) + ')';
+              ctx.shadowBlur = subSize * 0.35;
+              var subCoreGrad = ctx.createLinearGradient(0, subY - subSize / 2, 0, subY + subSize / 2);
+              subCoreGrad.addColorStop(0, '#ffe0c0');
+              subCoreGrad.addColorStop(0.3, '#ff7a5c');
+              subCoreGrad.addColorStop(0.65, '#e02020');
+              subCoreGrad.addColorStop(1, '#8b0a0a');
+              ctx.fillStyle = subCoreGrad;
+              ctx.fillText(subChar, subX, subY);
+              ctx.shadowBlur = 0;
+              ctx.strokeStyle = 'rgba(255,220,200,' + (subEase * 0.65) + ')';
+              ctx.lineWidth = Math.max(0.6, subSize * 0.006);
+              ctx.strokeText(subChar, subX, subY);
+            }
+          }
+          ctx.restore();
+        }
+      }
+
+      // 结束全局下移变换
+      ctx.restore();
+
+      // ===== 暗角 =====
+      drawVignette();
+
+      // ===== 胶片颗粒 =====
+      drawGrain(t, 1);
+
+      // ===== 循环或结束 =====
       if (t < totalDuration) {
         requestAnimationFrame(draw);
       } else {
-        // 淡出
         var overlay = document.getElementById('entrance-overlay');
         overlay.classList.add('fade-out');
         document.documentElement.classList.remove('entrance-active');
         window.scrollTo({ top: 0, behavior: 'instant' });
-        setTimeout(function() { overlay.remove(); }, 800);
+        setTimeout(function () { overlay.remove(); }, 800);
         sessionStorage.setItem('entrance_done_v2', '1');
       }
+    }
+
+    // ===== 颜色插值 =====
+    function interpColor(c1, c2, t2) {
+      var r = Math.round(c1[0] + (c2[0] - c1[0]) * t2);
+      var g = Math.round(c1[1] + (c2[1] - c1[1]) * t2);
+      var b = Math.round(c1[2] + (c2[2] - c1[2]) * t2);
+      return 'rgb(' + r + ',' + g + ',' + b + ')';
     }
 
     function drawMountainLayer(mts, color, progress, delay, yOffset) {
@@ -472,19 +1418,43 @@
       if (p <= 0) return;
       var ep = easeOutCubic(p);
       ctx.save();
-      ctx.globalAlpha = ep;
+      ctx.globalAlpha = ep * 0.9;
       ctx.fillStyle = color;
       ctx.translate(0, yOffset * (1 - ep));
       ctx.beginPath();
-      mts.forEach(function(mt) {
+      mts.forEach(function (mt) {
         ctx.moveTo(mt[0].x, H + 100);
-        mt.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
-        ctx.lineTo(mt[mt.length-1].x, H + 100);
+        mt.forEach(function (pt) { ctx.lineTo(pt.x, pt.y); });
+        ctx.lineTo(mt[mt.length - 1].x, H + 100);
       });
       ctx.closePath();
       ctx.fill();
       ctx.restore();
     }
+
+    // ===== 事件 =====
+    window.addEventListener('resize', function () {
+      resize();
+      generateMountains();
+      initStars();
+      initSparks();
+      initGeese();
+      initInkClouds();
+      initGrain();
+      initFog();
+      initGroundEmbers();
+      generateCracks();
+      updateSparkPos();
+    });
+
+    document.getElementById('skip').addEventListener('click', function () {
+      var overlay = document.getElementById('entrance-overlay');
+      overlay.classList.add('fade-out');
+      document.documentElement.classList.remove('entrance-active');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      setTimeout(function () { overlay.remove(); }, 800);
+      sessionStorage.setItem('entrance_done_v2', '1');
+    });
 
     requestAnimationFrame(draw);
   })();

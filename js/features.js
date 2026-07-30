@@ -650,31 +650,6 @@ window.RedFeatures = (() => {
   /* ================================================================
      (4) 场馆收藏
      ================================================================ */
-  function initFavorites() {
-    if (!location.pathname.includes('guide.html')) return;
-
-    const observer = new MutationObserver(() => {
-      $$('.venue-card').forEach(card => {
-        if (card.querySelector('.fav-btn')) return;
-        const id = card.dataset.id;
-        if (!id) return;
-        const btn = document.createElement('button');
-        btn.className = 'fav-btn';
-        btn.title = '收藏场馆';
-        btn.innerHTML = isFavorite(id) ? '❤️' : '🤍';
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleFavorite(id);
-          btn.innerHTML = isFavorite(id) ? '❤️' : '🤍';
-          btn.classList.toggle('active', isFavorite(id));
-        });
-        if (isFavorite(id)) btn.classList.add('active');
-        card.querySelector('.card-footer')?.appendChild(btn);
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
-
   function isFavorite(id) {
     try {
       const favs = JSON.parse(localStorage.getItem('redguide_favs') || '[]');
@@ -838,7 +813,6 @@ window.RedFeatures = (() => {
     initChatWidget();
     initDarkMode();
     initQuiz();
-    initFavorites();
     initMobileNav();
     initHomepageInnovation();
   }

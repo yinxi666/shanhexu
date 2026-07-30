@@ -51,41 +51,40 @@
     <!-- ===== 页面 Hero ===== -->
     <section class="subpage-hero">
       <video class="flag-video" src="../assets/演示视频/国旗动态壁纸【无水印】.mp4" autoplay loop muted playsinline aria-hidden="true"></video>
-      <img class="hero-bg animate-ken-burns" draggable="false" oncontextmenu="return false;" src="../assets/页面通用图片/学习留言墙模块封面.webp" alt="留言墙">
+      <img class="hero-bg animate-ken-burns" draggable="false" oncontextmenu="return false;" src="../assets/页面通用图片/留言板.webp" alt="留言墙">
       <div class="subpage-hero-content">
         <h1 class="subpage-hero-title">学习留言墙</h1>
         <p class="subpage-hero-subtitle">展示实践心得与学习感悟，支持前端模拟提交交互，你的声音将在这里被看到</p>
       </div>
     </section>
 
-    <!-- ===== 留言区：列表 + 表单 ===== -->
+    <!-- ===== 留言区 ===== -->
     <section class="section">
-      <div class="message-layout">
-        <!-- 左侧：留言列表 -->
-        <div>
-          <div class="section-heading" style="text-align:left;">
-            <h2>💬 学习感悟</h2>
-            <p>来自参与红色文旅实践的同学们的真实心得与感悟</p>
-          </div>
-          <div class="message-list" id="message-list-container">
-            <div class="empty-state"><div class="empty-icon">⏳</div><h3>加载中…</h3></div>
-          </div>
-        </div>
+      <div class="section-heading" style="text-align:left;">
+        <h2>💬 学习感悟</h2>
+        <p>来自参与红色文旅实践的同学们的真实心得与感悟</p>
+      </div>
 
-        <!-- 右侧：提交表单 -->
-        <div class="message-form-card">
-          <h3>✍️ 写下你的感悟</h3>
-          <div class="form-body">
-            <form id="msg-form">
-              <div class="form-group">
+      <!-- 软木板留言展示 -->
+      <div class="message-list" id="message-list-container">
+        <div class="empty-state"><div class="empty-icon">⏳</div><h3>加载中…</h3></div>
+      </div>
+
+      <!-- 提交表单（软木板下方） -->
+      <div class="message-form-card" id="message-form-card">
+        <h3>✍️ 写下你的感悟</h3>
+        <div class="form-body">
+          <form id="msg-form">
+            <div class="form-row">
+              <div class="form-group form-group-half">
                 <label for="msg-author">姓名 <span class="required">*</span></label>
                 <input type="text" id="msg-author" placeholder="请输入你的姓名" required maxlength="20">
               </div>
-              <div class="form-group">
+              <div class="form-group form-group-half">
                 <label for="msg-studentid">学号</label>
                 <input type="text" id="msg-studentid" placeholder="选填" maxlength="20">
               </div>
-              <div class="form-group">
+              <div class="form-group form-group-half">
                 <label for="msg-class">班级</label>
                 <select id="msg-class">
                   <option value="">选择班级（选填）</option>
@@ -96,23 +95,23 @@
                   <option value="大数据2025级01班">大数据2025级01班</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label for="msg-title">心得标题 <span class="required">*</span></label>
-                <input type="text" id="msg-title" placeholder="给你的感悟起个标题" required maxlength="50">
-              </div>
-              <div class="form-group">
-                <label for="msg-content">感悟内容 <span class="required">*</span></label>
-                <textarea id="msg-content" placeholder="分享你的实践心得、学习感悟或对红色文化的理解（至少20个字）…" required minlength="20"></textarea>
-              </div>
-              <button type="submit" class="form-submit">📤 提交感悟</button>
-            </form>
-          </div>
-          <div class="form-success">
-            <div class="success-icon">✅</div>
-            <h4>提交成功！</h4>
-            <p>你的感悟已提交（前端模拟），当前显示为"审核中"状态。</p>
-            <button class="btn primary" style="margin-top:16px;" onclick="document.querySelector('.form-body').style.display='';this.parentElement.classList.remove('show');document.getElementById('msg-form').reset();">✍️ 再写一条</button>
-          </div>
+            </div>
+            <div class="form-group">
+              <label for="msg-title">心得标题 <span class="required">*</span></label>
+              <input type="text" id="msg-title" placeholder="给你的感悟起个标题" required maxlength="50">
+            </div>
+            <div class="form-group">
+              <label for="msg-content">感悟内容 <span class="required">*</span></label>
+              <textarea id="msg-content" placeholder="分享你的实践心得、学习感悟或对红色文化的理解（至少20个字）…" required minlength="20"></textarea>
+            </div>
+            <button type="submit" class="form-submit">📤 提交感悟</button>
+          </form>
+        </div>
+        <div class="form-success">
+          <div class="success-icon">✅</div>
+          <h4>提交成功！</h4>
+          <p>你的感悟已提交（前端模拟），当前显示为"审核中"状态。</p>
+          <button class="btn primary" style="margin-top:16px;" onclick="var fc=document.getElementById('message-form-card');fc.querySelector('.form-body').style.display='';fc.querySelector('.form-success').classList.remove('show');document.getElementById('msg-form').reset();">✍️ 再写一条</button>
         </div>
       </div>
     </section>
