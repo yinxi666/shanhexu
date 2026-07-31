@@ -3820,47 +3820,38 @@ html.dark .msg-status.rejected {
     padding-bottom: 76px;
   }
 
-  /* 浮动按钮统一排放 */
-  .back-to-top,
-  .dark-toggle,
-  .quiz-fab,
-  .music-toggle,
-  .chat-fab {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-  }
-
+  /* 浮动按钮：左下深色，右下四个等距排列 */
   .dark-toggle {
     left: 8px;
     bottom: 80px;
-  }
-
-  .chat-widget {
-    bottom: 72px;
-    right: 0;
-  }
-
-  .quiz-fab {
-    bottom: 72px;
-    right: 44px;
-  }
-
-  .music-player {
-    bottom: 120px;
-    right: 0;
-  }
-
-  .music-toggle {
     width: 40px;
     height: 40px;
     font-size: 18px;
   }
 
+  .chat-widget,
+  .quiz-fab,
+  .music-player,
   .back-to-top {
-    bottom: 72px;
-    right: 88px;
+    width: 40px;
+    height: 40px;
   }
+
+  .chat-widget { bottom: 80px; right: 148px; }
+  .quiz-fab    { bottom: 80px; right: 100px; }
+  .music-player { bottom: 80px; right: 52px; }
+  .back-to-top { bottom: 80px; right: 4px; }
+
+  .chat-fab,
+  .quiz-fab,
+  .music-toggle,
+  .back-to-top {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .music-player .music-volume { display: none; }
 
   .chat-widget {
     bottom: 64px;
