@@ -1211,6 +1211,18 @@ p {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+@media (max-width: 900px) {
+  .guide-list .venue-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .guide-list .venue-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .guide-map-sticky {
   position: sticky;
   top: 100px;
@@ -2271,18 +2283,6 @@ p {
   background: var(--line);
 }
 
-@media (max-width: 640px) {
-  .music-player {
-    bottom: 148px;
-    right: 12px;
-  }
-
-  .music-toggle {
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
-  }
-}
 
 /* ---------- Message Wall ---------- */
 .message-layout {
@@ -3806,26 +3806,46 @@ html.dark .msg-status.rejected {
     padding-bottom: 76px;
   }
 
-  /* 浮动按钮：横向一排，深色左边，其余右边 */
+  /* 浮动按钮统一排放 */
   .back-to-top,
   .dark-toggle,
-  .quiz-fab {
-    bottom: 64px;
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
+  .quiz-fab,
+  .music-toggle,
+  .chat-fab {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 
   .dark-toggle {
     left: 8px;
+    bottom: 80px;
+  }
+
+  .chat-widget {
+    bottom: 72px;
+    right: 0;
   }
 
   .quiz-fab {
-    right: 84px;
+    bottom: 72px;
+    right: 44px;
+  }
+
+  .music-player {
+    bottom: 120px;
+    right: 0;
+  }
+
+  .music-toggle {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 
   .back-to-top {
-    right: 44px;
+    bottom: 72px;
+    right: 88px;
   }
 
   .chat-widget {

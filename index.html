@@ -1055,6 +1055,18 @@
     }
     initGroundEmbers();
 
+    // ===== 背景诗词文字 =====
+    var bgTexts = [
+      '星星之火 可以燎原',
+      '为有牺牲多壮志 敢教日月换新天',
+      '红军不怕远征难 万水千山只等闲',
+      '雄关漫道真如铁 而今迈步从头越',
+      '数风流人物 还看今朝',
+      '江山如此多娇',
+      '不到长城非好汉',
+      '天翻地覆慨而慷'
+    ];
+
     // ===== 主绘制 =====
     function draw(now) {
       var dt = Math.min(0.05, (now - lastTime) / 1000);
@@ -1385,6 +1397,28 @@
 
       // 结束全局下移变换
       ctx.restore();
+
+      // ===== 背景诗词 —— 底部逐行堆叠，渐次浮现 =====
+      if (t > 1.6 && t < TL.end) {
+        var btSize = Math.min(W * 0.045, 30);
+        var btLineH = btSize * 1.5;
+        var btStartY = H * 0.82;
+        var btStagger = 0.45; // 每行间隔秒数
+        ctx.save();
+        ctx.fillStyle = '#d4a860';
+        ctx.font = '400 ' + btSize + 'px "STZhongsong","KaiTi","SimSun",serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (var bi = 0; bi < bgTexts.length; bi++) {
+          var btAppear = 1.6 + bi * btStagger;
+          var btAlpha = clamp((t - btAppear) / 0.8, 0, 1) * 0.10;
+          if (btAlpha > 0.002) {
+            ctx.globalAlpha = btAlpha;
+            ctx.fillText(bgTexts[bi], W * 0.5, btStartY + bi * btLineH);
+          }
+        }
+        ctx.restore();
+      }
 
       // ===== 暗角 =====
       drawVignette();
