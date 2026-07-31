@@ -125,7 +125,7 @@ window.RedRenderers = (() => {
           <p>${practice.summary || ''}</p>
         </div>
         <div class="practice-footer">
-          <span class="practice-date"><span class="pd-year">${(practice.createdAt || '').slice(0,4)}</span><span class="pd-month">${parseInt((practice.createdAt || '').slice(5,7),10)}</span><span class="pd-day">${parseInt((practice.createdAt || '').slice(8,10),10)}</span></span>
+          <span class="practice-date"><span class="pd-year">${(practice.createdAt || '----').slice(0,4)}</span><span class="pd-month">${parseInt((practice.createdAt || '--').slice(5,7),10) || '--'}</span><span class="pd-day">${parseInt((practice.createdAt || '--').slice(8,10),10) || '--'}</span></span>
           <span class="practice-likes" onclick="event.stopPropagation();window.RedGuide.likePractice(this, '${practice.id}')">❤️ <span class="like-count">${(function(){try{var v=sessionStorage.getItem('redguide_likecount_'+practice.id);return v?v:practice.likes||0}catch(e){return practice.likes||0}})()}</span></span>
         </div>
       </div>

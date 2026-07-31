@@ -326,9 +326,9 @@ window.RedGuide = (() => {
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      const author = $('#msg-author')?.value.trim();
-      const title = $('#msg-title')?.value.trim();
-      const content = $('#msg-content')?.value.trim();
+      const author = ($('#msg-author')?.value || '').trim();
+      const title = ($('#msg-title')?.value || '').trim();
+      const content = ($('#msg-content')?.value || '').trim();
       if (!author || !title || !content) {
         showToast('请填写所有必填字段');
         return;
@@ -343,8 +343,8 @@ window.RedGuide = (() => {
         id: Date.now(),
         title,
         author,
-        className: $('#msg-class')?.value || '计算机2026级',
-        studentId: $('#msg-studentid')?.value || '***',
+        className: ($('#msg-class')?.value || '计算机2026级'),
+        studentId: ($('#msg-studentid')?.value || '***'),
         content,
         submitTime: new Date().toISOString().replace('T', ' ').slice(0, 16),
         status: 'pending',
@@ -565,6 +565,7 @@ window.RedGuide = (() => {
     initNavigation();
     initBackToTop();
     initViewTransitions();
+    initHeaderScroll();
     initScrollAnimations();
     initBgMusic();
   }

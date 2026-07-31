@@ -148,10 +148,6 @@ window.RedFeatures = (() => {
     });
   }
 
-  /* ---- 对话上下文记忆 ---- */
-  let _lastTopic = null;      // 上一次讨论的场馆/地区/主题
-  let _lastVenues = null;     // 上一次搜索结果
-
   /* ---- AI 回答生成引擎 ---- */
   function generateReply(query) {
     const q = query.trim();
@@ -229,9 +225,7 @@ window.RedFeatures = (() => {
     for (const { re, handler } of patterns) {
       const match = q.match(re);
       if (match) {
-        const result = handler(match);
-        _lastTopic = q;
-        return result;
+        return handler(match);
       }
     }
 
@@ -239,7 +233,6 @@ window.RedFeatures = (() => {
     // 先尝试场馆名模糊搜索
     const fuzzyVenue = findVenue(q);
     if (fuzzyVenue) {
-      _lastVenues = [fuzzyVenue];
       return formatVenueDetail(fuzzyVenue) + '<br><i>💡 输入「推荐路线」可获取主题游览建议</i>';
     }
 
@@ -248,7 +241,6 @@ window.RedFeatures = (() => {
     if (regionMatch.length === 0) regionMatch = venues.filter(v => v.city && v.city.includes(q.slice(0, 2)));
     if (regionMatch.length === 0) regionMatch = venues.filter(v => v.district && v.district.includes(q.slice(0, 2)));
     if (regionMatch.length > 0) {
-      _lastVenues = regionMatch;
       return searchByRegion(q.slice(0, 2));
     }
 
@@ -287,7 +279,6 @@ window.RedFeatures = (() => {
     if (found.length === 0) {
       return `暂未收录「${region}」的场馆信息。目前已覆盖 <b>${getProvinceCount()}</b> 个省区市。试试输入省份全称如「陕西省」「湖南省」？`;
     }
-    _lastVenues = found;
     const cats = [...new Set(found.map(v => v.category).filter(Boolean))];
     return `📍 <b>${region}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
       found.map(v => `• <b>${v.name}</b> — ${v.category||'红色场馆'}｜${v.city||''}${v.district||''}<br><small>${(v.summary||'').slice(0,50)}…</small>`).join('<br>') +
@@ -298,8 +289,6 @@ window.RedFeatures = (() => {
   function searchVenue(name) {
     const v = findVenue(name.replace(/[的了吗呢]$/, '').trim());
     if (!v) return `没找到「<b>${name.slice(0,15)}</b>」的详细信息。<br><br>🔍 试试：<br>• 输入完整场馆名称<br>• 输入省份名称查看当地全部场馆<br>• 到<a href="/pages/guide.html">全国导览</a>搜索`;
-    _lastVenues = [v];
-    _lastTopic = v.name;
     return formatVenueDetail(v) + '<br><i>💡 问「' + v.name.slice(0, 4) + '附近有什么」查看周边场馆</i>';
   }
 

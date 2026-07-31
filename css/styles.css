@@ -2505,13 +2505,6 @@ p {
 .message-form-card .form-group textarea:focus,
 .message-form-card .form-group select:focus {
   border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.08);
-}
-
-.message-form-card .form-group input:focus,
-.message-form-card .form-group textarea:focus,
-.message-form-card .form-group select:focus {
-  border-color: var(--red);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
 }
 
@@ -3070,16 +3063,8 @@ p {
     gap: 12px;
   }
 
-  .hero {
-    min-height: 440px;
-  }
-
   .hero-content {
     padding: 72px 20px 80px;
-  }
-
-  .hero h1 {
-    font-size: clamp(32px, 8vw, 48px);
   }
 
   .hero-search {
@@ -3159,14 +3144,6 @@ p {
     gap: 24px;
   }
 
-  .page-hero {
-    min-height: 240px;
-  }
-
-  .page-hero>div {
-    padding: 48px 20px 36px;
-  }
-
   .section {
     padding: 40px 16px;
   }
@@ -3227,10 +3204,6 @@ html.dark .nav-links li a:hover,
 html.dark .nav-links li a.active {
   color: var(--red);
   background: var(--light-red);
-}
-
-html.dark .page-hero::before {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.5));
 }
 
 html.dark ::-webkit-scrollbar-thumb {
@@ -4070,31 +4043,6 @@ html.dark .msg-status.rejected {
     color: #000;
     font-size: 12pt;
     padding: 0;
-  }
-
-  .hero,
-  .page-hero {
-    min-height: auto;
-    background: none !important;
-    color: #000;
-  }
-
-  .hero::before,
-  .page-hero::before,
-  .hero-overlay {
-    display: none;
-  }
-
-  .hero h1,
-  .page-hero h1 {
-    color: #000;
-    text-shadow: none;
-    font-size: 24pt;
-  }
-
-  .hero p,
-  .page-hero p {
-    color: #333;
   }
 
   .eyebrow {
