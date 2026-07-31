@@ -296,16 +296,26 @@
   <!-- 红色江山·电影级开场动画（增强版） -->
   <script>
   (function () {
-    if (sessionStorage.getItem('entrance_done_v2')) {
+    // 已播放过则跳过（双保险）
+    if (sessionStorage.getItem('entrance_done_v2') || localStorage.getItem('entrance_done_v2')) {
       var el = document.getElementById('entrance-overlay');
       if (el) el.remove();
       return;
     }
+    // bfcache 恢复时清理残留
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted && (sessionStorage.getItem('entrance_done_v2') || localStorage.getItem('entrance_done_v2'))) {
+        var el = document.getElementById('entrance-overlay');
+        if (el) { el.classList.add('fade-out'); setTimeout(function () { el.remove(); }, 800); }
+        document.documentElement.classList.remove('entrance-active');
+      }
+    });
     document.documentElement.classList.add('entrance-active');
 
     var canvas = document.getElementById('entrance-canvas');
     var ctx = canvas.getContext('2d');
-    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var isMobile = window.innerWidth < 768;
+    var DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
     var W = 0, H = 0;
 
     // ===== 叙事时间线 =====
@@ -802,7 +812,7 @@
     var stars = [];
     function initStars() {
       stars = [];
-      for (var i = 0; i < 170; i++) {
+      for (var i = 0; i < (isMobile ? 80 : 170); i++) {
         stars.push({
           x: Math.random() * W,
           y: Math.random() * H * 0.7,
@@ -815,7 +825,7 @@
     var sparks = [];
     function initSparks() {
       sparks = [];
-      for (var i = 0; i < 50; i++) {
+      for (var i = 0; i < (isMobile ? 20 : 50); i++) {
         sparks.push({
           x: Math.random() * W,
           y: H * 0.7 + Math.random() * H * 0.3,
@@ -1040,7 +1050,7 @@
     var groundEmbers = [];
     function initGroundEmbers() {
       groundEmbers = [];
-      for (var i = 0; i < 25; i++) {
+      for (var i = 0; i < (isMobile ? 10 : 25); i++) {
         groundEmbers.push({
           x: Math.random() * W,
           y: H * 0.65 + Math.random() * H * 0.3,
@@ -1436,6 +1446,7 @@
         window.scrollTo({ top: 0, behavior: 'instant' });
         setTimeout(function () { overlay.remove(); }, 800);
         sessionStorage.setItem('entrance_done_v2', '1');
+        try { localStorage.setItem('entrance_done_v2', '1'); } catch (e) {}
       }
     }
 
@@ -1488,6 +1499,7 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       setTimeout(function () { overlay.remove(); }, 800);
       sessionStorage.setItem('entrance_done_v2', '1');
+      try { localStorage.setItem('entrance_done_v2', '1'); } catch (e) {}
     });
 
     requestAnimationFrame(draw);

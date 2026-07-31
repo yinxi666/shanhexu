@@ -3807,25 +3807,25 @@ html.dark .msg-status.rejected {
     padding-bottom: 88px;
   }
 
-  /* 浮动按钮：左下深色，右下四个等距排列 */
+  /* 浮动按钮：左边深色切换，右边四个按钮竖排 */
   .dark-toggle {
     left: 8px;
-    bottom: 80px;
+    bottom: 100px;
     width: 40px;
     height: 40px;
     font-size: 18px;
   }
 
-  .chat-widget { bottom: 80px; right: 152px; width: 40px; height: 40px; overflow: hidden; }
-  .quiz-fab    { bottom: 80px; right: 104px; width: 40px; height: 40px; font-size: 18px; }
-  .music-player { bottom: 80px; right: 56px; }
-  .back-to-top { bottom: 80px; right: 8px; width: 40px; height: 40px; font-size: 18px; }
+  .back-to-top { bottom: 100px; right: 8px; width: 40px; height: 40px; font-size: 18px; }
+  .music-player { bottom: 148px; right: 8px; }
+  .quiz-fab    { bottom: 196px; right: 8px; width: 40px; height: 40px; font-size: 18px; }
+  .chat-widget { bottom: 244px; right: 8px; }
 
   .chat-fab,
   .music-toggle {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
   }
 
   .music-player .music-volume { display: none; }
