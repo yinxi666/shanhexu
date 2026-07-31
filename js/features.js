@@ -190,6 +190,11 @@ window.RedFeatures = (() => {
       { re: /(琼崖|琼崖纵队|二十三年红旗不倒|冯白驹)/, answer: '🌴 <b>琼崖革命</b>创造了"二十三年红旗不倒"的奇迹（1927—1950）。冯白驹领导琼崖纵队在孤岛环境下坚持武装斗争，直至配合渡海大军解放海南岛。', related: ['母瑞山革命根据地纪念园', '梅山老区革命烈士陵园'] },
     ];
 
+    // ===== 第一层匹配：历史知识库 =====
+    for (var ki = 0; ki < knowledge.length; ki++) {
+      if (knowledge[ki].re.test(q)) return knowledge[ki].answer;
+    }
+
     // ===== 第二层：场馆/省份/类别搜索模式 =====
     const patterns = [
       // 推荐路线
