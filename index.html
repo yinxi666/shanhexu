@@ -296,15 +296,15 @@
   <!-- 红色江山·电影级开场动画（增强版） -->
   <script>
   (function () {
-    // 已播放过则跳过（双保险）
-    if (sessionStorage.getItem('entrance_done_v2') || localStorage.getItem('entrance_done_v2')) {
+    // 已播放过则跳过
+    if (sessionStorage.getItem('entrance_done_v2')) {
       var el = document.getElementById('entrance-overlay');
       if (el) el.remove();
       return;
     }
     // bfcache 恢复时清理残留
     window.addEventListener('pageshow', function (e) {
-      if (e.persisted && (sessionStorage.getItem('entrance_done_v2') || localStorage.getItem('entrance_done_v2'))) {
+      if (e.persisted && sessionStorage.getItem('entrance_done_v2')) {
         var el = document.getElementById('entrance-overlay');
         if (el) { el.classList.add('fade-out'); setTimeout(function () { el.remove(); }, 800); }
         document.documentElement.classList.remove('entrance-active');
@@ -1446,7 +1446,6 @@
         window.scrollTo({ top: 0, behavior: 'instant' });
         setTimeout(function () { overlay.remove(); }, 800);
         sessionStorage.setItem('entrance_done_v2', '1');
-        try { localStorage.setItem('entrance_done_v2', '1'); } catch (e) {}
       }
     }
 
@@ -1499,7 +1498,6 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       setTimeout(function () { overlay.remove(); }, 800);
       sessionStorage.setItem('entrance_done_v2', '1');
-      try { localStorage.setItem('entrance_done_v2', '1'); } catch (e) {}
     });
 
     requestAnimationFrame(draw);
