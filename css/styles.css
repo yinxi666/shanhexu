@@ -3354,7 +3354,7 @@ html.dark .msg-status.rejected {
   display: none;
   position: absolute;
   bottom: 70px;
-  right: 0;
+  right: 70px;
   width: 380px;
   max-height: 540px;
   background: var(--card-bg);
@@ -3858,26 +3858,20 @@ html.dark .msg-status.rejected {
     font-size: 16px !important;
   }
 
-  .chat-widget {
-    bottom: 64px;
-    right: 4px;
-  }
-
-  .chat-fab {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-
   .chat-panel {
-    width: calc(100vw - 24px);
-    max-width: 320px;
-    max-height: 50vh;
-    right: 0;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 100px;
+    top: auto;
+    width: auto;
+    max-width: none;
+    max-height: 55vh;
+    border-radius: var(--radius) var(--radius) 0 0;
   }
 
   .chat-messages {
-    max-height: 30vh;
+    max-height: 35vh;
   }
 
   .chat-header {
