@@ -740,7 +740,6 @@ window.RedFeatures = (() => {
 
       detail.innerHTML = '<h3>' + ev.title + '</h3><p>' + ev.desc + '</p><div class="tl-venues">' + venueLinks + '</div>';
       detail.style.display = 'block';
-      detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     nodes.forEach(function(node) {
