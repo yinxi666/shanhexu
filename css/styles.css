@@ -3758,8 +3758,8 @@ html.dark .msg-status.rejected {
   z-index: 950;
   background: rgba(10, 10, 15, 0.95);
   border-top: 1px solid var(--card-border);
-  padding: 4px 2px;
-  padding-bottom: max(4px, env(safe-area-inset-bottom));
+  padding: 8px 4px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   justify-content: space-around !important;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
 }
@@ -3768,9 +3768,9 @@ html.dark .msg-status.rejected {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 1px;
-  padding: 2px 1px !important;
-  font-size: 10px !important;
+  gap: 4px;
+  padding: 6px 2px !important;
+  font-size: 13px !important;
   color: var(--muted);
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-smooth);
@@ -3803,7 +3803,7 @@ html.dark .msg-status.rejected {
 }
 
 .mobile-nav a span {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .mobile-nav a:hover,
@@ -3817,7 +3817,7 @@ html.dark .msg-status.rejected {
   }
 
   body {
-    padding-bottom: 76px;
+    padding-bottom: 88px;
   }
 
   /* 浮动按钮：左下深色，右下四个等距排列 */
@@ -3829,23 +3829,13 @@ html.dark .msg-status.rejected {
     font-size: 18px;
   }
 
-  .chat-widget,
-  .quiz-fab,
-  .music-player,
-  .back-to-top {
-    width: 40px;
-    height: 40px;
-  }
-
-  .chat-widget { bottom: 80px; right: 148px; }
-  .quiz-fab    { bottom: 80px; right: 100px; }
-  .music-player { bottom: 80px; right: 52px; }
-  .back-to-top { bottom: 80px; right: 4px; }
+  .chat-widget { bottom: 80px; right: 152px; width: 40px; height: 40px; overflow: hidden; }
+  .quiz-fab    { bottom: 80px; right: 104px; width: 40px; height: 40px; font-size: 18px; }
+  .music-player { bottom: 80px; right: 56px; }
+  .back-to-top { bottom: 80px; right: 8px; width: 40px; height: 40px; font-size: 18px; }
 
   .chat-fab,
-  .quiz-fab,
-  .music-toggle,
-  .back-to-top {
+  .music-toggle {
     width: 40px;
     height: 40px;
     font-size: 18px;
