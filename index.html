@@ -29,7 +29,8 @@
     #entrance-overlay.fade-out { opacity: 0; pointer-events: none; }
     #entrance-canvas { display: block; }
     /* 双层帷幕 */
-    #nav-curtain{position:fixed;inset:0;z-index:99999}
+    #nav-curtain{position:fixed;inset:0;z-index:99999;pointer-events:none}
+.nc-front,.nc-back{pointer-events:auto}
     .nc-front,.nc-back{position:absolute;inset:0;transform:translateX(100%);transition:transform .4s cubic-bezier(.5,0,.3,1)}
     .nc-front{background:rgba(245,210,210,.7);backdrop-filter:blur(2px);z-index:2}
     .nc-back{background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTAwIj48ZyBmaWxsPSIjYjkxYzFjIiBvcGFjaXR5PSIuMjUiPjxwb2x5Z29uIHBvaW50cz0iMzUuMCwxNi4wIDQwLjMsMzIuNyA1Ny44LDMyLjYgNDMuNiw0Mi44IDQ5LjEsNTkuNCAzNS4wLDQ5LjAgMjAuOSw1OS40IDI2LjQsNDIuOCAxMi4yLDMyLjYgMjkuNywzMi43Ii8+PHBvbHlnb24gcG9pbnRzPSI3NC4xLDkuMCA3OC40LDEzLjAgODMuNCwxMC4xIDgwLjksMTUuNCA4NS4zLDE5LjQgNzkuNSwxOC42IDc3LjAsMjMuOSA3Ni4wLDE4LjIgNzAuMiwxNy41IDc1LjMsMTQuNyIvPjxwb2x5Z29uIHBvaW50cz0iOTEuNywzMC4wIDkzLjcsMzUuNSA5OS41LDM1LjMgOTQuOSwzOC44IDk2LjksNDQuMyA5Mi4xLDQxLjAgODcuNSw0NC42IDg5LjIsMzkuMCA4NC4zLDM1LjggOTAuMiwzNS42Ii8+PHBvbHlnb24gcG9pbnRzPSI5MS4xLDU0LjYgOTAuNiw2MC40IDk2LjAsNjIuNiA5MC4zLDY0LjAgODkuOSw2OS44IDg2LjgsNjQuOCA4MS4yLDY2LjIgODUuMCw2MS44IDgxLjksNTYuOCA4Ny4zLDU5LjEiLz48cG9seWdvbiBwb2ludHM9Ijc3LjYsNzAuMyA3NS4wLDc1LjUgNzkuMiw3OS41IDczLjQsNzguNyA3MC45LDgzLjkgNjkuOSw3OC4yIDY0LjEsNzcuNCA2OS4zLDc0LjcgNjguMyw2OC45IDcyLjQsNzMuMCIvPjwvZz48L3N2Zz4=") left 8% top 15%/40% 70% no-repeat,linear-gradient(180deg,#f2c4c4 0%,#e8a8a8 50%,#f2c4c4 100%);z-index:1;transition-delay:.12s}
@@ -312,7 +313,7 @@
     document.documentElement.classList.add('entrance-active');
 
     var canvas = document.getElementById('entrance-canvas');
-    var ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d', { willReadFrequently: false });
     var isMobile = window.innerWidth < 768;
     var DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
     var W = 0, H = 0;
@@ -401,7 +402,7 @@
         var iw = tiananmenImg.naturalWidth || tiananmenImg.width;
         var ih = tiananmenImg.naturalHeight || tiananmenImg.height;
         oc.width = iw; oc.height = ih;
-        var octx = oc.getContext('2d');
+        var octx = oc.getContext('2d', { willReadFrequently: true });
         octx.drawImage(tiananmenImg, 0, 0);
         var imgData = octx.getImageData(0, 0, iw, ih);
         var d = imgData.data;
@@ -444,7 +445,7 @@
     tiananmenImg.src = '天安门.webp';
 
     var taFireCanvas = document.createElement('canvas');
-    var taFireCtx = taFireCanvas.getContext('2d');
+    var taFireCtx = taFireCanvas.getContext('2d', { willReadFrequently: true });
     var taEmbers = [];
 
     function drawTiananmen(cx, baseY, scale, alpha, time) {
@@ -1440,6 +1441,7 @@
         requestAnimationFrame(draw);
       } else {
         var overlay = document.getElementById('entrance-overlay');
+        if (!overlay) return;
         overlay.classList.add('fade-out');
         document.documentElement.classList.remove('entrance-active');
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1492,6 +1494,7 @@
 
     document.getElementById('skip').addEventListener('click', function () {
       var overlay = document.getElementById('entrance-overlay');
+      if (!overlay) return;
       overlay.classList.add('fade-out');
       document.documentElement.classList.remove('entrance-active');
       window.scrollTo({ top: 0, behavior: 'instant' });
