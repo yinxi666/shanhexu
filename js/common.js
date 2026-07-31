@@ -970,7 +970,7 @@ window.RedGuide = (() => {
 
       withCoords.forEach(function(v) {
         var marker = L.marker([v.coordinates.lat, v.coordinates.lng], { icon: defIcon })
-          .bindPopup('<b>' + v.name + '</b><br>' + v.province + ' ' + (v.city || '') + '<br><a href="detail.html?id=' + v.id + '">查看详情 →</a>');
+          .bindPopup('<b>' + v.name + '</b><br>' + v.province + ' ' + (v.city || '') + '<br><a href="' + getBasePath() + 'pages/detail.html?id=' + v.id + '">查看详情 →</a>');
         marker.addTo(leafletMap);
         venueMarkerMap[String(v.id)] = { marker: marker, def: defIcon, hl: hlIcon };
       });
