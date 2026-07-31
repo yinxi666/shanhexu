@@ -783,6 +783,20 @@ p {
   position: relative;
 }
 
+/* 子页面强制桌面宽度，移动端可缩放查看 */
+@media (max-width: 1024px) {
+  body {
+    min-width: 1024px;
+    overflow-x: auto;
+  }
+  .site-header,
+  .subpage-hero,
+  .section,
+  .site-footer {
+    min-width: 1024px;
+  }
+}
+
 .subpage-hero + .section::after {
   content: '';
   position: fixed;
