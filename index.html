@@ -1509,9 +1509,9 @@
     if(!curtain)return;
     var locked=false;
     document.addEventListener('click',function(e){
-      if(locked)return;
       var a=e.target.closest('a');
       if(!a||curtain.classList.contains('go'))return;
+      if(locked)return;
       var href=a.getAttribute('href');
       if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript'))return;
       e.preventDefault();
