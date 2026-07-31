@@ -105,6 +105,6 @@
   <script src="../js/common.js?v=20260731080000"></script>
   <script src="../js/features.js?v=20260731080000"></script>
 <script>!function(){var c=document.getElementById("nav-curtain");if(!c)return;var l=!1;document.addEventListener("click",function(e){var a=e.target.closest("a");if(!a||c.classList.contains("go"))return;if(l)return;var h=a.getAttribute("href");if(!h||h.startsWith("http")||h.startsWith("#")||h.startsWith("javascript"))return;e.preventDefault();l=!0;c.classList.add("go");setTimeout(function(){location.href=h},550)});window.addEventListener("pageshow",function(){l=!1;c.classList.remove("go")})}();</script>
-    window.addEventListener('pageshow',function(){locked=false;curtain.classList.remove('go');});
+
 </body>
 </html>
