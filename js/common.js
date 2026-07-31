@@ -1174,7 +1174,7 @@ window.RedGuide = (() => {
 
     var detailNavHtml = `
       <div class="detail-action-bar">
-        <a href="pages/guide.html" class="action-back">← 返回导览列表</a>
+        <a href="guide.html" class="action-back">← 返回导览列表</a>
         <div class="action-right">
           <button class="action-btn" onclick="window.RedGuide.copyShareLink(document.getElementById('detail-name').textContent)" title="复制分享链接">🔗 分享</button>
           <button class="action-btn btn-print" onclick="window.print()" title="打印场馆详情">🖨️ 打印</button>
