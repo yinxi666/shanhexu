@@ -45,7 +45,7 @@ window.RedFeatures = (() => {
               <span class="chat-avatar">🤖</span>
               <div>
                 <strong>红旅AI助手</strong>
-                <small>基于场馆知识库 · 离线可用</small>
+                <small>智能导览 · 知识库 Agent</small>
               </div>
             </div>
             <button class="chat-close" aria-label="关闭对话">✕</button>
@@ -128,14 +128,14 @@ window.RedFeatures = (() => {
       input.value = '';
       quickBtns.style.display = 'none';
 
-      const typingId = appendMsg('bot', '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>');
+      const thinkingId = appendMsg('bot', '<span class="ai-thinking"><span class="ai-thinking-icon">✦</span><span class="ai-thinking-text">正在检索知识库</span><span class="ai-thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>');
       setTimeout(() => {
         const reply = generateReply(text);
-        const typingEl = document.getElementById(typingId);
-        if (typingEl) typingEl.remove();
+        const thinkingEl = document.getElementById(thinkingId);
+        if (thinkingEl) thinkingEl.remove();
         appendMsg('bot', reply);
         saveChatHistory();
-      }, 600 + Math.random() * 600);
+      }, 700 + Math.random() * 600);
     }
 
     function appendMsg(role, text) {
@@ -591,7 +591,7 @@ window.RedFeatures = (() => {
 
     const fab = $('.quiz-fab');
     const overlay = $('#quiz-overlay');
-    const closeBtn = $('.quiz-close');
+    const closeBtn = $('.quiz-close', overlay);
     const startBtn = $('#quiz-start-btn');
     const body = $('#quiz-body');
     const result = $('#quiz-result');

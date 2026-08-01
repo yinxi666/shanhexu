@@ -278,7 +278,7 @@ window.RedCardGen = (() => {
     overlay.id = 'cardgen-overlay';
     overlay.innerHTML = `
       <div class="quiz-modal cardgen-modal">
-        <button class="quiz-close" aria-label="关闭">✕</button>
+        <button class="cardgen-close" aria-label="关闭">✕</button>
         <h3 style="margin:0 0 4px;">🎴 红色纪念卡</h3>
         <p style="margin:0 0 16px;font-size:13px;color:var(--muted);">输入姓名、选择精神，生成一张可带走、可分享的红色文创纪念卡</p>
 
@@ -319,7 +319,7 @@ window.RedCardGen = (() => {
     `;
     document.body.appendChild(overlay);
 
-    overlay.querySelector('.quiz-close').addEventListener('click', close);
+    overlay.querySelector('.cardgen-close').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && overlay.classList.contains('open')) close(); });
 
