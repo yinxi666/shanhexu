@@ -569,9 +569,6 @@ window.RedGuide = (() => {
   async function initHomePage() {
     await initCommon();
 
-    // 骨架屏
-    renderSkeletonGrid(4, 'featured-venues');
-
     // 加载数据（loadJSON 内部已容错，仅 loadAllVenues 可能抛错，捕获避免 unhandled rejection）
     let venues = [], practices = [], reflections = [];
     try {
@@ -600,16 +597,6 @@ window.RedGuide = (() => {
     if (statCategories) statCategories.textContent = categoryCount > 0 ? categoryCount : '0';
     if (statPractices) statPractices.textContent = practiceCount > 0 ? practiceCount + '+' : '0';
     if (statReflections) statReflections.textContent = reflectionCount > 0 ? reflectionCount + '+' : '0';
-
-    // 渲染推荐场馆
-    const featuredContainer = $('#featured-venues');
-    if (featuredContainer && venues.length > 0) {
-      const featured = venues.slice(0, 4);
-      featuredContainer.innerHTML = featured.map((v, i) => {
-        return renderVenueCard(v).replace('class="venue-card"', 'class="venue-card scroll-animate scroll-animate-delay-' + (i+1) + '"');
-      }).join('');
-      rescanScrollAnimations();
-    }
 
     // 初始化热力图
     initHomeHeatmap(venues);
