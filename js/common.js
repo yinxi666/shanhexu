@@ -1182,6 +1182,7 @@ window.RedGuide = (() => {
       <div class="detail-action-bar">
         <a href="guide.html" class="action-back">← 返回导览列表</a>
         <div class="action-right">
+          <button class="action-btn" onclick="window.RedCardGen && window.RedCardGen.open()" title="生成红色纪念卡">🎴 纪念卡</button>
           <button class="action-btn" onclick="window.RedGuide.copyShareLink(document.getElementById('detail-name').textContent)" title="复制分享链接">🔗 分享</button>
           <button class="action-btn btn-print" onclick="window.print()" title="打印场馆详情">🖨️ 打印</button>
         </div>

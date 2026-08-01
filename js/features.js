@@ -821,7 +821,7 @@ window.RedFeatures = (() => {
             <h2>创新功能</h2>
             <p>AI赋能红色文旅，打造沉浸式数字学习体验</p>
           </div>
-          <div class="feature-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+          <div class="feature-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
             <div class="feature-card" style="cursor:pointer;" onclick="document.querySelector('.chat-fab')?.click()">
               <div class="card-icon">🤖</div>
               <span class="card-num">AI</span>
@@ -842,6 +842,13 @@ window.RedFeatures = (() => {
               <h3>深色/浅色模式</h3>
               <p>一键切换深色模式，保护视力，适配不同阅读环境偏好。</p>
               <span style="color:var(--red);font-size:13px;font-weight:600;">切换模式 →</span>
+            </div>
+            <div class="feature-card" style="cursor:pointer;" onclick="window.RedCardGen && window.RedCardGen.open()">
+              <div class="card-icon">🎴</div>
+              <span class="card-num">Card</span>
+              <h3>红色纪念卡</h3>
+              <p>输入姓名、选择红色精神，生成一张可下载、可分享的红色文创纪念卡。</p>
+              <span style="color:var(--red);font-size:13px;font-weight:600;">生成纪念卡 →</span>
             </div>
           </div>
         </section>
