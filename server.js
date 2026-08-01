@@ -2,18 +2,53 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const server = http.createServer((req, res) => {
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
-  const ext = path.extname(filePath);
+// 常见静态文件 MIME 映射
+const MIME = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.txt': 'text/plain',
+  '.md': 'text/markdown',
+  '.svg': 'image/svg+xml',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.ogg': 'audio/ogg',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.m4a': 'audio/mp4',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.webmanifest': 'application/manifest+json',
+};
 
-  let contentType = 'text/html';
-  if (ext === '.js') contentType = 'application/javascript';
-  else if (ext === '.css') contentType = 'text/css';
-  else if (ext === '.json') contentType = 'application/json';
-  else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
-  else if (ext === '.png') contentType = 'image/png';
-  else if (ext === '.webp') contentType = 'image/webp';
-  else if (ext === '.mp4') contentType = 'video/mp4';
+const ROOT = path.resolve(__dirname);
+
+const server = http.createServer((req, res) => {
+  // 解析并净化请求路径，防目录穿越
+  let urlPath;
+  try {
+    urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  } catch (e) {
+    res.writeHead(400);
+    res.end('Bad request');
+    return;
+  }
+  const requested = urlPath === '/' ? 'index.html' : urlPath;
+  const filePath = path.resolve(path.join(ROOT, requested));
+  if (filePath !== ROOT && !filePath.startsWith(ROOT + path.sep)) {
+    res.writeHead(403);
+    res.end('Forbidden');
+    return;
+  }
+
+  const contentType = MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 
   fs.readFile(filePath, (err, data) => {
     if (err) {

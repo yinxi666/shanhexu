@@ -720,56 +720,6 @@ p {
   flex-shrink: 0;
 }
 
-/* ---------- Search Bar (Hero) ---------- */
-.hero-search {
-  margin-top: 0;
-  display: flex;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  gap: 0;
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-.hero-search input {
-  flex: 1 !important;
-  min-height: 52px;
-  padding: 0 20px;
-  border: 1px solid var(--card-border);
-  font-size: 15px;
-  color: var(--ink);
-  background: var(--white);
-  outline: none;
-  transition: border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
-}
-
-.hero-search input:focus {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.hero-search input::placeholder {
-  color: var(--muted);
-}
-
-.hero-search button {
-  min-height: 52px;
-  padding: 0 28px;
-  border: 0;
-  background: var(--red);
-  color: var(--white);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-
-.hero-search button:hover {
-  background: var(--deep-red);
-}
-
 /* ---------- Section Layout ---------- */
 .section {
   max-width: var(--max-width);
@@ -3067,19 +3017,6 @@ p {
     padding: 72px 20px 80px;
   }
 
-  .hero-search {
-    flex-direction: column;
-    max-width: 100%;
-  }
-
-  .hero-search input {
-    border-radius: var(--radius) var(--radius) 0 0;
-  }
-
-  .hero-search button {
-    border-radius: 0 0 var(--radius) var(--radius);
-  }
-
   .search-toolbar {
     flex-direction: column;
     border-radius: 20px;
@@ -4031,7 +3968,6 @@ html.dark .msg-status.rejected {
   .mobile-nav,
   .site-footer,
   .hero-actions,
-  .hero-search,
   .video-modal-overlay,
   .message-form-card,
   .pagination {

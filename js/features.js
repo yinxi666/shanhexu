@@ -9,6 +9,24 @@ window.RedFeatures = (() => {
 
   let venuesCache = [];
 
+  /* ---- 路径工具：委托 RedData，缺失时本地降级 ---- */
+  function getBasePath() {
+    if (window.RedData && typeof window.RedData.getBasePath === 'function') {
+      return window.RedData.getBasePath();
+    }
+    return (location.pathname.includes('/pages/')) ? '../' : '';
+  }
+
+  /* ---- HTML 转义（防聊天回复反射用户输入的自 XSS） ---- */
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /* ================================================================
      (1) AI 智能导览助手
      ================================================================ */
@@ -252,19 +270,19 @@ window.RedFeatures = (() => {
     // 尝试在简介中全文搜索
     const summaryMatch = venues.filter(v => v.summary && v.summary.includes(q.slice(0, 3)));
     if (summaryMatch.length > 0) {
-      return `🔍 在简介中搜索「${q.slice(0, 6)}」找到 <b>${summaryMatch.length}</b> 个相关场馆：<br>` +
+      return `🔍 在简介中搜索「${escapeHtml(q.slice(0, 6))}」找到 <b>${summaryMatch.length}</b> 个相关场馆：<br>` +
         summaryMatch.slice(0, 5).map(v => `• <b>${v.name}</b> — ${v.province} ${v.city||''}<br><small>${(v.summary||'').slice(0,60)}…</small>`).join('<br><br>') +
         `<br><i>💡 点击场馆名可在导览页查看详情</i>`;
     }
 
     // 真正的智能降级：给出有帮助的建议
-    return `🤔 关于「<b>${q.slice(0, 30)}</b>」，我还在学习中。试试这些：<br><br>
+    return `🤔 关于「<b>${escapeHtml(q.slice(0, 30))}</b>」，我还在学习中。试试这些：<br><br>
       🗺️ <b>查场馆</b>：「延安有什么场馆」「介绍井冈山革命博物馆」<br>
       📖 <b>学历史</b>：「长征」「遵义会议」「九一八事变」<br>
       🚩 <b>悟精神</b>：「红船精神」「长征精神」「红旗渠精神」<br>
       📊 <b>看数据</b>：「有多少场馆」「哪些省份最多」「场馆类别」<br>
       🛤️ <b>找路线</b>：「推荐红色旅游路线」「长征路线怎么走」<br><br>
-      <i>或者到<a href="/pages/guide.html">全国导览</a>页面浏览全部 ${venues.length} 个场馆</i>`;
+      <i>或者到<a href="${getBasePath()}pages/guide.html">全国导览</a>页面浏览全部 ${venues.length} 个场馆</i>`;
   }
 
   /* ===== 智能搜索函数 ===== */
@@ -282,10 +300,10 @@ window.RedFeatures = (() => {
       found = venues.filter(v => v.district && v.district.includes(region));
     }
     if (found.length === 0) {
-      return `暂未收录「${region}」的场馆信息。目前已覆盖 <b>${getProvinceCount()}</b> 个省区市。试试输入省份全称如「陕西省」「湖南省」？`;
+      return `暂未收录「${escapeHtml(region)}」的场馆信息。目前已覆盖 <b>${getProvinceCount()}</b> 个省区市。试试输入省份全称如「陕西省」「湖南省」？`;
     }
     const cats = [...new Set(found.map(v => v.category).filter(Boolean))];
-    return `📍 <b>${region}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
+    return `📍 <b>${escapeHtml(region)}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
       found.map(v => `• <b>${v.name}</b> — ${v.category||'红色场馆'}｜${v.city||''}${v.district||''}<br><small>${(v.summary||'').slice(0,50)}…</small>`).join('<br>') +
       `<br>🏷️ 类别分布：${cats.map(c => c).join(' · ')}` +
       `<br><i>💡 输入场馆名称可查看详细信息</i>`;
@@ -293,7 +311,7 @@ window.RedFeatures = (() => {
 
   function searchVenue(name) {
     const v = findVenue(name.replace(/[的了吗呢]$/, '').trim());
-    if (!v) return `没找到「<b>${name.slice(0,15)}</b>」的详细信息。<br><br>🔍 试试：<br>• 输入完整场馆名称<br>• 输入省份名称查看当地全部场馆<br>• 到<a href="/pages/guide.html">全国导览</a>搜索`;
+    if (!v) return `没找到「<b>${escapeHtml(name.slice(0,15))}</b>」的详细信息。<br><br>🔍 试试：<br>• 输入完整场馆名称<br>• 输入省份名称查看当地全部场馆<br>• 到<a href="${getBasePath()}pages/guide.html">全国导览</a>搜索`;
     return formatVenueDetail(v) + '<br><i>💡 问「' + v.name.slice(0, 4) + '附近有什么」查看周边场馆</i>';
   }
 
@@ -308,13 +326,51 @@ window.RedFeatures = (() => {
       <br><i>💡 建议出行前通过官网或电话确认开放时间和预约方式</i>`;
   }
 
+  /* ---- 场馆详情格式化（AI 聊天用） ---- */
+  function formatVenueDetail(v) {
+    if (!v) return '暂未找到该场馆的详细信息。';
+    const detail = (window.RedData && typeof window.RedData.getVenueDetail === 'function')
+      ? window.RedData.getVenueDetail(v.name)
+      : null;
+    const bp = getBasePath();
+    const coord = v.coordinates;
+    const imgSrc = (window.RedData && typeof window.RedData.resolveAssetPath === 'function')
+      ? window.RedData.resolveAssetPath(v.image, bp)
+      : '';
+    const truncate = (s, n) => (s && s.length > n) ? s.slice(0, n) + '…' : s;
+
+    let html = '<div style="margin-bottom:12px;padding:10px;background:var(--white);border-radius:8px;border:1px solid var(--card-border);">';
+    html += '<b style="font-size:15px;">🏛️ ' + v.name + '</b><br>';
+    html += '<span style="font-size:13px;color:var(--muted);">📍 ' + (v.province || '') +
+      (v.city ? ' · ' + v.city : '') +
+      (v.district ? ' · ' + v.district : '') +
+      (v.category ? ' · ' + v.category : '') + '</span>';
+    if (coord && coord.lat != null && coord.lng != null) {
+      html += '<br>🌐 坐标：' + coord.lat.toFixed(4) + ', ' + coord.lng.toFixed(4);
+    }
+    if (imgSrc) {
+      html += '<br><img src="' + imgSrc + '" alt="' + v.name + '" loading="lazy" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:8px;" onerror="this.style.display=\'none\'">';
+    }
+    if (detail && detail.history) {
+      html += '<br><br><b>📖 历史背景</b><br>' + truncate(detail.history, 110);
+    } else if (v.summary) {
+      html += '<br><br><b>📖 简介</b><br>' + truncate(v.summary, 110);
+    }
+    if (detail && detail.education) {
+      html += '<br><br><b>🎓 教育意义</b><br>' + truncate(detail.education, 80);
+    }
+    html += '<br><br><a href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '" style="color:var(--red);font-weight:bold;">查看完整详情 →</a>';
+    html += '</div>';
+    return html;
+  }
+
   function searchByCategory(cat) {
     const found = venuesCache.filter(v => v.category && v.category.includes(cat));
     if (found.length === 0) {
       const allCats = getCategoriesRaw();
-      return `没找到「${cat}」类别。当前场馆类别有：${allCats.join('、')}<br><br><i>💡 输入类别名查看该类别下的场馆</i>`;
+      return `没找到「${escapeHtml(cat)}」类别。当前场馆类别有：${allCats.join('、')}<br><br><i>💡 输入类别名查看该类别下的场馆</i>`;
     }
-    return `🏷️ <b>${cat}</b> 类场馆共 <b>${found.length}</b> 个：<br><br>` +
+    return `🏷️ <b>${escapeHtml(cat)}</b> 类场馆共 <b>${found.length}</b> 个：<br><br>` +
       found.map(v => `• <b>${v.name}</b> — ${v.province} ${v.city||''}`).join('<br>') +
       `<br><i>💡 输入场馆名了解详情</i>`;
   }
@@ -457,7 +513,7 @@ window.RedFeatures = (() => {
       html += '<b>' + r.name + '</b><br>📌 ' + r.desc + '<br>';
       html += '🏛️ ' + r.venues.map(function(vn) {
         var v = venuesCache.find(function(x) { return x.name.indexOf(vn) >= 0; });
-        return v ? '<a href="/pages/detail.html?id=' + v.id + '" style="color:var(--red);">' + vn + '</a>' : vn;
+        return v ? '<a href="' + getBasePath() + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '" style="color:var(--red);">' + vn + '</a>' : vn;
       }).join(' → ');
       html += '</div>';
     });
@@ -547,10 +603,12 @@ window.RedFeatures = (() => {
     let currentQ = 0;
     let score = 0;
     let answered = [];
+    let advanceTimer = null;
 
     startBtn.addEventListener('click', startQuiz);
 
     function startQuiz() {
+      clearTimeout(advanceTimer);
       currentQ = 0;
       score = 0;
       answered = [];
@@ -596,12 +654,14 @@ window.RedFeatures = (() => {
             : '❌ <b>回答错误</b> ' + item.tip;
           fb.classList.add('show');
 
-          setTimeout(() => { currentQ++; showQuestion(); }, 2500);
+          clearTimeout(advanceTimer);
+          advanceTimer = setTimeout(() => { currentQ++; showQuestion(); }, 2500);
         });
       });
     }
 
     function showResult() {
+      clearTimeout(advanceTimer);
       const pct = Math.round((score / quizData.length) * 100);
       let emoji, msg;
       if (pct >= 90) { emoji = '🏆'; msg = '太棒了！你是红色知识达人！'; }
@@ -626,6 +686,7 @@ window.RedFeatures = (() => {
     }
 
     function resetQuiz() {
+      clearTimeout(advanceTimer);
       currentQ = 0; score = 0; answered = [];
       body.innerHTML = `
         <div class="quiz-start">
@@ -667,7 +728,7 @@ window.RedFeatures = (() => {
   function initMobileNav() {
     if ($('.mobile-nav')) return;
 
-    const bp = (location.pathname.includes('/pages/')) ? '../' : '';
+    const bp = getBasePath();
     const current = location.pathname.replace(/\/$/, '');
 
     function isActive(page) {
@@ -725,7 +786,7 @@ window.RedFeatures = (() => {
 
       nodes.forEach(function(n) { n.classList.toggle('active', n.dataset.year === year); });
 
-      var bp = (location.pathname.includes('/pages/')) ? '../' : '';
+      var bp = getBasePath();
       var venueLinks = ev.venues.map(function(vn) {
         var v = venuesCache.find(function(x) { return x.name.indexOf(vn) >= 0; });
         var id = v ? v.id : vn;
@@ -794,10 +855,15 @@ window.RedFeatures = (() => {
      ================================================================ */
   async function initAll() {
     if (window.RedData) {
-      venuesCache = await RedData.loadAllVenues();
+      try {
+        venuesCache = await RedData.loadAllVenues();
+      } catch (e) {
+        console.warn('[RedFeatures] 场馆数据加载失败，创新功能降级运行', e);
+        venuesCache = [];
+      }
     } else {
       try {
-        const bp = (location.pathname.includes('/pages/')) ? '../' : '';
+        const bp = getBasePath();
         const core = await fetch(bp + 'data/venues.json').then(r => r.json()).catch(() => []);
         venuesCache = core;
       } catch (e) {}

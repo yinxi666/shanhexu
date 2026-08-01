@@ -80,13 +80,15 @@ window.RedGuide = (() => {
 
   // 返回顶部
   function initBackToTop() {
-    if ($('.back-to-top')) return;
-    const btn = document.createElement('button');
-    btn.className = 'back-to-top';
-    btn.innerHTML = '↑';
-    btn.setAttribute('aria-label', '返回顶部');
-    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    document.body.appendChild(btn);
+    let btn = $('.back-to-top');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.className = 'back-to-top';
+      btn.innerHTML = '↑';
+      btn.setAttribute('aria-label', '返回顶部');
+      btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      document.body.appendChild(btn);
+    }
 
     let ticking = false;
     window.addEventListener('scroll', () => {
@@ -247,19 +249,19 @@ window.RedGuide = (() => {
     document.body.appendChild(lb);
   }
 
-  // 点赞
+  // 点赞（统一 key：redguide_likes_<id> 存计数；旧 redguide_likecount_<id> 仅作迁移兼容）
   function likePractice(el, id) {
     const countEl = el.querySelector('.like-count');
     if (!countEl) return;
     const key = 'redguide_likes_' + id;
+    const legacyKey = 'redguide_likecount_' + id;
     try {
-      const liked = sessionStorage.getItem(key);
+      const liked = sessionStorage.getItem(key) != null || sessionStorage.getItem(legacyKey) != null;
       if (liked) {
         el.style.transform = 'scale(0.9)';
         setTimeout(() => el.style.transform = '', 150);
         return;
       }
-      sessionStorage.setItem(key, '1');
     } catch (e) {}
     const newCount = parseInt(countEl.textContent) + 1;
     countEl.textContent = newCount;
@@ -272,17 +274,20 @@ window.RedGuide = (() => {
         if (c && c !== countEl) c.textContent = newCount;
       }
     });
-    // 存下最新数值
-    try { sessionStorage.setItem('redguide_likecount_' + id, String(newCount)); } catch(e) {}
+    // 存下最新数值（统一 key，并清理旧的独立计数 key）
+    try { sessionStorage.setItem(key, String(newCount)); sessionStorage.removeItem(legacyKey); } catch(e) {}
     el.style.transform = 'scale(1.2)';
     setTimeout(() => el.style.transform = '', 200);
   }
 
-  // 获取点赞数（优先sessionStorage）
+  // 获取点赞数（统一 key 优先；旧方案残留时用旧 key 的计数）
   function getLikeCount(id, fallback) {
     try {
-      var c = sessionStorage.getItem('redguide_likecount_' + id);
-      if (c) return parseInt(c);
+      var c = sessionStorage.getItem('redguide_likes_' + id);
+      var legacy = sessionStorage.getItem('redguide_likecount_' + id);
+      if (c != null && legacy != null) return parseInt(legacy); // 旧方案：likes 是标志位，likecount 才是计数
+      if (c != null) return parseInt(c);
+      if (legacy != null) return parseInt(legacy);
     } catch(e) {}
     return fallback;
   }
@@ -290,18 +295,6 @@ window.RedGuide = (() => {
   // 跳转详情
   function goToDetail(id) {
     location.href = getBasePath() + 'pages/detail.html?id=' + encodeURIComponent(id);
-  }
-
-  // 首页搜索跳转
-  function searchFromHome() {
-    const input = $('#hero-search-input');
-    if (!input) return;
-    const query = input.value.trim();
-    if (query) {
-      location.href = getBasePath() + 'pages/guide.html?search=' + encodeURIComponent(query);
-    } else {
-      location.href = getBasePath() + 'pages/guide.html';
-    }
   }
 
   // Toast 提示
@@ -576,25 +569,21 @@ window.RedGuide = (() => {
   async function initHomePage() {
     await initCommon();
 
-    // 搜索框
-    const searchInput = $('#hero-search-input');
-    const searchBtn = $('#hero-search-btn');
-    if (searchBtn && searchInput) {
-      searchBtn.addEventListener('click', searchFromHome);
-      searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') searchFromHome();
-      });
-    }
-
     // 骨架屏
     renderSkeletonGrid(4, 'featured-venues');
 
-    // 加载数据
-    const [venues, practices, reflections] = await Promise.all([
-      loadAllVenues(),
-      loadJSON('data/practices.json'),
-      loadJSON('data/reflections.json')
-    ]);
+    // 加载数据（loadJSON 内部已容错，仅 loadAllVenues 可能抛错，捕获避免 unhandled rejection）
+    let venues = [], practices = [], reflections = [];
+    try {
+      [venues, practices, reflections] = await Promise.all([
+        loadAllVenues(),
+        loadJSON('data/practices.json'),
+        loadJSON('data/reflections.json')
+      ]);
+    } catch (err) {
+      console.warn('[RedGuide] 首页数据加载失败', err);
+      showToast('数据加载失败，请刷新重试');
+    }
 
     // 更新统计数据
     const provinceCount = getProvinces(venues).length;
@@ -647,12 +636,17 @@ window.RedGuide = (() => {
       }
     });
 
-    // 等待ECharts加载后初始化
+    // 等待ECharts加载后初始化（最多约15秒，超时降级SVG，避免无限轮询）
+    let echartsRetries = 0;
+    const ECHARTS_MAX_RETRIES = 50; // 50 × 300ms ≈ 15s
     function tryInit() {
       if (window.echarts) {
         initECharts(container, provinceData, provinceNames, venues);
-      } else {
+      } else if (echartsRetries < ECHARTS_MAX_RETRIES) {
+        echartsRetries++;
         setTimeout(tryInit, 300);
+      } else {
+        createSimpleHeatmap(container, provinceData);
       }
     }
     setTimeout(tryInit, 200);
@@ -868,7 +862,13 @@ window.RedGuide = (() => {
     // 骨架屏
     renderSkeletonGrid(8, 'venue-grid');
 
-    const venues = await loadAllVenues();
+    let venues = [];
+    try {
+      venues = await loadAllVenues();
+    } catch (err) {
+      console.warn('[RedGuide] 导览数据加载失败', err);
+      showToast('场馆数据加载失败，请刷新重试');
+    }
     const provinces = getProvinces(venues);
     const categories = getCategories(venues);
 
@@ -1112,7 +1112,13 @@ window.RedGuide = (() => {
       return;
     }
 
-    const venues = await loadAllVenues();
+    let venues = [];
+    try {
+      venues = await loadAllVenues();
+    } catch (err) {
+      console.warn('[RedGuide] 详情数据加载失败', err);
+      showToast('场馆数据加载失败，请刷新重试');
+    }
     const venue = venues.find(v => String(v.id) === String(id));
 
     if (!venue) {
@@ -1434,7 +1440,6 @@ window.RedGuide = (() => {
     openLightbox,
     likePractice,
     getLikeCount,
-    searchFromHome,
     showToast,
     renderVenueCard,
     renderPracticeCard,

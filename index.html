@@ -12,13 +12,13 @@
   <meta property="og:description" content="全国红色文旅场馆数字导览平台，AI智能导览助手。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="">
-  <link rel="icon" type="image/png" href="favicon.png?v=20260731080000">
+  <link rel="icon" type="image/png" href="favicon.png?v=20260802000000">
   <link rel="manifest" href="manifest.json">
   <link rel="preload" as="image" href="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp">
   <title>赓续血脉・数绘红旅 — 红色文旅数字导览</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://unpkg.com">
-  <link rel="stylesheet" href="css/styles.css?v=20260731080000">
+  <link rel="stylesheet" href="css/styles.css?v=20260802000000">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     html.entrance-active, html.entrance-active body { overflow: hidden; height: 100%; }
@@ -296,15 +296,22 @@
   <!-- 红色江山·电影级开场动画（增强版） -->
   <script>
   (function () {
+    // sessionStorage 访问防护（Safari 隐私模式等会抛异常，避免开场黑屏卡死）
+    function isEntranceDone() {
+      try { return !!sessionStorage.getItem('entrance_done_v2'); } catch (e) { return false; }
+    }
+    function markEntranceDone() {
+      try { sessionStorage.setItem('entrance_done_v2', '1'); } catch (e) {}
+    }
     // 已播放过则跳过
-    if (sessionStorage.getItem('entrance_done_v2')) {
+    if (isEntranceDone()) {
       var el = document.getElementById('entrance-overlay');
       if (el) el.remove();
       return;
     }
     // bfcache 恢复时清理残留
     window.addEventListener('pageshow', function (e) {
-      if (e.persisted && sessionStorage.getItem('entrance_done_v2')) {
+      if (e.persisted && isEntranceDone()) {
         var el = document.getElementById('entrance-overlay');
         if (el) { el.classList.add('fade-out'); setTimeout(function () { el.remove(); }, 800); }
         document.documentElement.classList.remove('entrance-active');
@@ -1446,7 +1453,7 @@
         document.documentElement.classList.remove('entrance-active');
         window.scrollTo({ top: 0, behavior: 'instant' });
         setTimeout(function () { overlay.remove(); }, 800);
-        sessionStorage.setItem('entrance_done_v2', '1');
+        markEntranceDone();
       }
     }
 
@@ -1499,7 +1506,7 @@
       document.documentElement.classList.remove('entrance-active');
       window.scrollTo({ top: 0, behavior: 'instant' });
       setTimeout(function () { overlay.remove(); }, 800);
-      sessionStorage.setItem('entrance_done_v2', '1');
+      markEntranceDone();
     });
 
     requestAnimationFrame(draw);
@@ -1520,7 +1527,7 @@
       e.preventDefault();
       locked=true;
       curtain.classList.add('go');
-      setTimeout(function(){location.href=href},550);
+      setTimeout(function(){location.href=href},450);
     });
     window.addEventListener('pageshow',function(){locked=false;curtain.classList.remove('go');});
   })();
@@ -1554,10 +1561,10 @@
   })();
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <script src="js/data.js?v=20260731080000"></script>
-  <script src="js/renderers.js?v=20260731080000"></script>
-  <script src="js/common.js?v=20260731080000"></script>
-  <script src="js/features.js?v=20260731080000"></script>
+  <script src="js/data.js?v=20260802000000"></script>
+  <script src="js/renderers.js?v=20260802000000"></script>
+  <script src="js/common.js?v=20260802000000"></script>
+  <script src="js/features.js?v=20260802000000"></script>
 </body>
 
 </html>
