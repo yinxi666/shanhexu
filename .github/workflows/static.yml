@@ -36,8 +36,18 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          # 仅上传站点运行所需的文件，避免 server.js/package.json/docs/CI 等污染线上产物
+          path: |
+            index.html
+            pages/
+            css/
+            js/
+            data/
+            assets/
+            images/
+            favicon.png
+            manifest.json
+            .nojekyll
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

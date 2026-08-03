@@ -7,16 +7,19 @@
 window.RedRenderers = (() => {
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
-  function getBasePath() {
-    return RedData.getBasePath();
-  }
+  /* 路径工具：统一委托 RedData（data.js 最先加载，始终可用） */
+  const getBasePath = (...a) => window.RedData.getBasePath(...a);
+  const resolveAssetPath = (...a) => window.RedData.resolveAssetPath(...a);
+  const fallbackSrc = (...a) => window.RedData.fallbackSrc(...a);
 
-  function resolveAssetPath(imagePath, basePath) {
-    return RedData.resolveAssetPath(imagePath, basePath);
-  }
-
-  function fallbackSrc() {
-    return RedData.fallbackSrc();
+  /** HTML 转义 — 留言等用户输入必须转义后再拼入 innerHTML */
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   /**
@@ -26,6 +29,7 @@ window.RedRenderers = (() => {
    * @returns {string} HTML字符串
    */
   function isFavorite(id) {
+    if (window.RedFeatures && typeof RedFeatures.isFavorite === 'function') return RedFeatures.isFavorite(id);
     try {
       const favs = JSON.parse(localStorage.getItem('redguide_favs') || '[]');
       return favs.includes(String(id));
@@ -56,45 +60,10 @@ window.RedRenderers = (() => {
         <div class="card-footer">
           <span>${venue.officialVerificationStatus || ''}</span>
           <span>
-            <button class="fav-btn ${favClass}" title="收藏场馆" onclick="event.stopPropagation(); window.RedFeatures.toggleFavorite('${venue.id}'); this.innerHTML = window.RedFeatures.isFavorite('${venue.id}') ? '❤️' : '🤍'; this.classList.toggle('active', window.RedFeatures.isFavorite('${venue.id}'));">${favIcon}</button>
+            <button class="fav-btn ${favClass}" title="收藏场馆" aria-pressed="${favActive}" onclick="event.stopPropagation(); const nx = window.RedFeatures.toggleFavorite('${venue.id}'); this.innerHTML = nx ? '❤️' : '🤍'; this.classList.toggle('active', nx); this.setAttribute('aria-pressed', String(nx));">${favIcon}</button>
             <span class="card-link">查看详情 →</span>
           </span>
         </div>
-      </div>
-    `;
-  }
-
-  /**
-   * 渲染政策卡片
-   * @param {Object} policy - 政策数据对象
-   * @param {string} [basePath] - 基础路径
-   * @returns {string} HTML字符串
-   */
-  function renderPolicyCard(policy, basePath) {
-    const bp = basePath || getBasePath();
-    const imgSrc = resolveAssetPath(policy.image, bp) || (bp + 'assets/页面通用图片/时事政策模块封面.webp');
-    const fb = fallbackSrc();
-    const hasUrl = policy.url && policy.url.trim();
-    return `
-      <div class="policy-card">
-        <div class="policy-img">
-          <img src="${imgSrc}" alt="${policy.title}" loading="lazy" onerror="this.onerror=null;this.src='${fb}'">
-        </div>
-        <div class="policy-info">
-          <h3>${policy.title}</h3>
-          <p class="policy-summary">${policy.summary || ''}</p>
-          <div class="policy-meta">
-            <span class="policy-source">${policy.source || '未知来源'}</span>
-            <span>📅 ${policy.publishedAt || ''}</span>
-          </div>
-        </div>
-        ${hasUrl ? `
-        <div class="policy-link">
-          <a href="${policy.url}" target="_blank" rel="noopener">阅读全文 →</a>
-        </div>` : `
-        <div class="policy-link">
-          <span style="padding:8px 14px;background:#f3f4f6;border-radius:6px;font-size:13px;color:#9ca3af;">待补充链接</span>
-        </div>`}
       </div>
     `;
   }
@@ -166,21 +135,23 @@ window.RedRenderers = (() => {
       rotHash = rotSeed.charCodeAt(ri) + ((rotHash << 5) - rotHash);
     }
     var rotation = ((Math.abs(rotHash) % 51) - 25) / 10; // -2.5° ~ 2.5°
+    // 留言作者/标题/内容来自用户提交（sessionStorage），必须转义防存储型 XSS
+    const esc = escapeHtml;
     return `
       <div class="message-card" style="transform:rotate(${rotation}deg)">
         <div class="msg-pin" style="background:${pinColor}"></div>
         <div class="msg-header">
-          <div class="msg-avatar" style="background:${bg}">${initials}</div>
+          <div class="msg-avatar" style="background:${bg}">${esc(initials)}</div>
           <div class="msg-author-info">
-            <h4>${msg.author || '匿名用户'}</h4>
-            <span>${msg.className || ''} · ${msg.submitTime || ''}</span>
+            <h4>${esc(msg.author || '匿名用户')}</h4>
+            <span>${esc(msg.className || '')} · ${esc(msg.submitTime || '')}</span>
           </div>
         </div>
-        <div class="msg-title">${msg.title || ''}</div>
-        <div class="msg-content">${msg.content || ''}</div>
+        <div class="msg-title">${esc(msg.title || '')}</div>
+        <div class="msg-content">${esc(msg.content || '')}</div>
         <div class="msg-footer">
-          <span>学号: ${msg.studentId || '***'}</span>
-          <span class="msg-status ${msg.status || 'pending'}">${statusMap[msg.status] || msg.status}</span>
+          <span>学号: ${esc(msg.studentId || '***')}</span>
+          <span class="msg-status ${esc(msg.status) || 'pending'}">${esc(statusMap[msg.status]) || esc(msg.status) || ''}</span>
         </div>
       </div>
     `;
@@ -195,9 +166,31 @@ window.RedRenderers = (() => {
    * @param {Function} renderFn - 翻页回调函数
    * @returns {string} HTML字符串
    */
+  // 分页回调注册表：selector → 回调，配合下方 document 级事件委托
+  const paginationHandlers = new Map();
+
   function renderPagination(totalItems, pageSize, currentPage, containerSelector, renderFn) {
     const totalPages = Math.ceil(totalItems / pageSize);
     if (totalPages <= 1) return '';
+
+    // 首次调用时注册一次性事件委托，避免 setTimeout(0) 挂监听导致的竞态
+    //（容器在 timeout 前被重渲染时监听器会挂到被替换的旧节点上）
+    if (!paginationHandlers.has(containerSelector)) {
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-page]');
+        if (!btn || !e.target.closest('.pagination')) return;
+        const container = btn.closest(containerSelector);
+        if (!container) return;
+        const handler = paginationHandlers.get(containerSelector);
+        if (!handler) return;
+        const page = parseInt(btn.dataset.page, 10);
+        if (!page) return;
+        handler(page);
+        const section = container.closest('.section');
+        if (section) window.scrollTo({ top: section.offsetTop - 100, behavior: 'smooth' });
+      });
+    }
+    paginationHandlers.set(containerSelector, renderFn);
 
     let html = '<div class="pagination">';
     html += `<button ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">‹</button>`;
@@ -206,21 +199,6 @@ window.RedRenderers = (() => {
     }
     html += `<button ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">›</button>`;
     html += '</div>';
-
-    setTimeout(() => {
-      const paginationDiv = document.querySelector(containerSelector + ' .pagination');
-      if (paginationDiv) {
-        paginationDiv.querySelectorAll('button').forEach(btn => {
-          btn.addEventListener('click', function () {
-            const page = parseInt(this.dataset.page);
-            if (!page || typeof renderFn !== 'function') return;
-            renderFn(page);
-            const section = paginationDiv.closest('.section');
-            if (section) window.scrollTo({ top: section.offsetTop - 100, behavior: 'smooth' });
-          });
-        });
-      }
-    }, 0);
 
     return html;
   }
@@ -242,7 +220,6 @@ window.RedRenderers = (() => {
 
   return {
     renderVenueCard,
-    renderPolicyCard,
     renderPracticeCard,
     renderMessageCard,
     renderPagination,

@@ -8,27 +8,11 @@ window.RedGuide = (() => {
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
 
-  function getBasePath() {
-    const path = location.pathname;
-    if (path.includes('/pages/')) return '../';
-    return '';
-  }
-
-  /** 安全拼接资源路径 — 处理绝对路径 /assets/… 和相对路径 */
-  function resolveAssetPath(imagePath, basePath) {
-    const bp = basePath || getBasePath();
-    const fallback = bp + 'assets/页面通用图片/暂无图片.png';
-    if (!imagePath) return fallback;
-    if (/^https?:\/\//.test(imagePath)) return imagePath;
-    // 已是以 / 开头的绝对路径（从服务器根目录），直接使用
-    if (imagePath.startsWith('/')) return imagePath;
-    return bp + imagePath;
-  }
-
-  function fallbackSrc() {
-    const bp = getBasePath();
-    return bp + 'assets/页面通用图片/暂无图片.png';
-  }
+  /* 路径工具：统一委托 RedData（data.js 在每页最先加载，始终可用），
+     避免同一逻辑在五个模块各维护一份副本 */
+  const getBasePath = (...a) => window.RedData.getBasePath(...a);
+  const resolveAssetPath = (...a) => window.RedData.resolveAssetPath(...a);
+  const fallbackSrc = (...a) => window.RedData.fallbackSrc(...a);
 
   /* ---------- 数据层引用（委托给 RedData 纯数据模块） ---------- */
   const loadJSON = (...a) => RedData.loadJSON(...a);
@@ -39,7 +23,6 @@ window.RedGuide = (() => {
 
   /* ---------- 渲染函数（委托给 RedRenderers 模块） ---------- */
   const renderVenueCard = (venue, bp) => window.RedRenderers.renderVenueCard(venue, bp);
-  const renderPolicyCard = (policy, bp) => window.RedRenderers.renderPolicyCard(policy, bp);
   const renderPracticeCard = (practice, bp) => window.RedRenderers.renderPracticeCard(practice, bp);
   const renderMessageCard = (msg) => window.RedRenderers.renderMessageCard(msg);
   const renderPagination = (total, size, page, selector, fn) => window.RedRenderers.renderPagination(total, size, page, selector, fn);
@@ -62,17 +45,21 @@ window.RedGuide = (() => {
       });
     }
 
-    // 高亮当前页
-    const current = location.pathname.replace(/\/$/, '') || '/index.html';
+    // 高亮当前页（兼容 GitHub Pages 子路径部署）
+    const curPath = location.pathname.replace(/\/+$/, '');
+    const curFile = curPath.split('/').pop() || '';
+    // 目录根（如 /shanhexu/ 或 /）实际渲染 index.html
+    const currentFile = /\.html$/i.test(curFile) ? curFile : 'index.html';
     $$('.nav-links a').forEach(link => {
       const href = link.getAttribute('href');
-      if (!href) return;
-      const target = href.replace(/^\.\.\//, '/').replace(/^\.\//, '/');
-      const cur = current.replace(/^\/+/, '/');
+      if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('javascript')) return;
+      const target = '/' + href.replace(/^(\.\.\/|\.\/)+/, '');
+      const targetFile = target.split('/').pop() || '';
+      if (!targetFile) return;
       // 详情页属于导览模块，同时高亮"全国导览"
-      const isDetailPage = cur.includes('/detail.html');
-      const targetIsGuide = target.includes('guide.html');
-      if (cur.endsWith(target) || (cur === '/index.html' && target === '/index.html') || (isDetailPage && targetIsGuide)) {
+      const isDetailPage = currentFile === 'detail.html';
+      const targetIsGuide = targetFile === 'guide.html';
+      if (targetFile === currentFile || (isDetailPage && targetIsGuide)) {
         link.classList.add('active');
       }
     });
@@ -103,12 +90,14 @@ window.RedGuide = (() => {
   }
 
   // 图片轮播
-  function initCarousel(total, basePath) {
-    const track = $('.carousel-track');
-    const prevBtn = $('.carousel-prev');
-    const nextBtn = $('.carousel-next');
-    const dots = $$('.carousel-dot');
-    const counter = $('.carousel-counter');
+  function initCarousel(total) {
+    const carouselEl = $('.detail-carousel');
+    const track = $('.carousel-track', carouselEl);
+    const prevBtn = $('.carousel-prev', carouselEl);
+    const nextBtn = $('.carousel-next', carouselEl);
+    // 限定在当前轮播内部，避免将来页面新增轮播时串扰
+    const dots = $$('.carousel-dot', carouselEl);
+    const counter = $('.carousel-counter', carouselEl);
     if (!track || !prevBtn || !nextBtn) return;
 
     let current = 0;
@@ -174,11 +163,12 @@ window.RedGuide = (() => {
       closeVideo();
       showToast('视频加载失败');
     };
-    overlay.style.zIndex = '10001';
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 
     function closeVideo() {
+      // 仅当视频弹窗确实打开时才释放滚动锁，避免 Escape 误触清掉其他弹窗的锁
+      if (!overlay.classList.contains('open')) return;
       overlay.classList.remove('open');
       video.pause();
       video.src = '';
@@ -206,8 +196,9 @@ window.RedGuide = (() => {
         '</div>';
     }
 
+    // 独立类名，避免与视频弹窗 .video-modal-overlay 混淆（此前 openVideo 会误命中本弹窗导致崩溃）
     let overlay = document.createElement('div');
-    overlay.className = 'video-modal-overlay';
+    overlay.className = 'practice-modal-overlay';
     overlay.id = 'practice-detail-overlay';
     overlay.innerHTML = `
       <div class="quiz-modal" style="max-width:640px;max-height:85vh;overflow-y:auto;padding:0;">
@@ -268,8 +259,10 @@ window.RedGuide = (() => {
     // 同步更新页面上相同实践的所有点赞数（卡片+弹窗）
     var allLikes = document.querySelectorAll('.practice-likes');
     allLikes.forEach(function(like) {
+      // 精确解析 onclick 中的 id 参数，避免 practice-1 与 practice-10 子串误匹配
       var onclick = like.getAttribute('onclick') || '';
-      if (onclick.indexOf(id) >= 0) {
+      var m = onclick.match(/likePractice\(\s*this\s*,\s*'([^']+)'\s*\)/);
+      if (m && m[1] === id) {
         var c = like.querySelector('.like-count');
         if (c && c !== countEl) c.textContent = newCount;
       }
@@ -396,7 +389,9 @@ window.RedGuide = (() => {
     let html = '';
     const pageSize = 4;
     const totalPages = Math.ceil(all.length / pageSize);
-    const currentPage = parseInt(new URLSearchParams(location.search).get('msg_page') || '1');
+    let currentPage = parseInt(new URLSearchParams(location.search).get('msg_page') || '1', 10);
+    if (!Number.isFinite(currentPage) || currentPage < 1) currentPage = 1;
+    if (currentPage > (totalPages || 1)) currentPage = totalPages || 1;
 
     const start = (currentPage - 1) * pageSize;
     const pageItems = all.slice(start, start + pageSize);
@@ -488,21 +483,19 @@ window.RedGuide = (() => {
       }
     });
 
-    // 恢复播放状态和进度
-    var wasPlaying = sessionStorage.getItem('bgmusic_playing') === '1';
-    var savedTime = parseFloat(sessionStorage.getItem('bgmusic_time') || '0');
+    // 恢复播放状态和进度（storage 裸读需容错，隐身/受限模式会抛异常）
+    var wasPlaying = false, savedTime = 0;
+    try {
+      wasPlaying = sessionStorage.getItem('bgmusic_playing') === '1';
+      savedTime = parseFloat(sessionStorage.getItem('bgmusic_time') || '0') || 0;
+    } catch (e) { /* 存储不可用：忽略恢复 */ }
     if (wasPlaying) {
       btn.innerHTML = '🎵';
       btn.classList.add('playing');
-      // 先设进度再播放
-      if (savedTime > 0) bgMusic.currentTime = savedTime;
-      bgMusic.play().catch(function () {
-        var resume = function () {
-          if (savedTime > 0) bgMusic.currentTime = savedTime;
-          bgMusic.play().catch(function () {});
-        };
-        document.addEventListener('click', resume, { once: true });
-      });
+      // 先设进度再播放（元数据未就绪时 currentTime 可能抛 InvalidStateError）
+      if (savedTime > 0) { try { bgMusic.currentTime = savedTime; } catch (e) {} }
+      // 首次交互后由下方 tryPlay 统一恢复，避免两套机制重复触发
+      bgMusic.play().catch(function () {});
     }
 
     // 播放/暂停
@@ -661,7 +654,7 @@ window.RedGuide = (() => {
     }));
 
     try {
-      const response = await fetch(getBasePath() + 'data/china.json');
+      const response = await fetch(getBasePath() + 'data/china.json?v=2026080316');
       const mapData = await response.json();
       echarts.registerMap('china', mapData);
 
@@ -797,7 +790,7 @@ window.RedGuide = (() => {
       svgContent += `
         <g transform="translate(${pos.x}, ${pos.y})">
           <circle cx="0" cy="0" r="${radius}" fill="${color}" opacity="0.8" />
-          <text x="0" y="-${radius + 8}" text-anchor="middle" font-size="7" fill="#64748b">${name}</text>
+          <text x="0" y="-${radius + 8}" text-anchor="middle" font-size="7" fill="#64748b">${shortName}</text>
           <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="bold" fill="${count > 0 ? '#ffffff' : '#9ca3af'}">${count}</text>
         </g>
       `;
@@ -895,16 +888,21 @@ window.RedGuide = (() => {
       if (toggleBtn) toggleBtn.style.display = '';
     }
 
+    let _leafletInjected = false;
     async function initMap() {
       if (leafletMap) return;
-      if (!window.L) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-          script.onload = resolve;
-          script.onerror = reject;
-          document.head.appendChild(script);
-        });
+      if (!window.L && !_leafletInjected) {
+        _leafletInjected = true;
+        try {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.setAttribute('data-injected', '1');
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        } catch (e) { /* CDN 注入失败：仅地图不可用，不影响其他功能 */ }
       }
       if (!window.L || !mapContainer) return;
       leafletMap = L.map(mapContainer, {
@@ -945,9 +943,12 @@ window.RedGuide = (() => {
 
     function plotVenuesOnMap(filteredVenues) {
       if (!leafletMap) return;
+      // 先收集再移除，避免在 eachLayer 迭代过程中修改 _layers 集合导致部分 marker 残留
+      const staleMarkers = [];
       leafletMap.eachLayer(layer => {
-        if (layer instanceof L.Marker) leafletMap.removeLayer(layer);
+        if (layer instanceof L.Marker) staleMarkers.push(layer);
       });
+      staleMarkers.forEach(layer => leafletMap.removeLayer(layer));
       venueMarkerMap = {};
       var withCoords = filteredVenues.filter(function(v) { return v.coordinates && v.coordinates.lat; });
       if (withCoords.length === 0) return;
@@ -1022,7 +1023,8 @@ window.RedGuide = (() => {
       if (province && province !== 'all') url.searchParams.set('province', province); else url.searchParams.delete('province');
       if (category && category !== 'all') url.searchParams.set('category', category); else url.searchParams.delete('category');
       if (page && page > 1) url.searchParams.set('page', page); else url.searchParams.delete('page');
-      window.history.replaceState({}, '', url.toString());
+      // file:// 或受限环境下 replaceState 可能抛错，不能中断渲染
+      try { window.history.replaceState({}, '', url.toString()); } catch (e) {}
     }
 
     function doRender(resetPage, mapOnly) {
@@ -1039,7 +1041,8 @@ window.RedGuide = (() => {
 
       // URL 同步
       var pageSize = 9;
-      var currentPage = resetPage ? 1 : parseInt(new URLSearchParams(location.search).get('page') || '1');
+      var rawPage = resetPage ? 1 : parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
+      var currentPage = (Number.isFinite(rawPage) && rawPage > 0) ? rawPage : 1;
       var totalPages = Math.ceil(filtered.length / pageSize);
       var page = Math.min(currentPage, totalPages || 1);
       syncURL(query, province, category, page);
@@ -1123,9 +1126,12 @@ window.RedGuide = (() => {
       ? `${venue.summary}\n\n该场馆作为${venue.province}重要的红色文化教育基地，承载着丰富的革命历史记忆。参观者可以在此深入了解中国共产党领导人民进行革命斗争的光辉历程，感受革命先辈的崇高精神和坚定信念。`
       : '暂无详细描述。';
 
-    // 更新页面 hero 背景
+    // 更新页面 hero 背景（图加载失败时兜底占位图）
     const heroBg = $('#detail-hero-bg');
-    if (heroBg) heroBg.src = imgSrc;
+    if (heroBg) {
+      heroBg.src = imgSrc;
+      heroBg.onerror = function () { this.onerror = null; this.src = fb; };
+    }
 
     // 更新标题和副标题
     const titleEl = $('#detail-name');
@@ -1169,7 +1175,7 @@ window.RedGuide = (() => {
       <div class="detail-action-bar">
         <a href="guide.html" class="action-back">← 返回导览列表</a>
         <div class="action-right">
-          <button class="action-btn" onclick="window.RedCardGen && window.RedCardGen.open()" title="生成红色纪念卡">🎴 纪念卡</button>
+          <button class="action-btn" onclick="window.RedCardGen && window.RedCardGen.open('${String(venue.name || '').replace(/'/g, "\\'")}', '${String(venue.image || '').replace(/'/g, "\\'")}')" title="生成红色纪念卡">🎴 纪念卡</button>
           <button class="action-btn" onclick="window.RedGuide.copyShareLink(document.getElementById('detail-name').textContent)" title="复制分享链接">🔗 分享</button>
           <button class="action-btn btn-print" onclick="window.print()" title="打印场馆详情">🖨️ 打印</button>
         </div>
@@ -1233,7 +1239,7 @@ window.RedGuide = (() => {
 
     // 初始化轮播
     if (hasMultipleImages) {
-      initCarousel(uniqueCarousel.length, bp);
+      initCarousel(uniqueCarousel.length);
     }
   }
 
@@ -1245,8 +1251,8 @@ window.RedGuide = (() => {
 
     let policies;
     try { policies = await loadJSON('data/policies.json'); } catch (e) { policies = []; }
-    // 按日期从早到晚排列
-    policies.sort(function(a, b) {
+    // 按日期从早到晚排列（拷贝排序，避免原地修改 loadJSON 缓存数组）
+    policies = [...policies].sort(function(a, b) {
       return (a.publishedAt || '').localeCompare(b.publishedAt || '');
     });
 
@@ -1256,7 +1262,8 @@ window.RedGuide = (() => {
     // 分页：5条/页
     const pageSize = 5;
     const totalPages = Math.ceil(policies.length / pageSize);
-    const currentPage = parseInt(new URLSearchParams(location.search).get('page') || '1');
+    let currentPage = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
+    if (!Number.isFinite(currentPage) || currentPage < 1) currentPage = 1;
     const page = Math.min(currentPage, totalPages || 1);
     const pageItems = policies.slice((page - 1) * pageSize, page * pageSize);
 
@@ -1314,7 +1321,8 @@ window.RedGuide = (() => {
     const bp = getBasePath();
     const pageSize = 6;
     const params = new URLSearchParams(location.search);
-    const currentPage = parseInt(params.get('page') || '1');
+    let currentPage = parseInt(params.get('page') || '1', 10);
+    if (!Number.isFinite(currentPage) || currentPage < 1) currentPage = 1;
     const totalPages = Math.ceil(practices.length / pageSize);
     const page = Math.min(currentPage, totalPages || 1);
     const pageItems = practices.slice((page - 1) * pageSize, page * pageSize);
@@ -1373,14 +1381,12 @@ window.RedGuide = (() => {
   function initHeaderScroll() {
     const header = document.querySelector('.site-header');
     if (!header) return;
-    let lastScrollY = window.scrollY;
     window.addEventListener('scroll', () => {
       if (window.scrollY > 100) {
         header.classList.add('scrolled');
       } else {
         header.classList.remove('scrolled');
       }
-      lastScrollY = window.scrollY;
     }, { passive: true });
   }
 

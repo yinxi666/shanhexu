@@ -23,21 +23,28 @@ window.RedData = (() => {
     return getBasePath() + 'assets/页面通用图片/暂无图片.png';
   }
 
-  /* ---- 数据加载 ---- */
+  /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
+  const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
   async function loadJSON(filename) {
-    try {
-      const res = await fetch(getBasePath() + filename + '?v=20260729020757');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
-    } catch (err) {
-      console.warn('[RedData] 无法加载 ' + filename + ':', err.message);
-      return [];
-    }
+    if (__JSON_CACHE.has(filename)) return await __JSON_CACHE.get(filename);
+    const p = (async () => {
+      try {
+        const res = await fetch(getBasePath() + filename + '?v=2026080316');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        __JSON_CACHE.delete(filename);  // 失败不缓存，允许下次重试
+        console.info('[RedData] 无法加载 ' + filename + ':', err.message);
+        return [];
+      }
+    })();
+    __JSON_CACHE.set(filename, p);
+    return await p;
   }
 
   // 缓存：只加载一次
-  let _venuesPromise = null;
-  let _venuesCache = null;
+  let _venuesPromise = null;          // 重新加载时可重置
+  let _venuesCache = null;            // 重新加载时可重置
 
   async function loadAllVenues() {
     // 使用 !== null 判断，避免空数组 [] 被视为"已缓存"
@@ -473,20 +480,17 @@ window.RedData = (() => {
 
   /* ---- 纯数据查询（无 DOM 依赖） ---- */
   function filterVenues(venues, { query, province, category } = {}) {
-    let result = [...venues];
-    if (query && query.trim()) {
-      const q = query.trim().toLowerCase();
-      result = result.filter(v =>
+    const q = query && query.trim() ? query.trim().toLowerCase() : null;
+    return [...venues]
+      .filter(v => !q ||
         (v.name || '').toLowerCase().includes(q) ||
         (v.province || '').toLowerCase().includes(q) ||
         (v.city || '').toLowerCase().includes(q) ||
         (v.category || '').toLowerCase().includes(q) ||
         (v.summary || '').toLowerCase().includes(q)
-      );
-    }
-    if (province && province !== 'all') result = result.filter(v => v.province === province);
-    if (category && category !== 'all') result = result.filter(v => v.category === category);
-    return result;
+      )
+      .filter(v => !province || province === 'all' || v.province === province)
+      .filter(v => !category || category === 'all' || v.category === category);
   }
 
   function getProvinces(venues) {
@@ -514,8 +518,6 @@ window.RedData = (() => {
     getProvinces,
     getCategories,
     findVenueByName,
-    getVenueDetail,
-    // 直接读取缓存（不触发加载）
-    get cachedVenues() { return _venuesCache; }
+    getVenueDetail
   };
 })();

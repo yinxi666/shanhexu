@@ -9,13 +9,8 @@ window.RedFeatures = (() => {
 
   let venuesCache = [];
 
-  /* ---- 路径工具：委托 RedData，缺失时本地降级 ---- */
-  function getBasePath() {
-    if (window.RedData && typeof window.RedData.getBasePath === 'function') {
-      return window.RedData.getBasePath();
-    }
-    return (location.pathname.includes('/pages/')) ? '../' : '';
-  }
+  /* ---- 路径工具：统一委托 RedData（data.js 最先加载，始终可用） ---- */
+  const getBasePath = (...a) => window.RedData.getBasePath(...a);
 
   /* ---- HTML 转义（防聊天回复反射用户输入的自 XSS） ---- */
   function escapeHtml(s) {
@@ -93,9 +88,10 @@ window.RedFeatures = (() => {
     const quickBtns = $('#chat-quick-btns');
 
     fab.addEventListener('click', () => {
+      const opening = !panel.classList.contains('open');
       panel.classList.toggle('open');
-      fab.style.display = panel.classList.contains('open') ? 'none' : '';
-      if (panel.classList.contains('open')) { input.focus(); restoreChatHistory(); }
+      fab.style.display = opening ? 'none' : '';
+      if (opening) { if (quickBtns) quickBtns.style.display = ''; input.focus(); restoreChatHistory(); }
     });
     close.addEventListener('click', () => {
       panel.classList.remove('open');
@@ -106,7 +102,12 @@ window.RedFeatures = (() => {
     function saveChatHistory() {
       try {
         const bubbles = $$('.chat-bubble', messages);
-        const history = bubbles.map(b => ({ html: b.innerHTML, cls: b.parentElement.classList.contains('user') ? 'user' : 'bot' }));
+        // 用户消息存原文（textContent），机器人消息存 HTML（含 <b> 等富文本），
+        // 避免用户消息经 innerHTML→textContent 两次转义后显示乱码
+        const history = bubbles.map(b => {
+          const isUser = b.parentElement.classList.contains('user');
+          return { text: isUser ? b.textContent : b.innerHTML, cls: isUser ? 'user' : 'bot' };
+        });
         sessionStorage.setItem('redguide_chat', JSON.stringify(history.slice(-20)));
       } catch (e) {}
     }
@@ -117,7 +118,7 @@ window.RedFeatures = (() => {
         const existing = $$('.chat-msg', messages);
         if (existing.length <= 1) {
           messages.innerHTML = '';
-          saved.forEach(m => appendMsg(m.cls, m.html));
+          saved.forEach(m => appendMsg(m.cls, m.text));
         }
       } catch (e) {}
     }
@@ -271,7 +272,7 @@ window.RedFeatures = (() => {
     const summaryMatch = venues.filter(v => v.summary && v.summary.includes(q.slice(0, 3)));
     if (summaryMatch.length > 0) {
       return `🔍 在简介中搜索「${escapeHtml(q.slice(0, 6))}」找到 <b>${summaryMatch.length}</b> 个相关场馆：<br>` +
-        summaryMatch.slice(0, 5).map(v => `• <b>${v.name}</b> — ${v.province} ${v.city||''}<br><small>${(v.summary||'').slice(0,60)}…</small>`).join('<br><br>') +
+        summaryMatch.slice(0, 5).map(v => `• <b>${escapeHtml(v.name)}</b> — ${escapeHtml(v.province)} ${escapeHtml(v.city||'')}<br><small>${escapeHtml((v.summary||'').slice(0,60))}…</small>`).join('<br><br>') +
         `<br><i>💡 点击场馆名可在导览页查看详情</i>`;
     }
 
@@ -302,27 +303,32 @@ window.RedFeatures = (() => {
     if (found.length === 0) {
       return `暂未收录「${escapeHtml(region)}」的场馆信息。目前已覆盖 <b>${getProvinceCount()}</b> 个省区市。试试输入省份全称如「陕西省」「湖南省」？`;
     }
+    const esc = escapeHtml;
     const cats = [...new Set(found.map(v => v.category).filter(Boolean))];
-    return `📍 <b>${escapeHtml(region)}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
-      found.map(v => `• <b>${v.name}</b> — ${v.category||'红色场馆'}｜${v.city||''}${v.district||''}<br><small>${(v.summary||'').slice(0,50)}…</small>`).join('<br>') +
-      `<br>🏷️ 类别分布：${cats.map(c => c).join(' · ')}` +
+    return `📍 <b>${esc(region)}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
+      found.map(v => `• <b>${esc(v.name)}</b> — ${esc(v.category||'红色场馆')}｜${esc(v.city||'')}${esc(v.district||'')}<br><small>${esc((v.summary||'').slice(0,50))}…</small>`).join('<br>') +
+      `<br>🏷️ 类别分布：${cats.map(esc).join(' · ')}` +
       `<br><i>💡 输入场馆名称可查看详细信息</i>`;
   }
 
   function searchVenue(name) {
     const v = findVenue(name.replace(/[的了吗呢]$/, '').trim());
     if (!v) return `没找到「<b>${escapeHtml(name.slice(0,15))}</b>」的详细信息。<br><br>🔍 试试：<br>• 输入完整场馆名称<br>• 输入省份名称查看当地全部场馆<br>• 到<a href="${getBasePath()}pages/guide.html">全国导览</a>搜索`;
-    return formatVenueDetail(v) + '<br><i>💡 问「' + v.name.slice(0, 4) + '附近有什么」查看周边场馆</i>';
+    return formatVenueDetail(v) + '<br><i>💡 问「' + escapeHtml(v.name.slice(0, 4)) + '附近有什么」查看周边场馆</i>';
   }
 
   function searchVenueLocation(name) {
-    const v = findVenue(name.replace(/[在哪里怎么去地址位置交通]$/, '').trim());
+    // 整词剥离"怎么去/在哪里/地址/位置/交通"等后缀，而非只删单个字符
+    const v = findVenue(name.replace(/(怎么去|怎么走|在哪里|在哪儿|在哪|地址|位置|交通|怎么走)$/, '').trim());
     if (!v) return searchVenue(name);
     const coord = v.coordinates;
-    return `🏛️ <b>${v.name}</b><br>
-      📍 <b>详细地址</b>：${v.province||''}${v.city||''}${v.district||''}<br>
+    const esc = escapeHtml;
+    // 仅允许 http(s) 链接，杜绝 javascript: 注入
+    const safeUrl = (v.officialUrl && /^https?:\/\//i.test(v.officialUrl)) ? v.officialUrl : '';
+    return `🏛️ <b>${esc(v.name)}</b><br>
+      📍 <b>详细地址</b>：${esc(v.province||'')}${esc(v.city||'')}${esc(v.district||'')}<br>
       ${coord ? `🌐 <b>经纬度</b>：${coord.lat.toFixed(4)}, ${coord.lng.toFixed(4)}<br>` : ''}
-      ${v.officialUrl ? `🔗 <a href="${v.officialUrl}" target="_blank">官方网站（含交通指引）</a><br>` : ''}
+      ${safeUrl ? `🔗 <a href="${esc(safeUrl)}" target="_blank" rel="noopener">官方网站（含交通指引）</a><br>` : ''}
       <br><i>💡 建议出行前通过官网或电话确认开放时间和预约方式</i>`;
   }
 
@@ -338,26 +344,27 @@ window.RedFeatures = (() => {
       ? window.RedData.resolveAssetPath(v.image, bp)
       : '';
     const truncate = (s, n) => (s && s.length > n) ? s.slice(0, n) + '…' : s;
+    const esc = escapeHtml;
 
     let html = '<div style="margin-bottom:12px;padding:10px;background:var(--white);border-radius:8px;border:1px solid var(--card-border);">';
-    html += '<b style="font-size:15px;">🏛️ ' + v.name + '</b><br>';
-    html += '<span style="font-size:13px;color:var(--muted);">📍 ' + (v.province || '') +
-      (v.city ? ' · ' + v.city : '') +
-      (v.district ? ' · ' + v.district : '') +
-      (v.category ? ' · ' + v.category : '') + '</span>';
+    html += '<b style="font-size:15px;">🏛️ ' + esc(v.name) + '</b><br>';
+    html += '<span style="font-size:13px;color:var(--muted);">📍 ' + esc(v.province || '') +
+      (v.city ? ' · ' + esc(v.city) : '') +
+      (v.district ? ' · ' + esc(v.district) : '') +
+      (v.category ? ' · ' + esc(v.category) : '') + '</span>';
     if (coord && coord.lat != null && coord.lng != null) {
       html += '<br>🌐 坐标：' + coord.lat.toFixed(4) + ', ' + coord.lng.toFixed(4);
     }
     if (imgSrc) {
-      html += '<br><img src="' + imgSrc + '" alt="' + v.name + '" loading="lazy" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:8px;" onerror="this.style.display=\'none\'">';
+      html += '<br><img src="' + esc(imgSrc) + '" alt="' + esc(v.name) + '" loading="lazy" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:8px;" onerror="this.style.display=\'none\'">';
     }
     if (detail && detail.history) {
-      html += '<br><br><b>📖 历史背景</b><br>' + truncate(detail.history, 110);
+      html += '<br><br><b>📖 历史背景</b><br>' + esc(truncate(detail.history, 110));
     } else if (v.summary) {
-      html += '<br><br><b>📖 简介</b><br>' + truncate(v.summary, 110);
+      html += '<br><br><b>📖 简介</b><br>' + esc(truncate(v.summary, 110));
     }
     if (detail && detail.education) {
-      html += '<br><br><b>🎓 教育意义</b><br>' + truncate(detail.education, 80);
+      html += '<br><br><b>🎓 教育意义</b><br>' + esc(truncate(detail.education, 80));
     }
     html += '<br><br><a href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '" style="color:var(--red);font-weight:bold;">查看完整详情 →</a>';
     html += '</div>';
@@ -371,7 +378,7 @@ window.RedFeatures = (() => {
       return `没找到「${escapeHtml(cat)}」类别。当前场馆类别有：${allCats.join('、')}<br><br><i>💡 输入类别名查看该类别下的场馆</i>`;
     }
     return `🏷️ <b>${escapeHtml(cat)}</b> 类场馆共 <b>${found.length}</b> 个：<br><br>` +
-      found.map(v => `• <b>${v.name}</b> — ${v.province} ${v.city||''}`).join('<br>') +
+      found.map(v => `• <b>${escapeHtml(v.name)}</b> — ${escapeHtml(v.province)} ${escapeHtml(v.city||'')}`).join('<br>') +
       `<br><i>💡 输入场馆名了解详情</i>`;
   }
 
@@ -379,37 +386,45 @@ window.RedFeatures = (() => {
     const va = findVenue(a.trim());
     const vb = findVenue(b.trim());
     if (!va || !vb) return `需要两个有效场馆名才能对比哦。试试如「比较井冈山和延安」`;
+    const esc = escapeHtml;
     return `⚖️ <b>场馆对比</b><br><br>
       <table style="width:100%;font-size:13px;">
-      <tr><td></td><td><b>${va.name}</b></td><td><b>${vb.name}</b></td></tr>
-      <tr><td>📍 地区</td><td>${va.province} ${va.city||''}</td><td>${vb.province} ${vb.city||''}</td></tr>
-      <tr><td>🏷️ 类别</td><td>${va.category||'—'}</td><td>${vb.category||'—'}</td></tr>
-      <tr><td>📝 简介</td><td>${(va.summary||'').slice(0,40)}…</td><td>${(vb.summary||'').slice(0,40)}…</td></tr>
+      <tr><td></td><td><b>${esc(va.name)}</b></td><td><b>${esc(vb.name)}</b></td></tr>
+      <tr><td>📍 地区</td><td>${esc(va.province)} ${esc(va.city||'')}</td><td>${esc(vb.province)} ${esc(vb.city||'')}</td></tr>
+      <tr><td>🏷️ 类别</td><td>${esc(va.category||'—')}</td><td>${esc(vb.category||'—')}</td></tr>
+      <tr><td>📝 简介</td><td>${esc((va.summary||'').slice(0,40))}…</td><td>${esc((vb.summary||'').slice(0,40))}…</td></tr>
       </table><br><i>💡 输入场馆名查看完整详情</i>`;
   }
 
   function searchNearby(name) {
-    const v = findVenue(name.replace(/[附近周边周围旁边临近]$/, '').trim());
+    const v = findVenue(name.replace(/(附近|周边|周围|旁边|临近)$/, '').trim());
     if (!v) return searchVenue(name);
     const sameProv = venuesCache.filter(x => x.province === v.province && x.name !== v.name);
     const sameCity = sameProv.filter(x => x.city === v.city);
     const nearby = sameCity.length > 0 ? sameCity : sameProv;
-    return `📍 <b>${v.name}</b> 位于 <b>${v.province}${v.city||''}</b><br><br>` +
+    const esc = escapeHtml;
+    return `📍 <b>${esc(v.name)}</b> 位于 <b>${esc(v.province)}${esc(v.city||'')}</b><br><br>` +
       (nearby.length > 0
-        ? `同地区的其他场馆（${nearby.length}个）：<br>` + nearby.slice(0, 6).map(x => `• <b>${x.name}</b> — ${x.category||''}`).join('<br>')
+        ? `同地区的其他场馆（${nearby.length}个）：<br>` + nearby.slice(0, 6).map(x => `• <b>${esc(x.name)}</b> — ${esc(x.category||'')}`).join('<br>')
         : `该地区目前仅收录了这一个场馆`) +
-      `<br><i>💡 输入「${v.province.replace(/省|市|自治区/g,'')}有哪些场馆」查看全部</i>`;
+      `<br><i>💡 输入「${esc(v.province.replace(/省|市|自治区/g,''))}有哪些场馆」查看全部</i>`;
   }
 
   function getStats() {
     const v = venuesCache;
     const provinces = getProvinceCount();
     const cats = getCategoriesRaw();
+    let latest = '持续更新';
+    const dates = v.map(x => x.officialVerificationDate).filter(Boolean).sort();
+    if (dates.length) {
+      const mm = String(dates[dates.length - 1]).match(/^(\d{4})-(\d{2})/);
+      latest = mm ? mm[1] + '年' + String(parseInt(mm[2], 10)) + '月' : String(dates[dates.length - 1]);
+    }
     return `📊 <b>红色场馆数据统计</b><br><br>
       🏛️ 场馆总数：<b>${v.length}</b> 个<br>
       🗺️ 覆盖省区市：<b>${provinces}</b> 个<br>
       🏷️ 场馆类别：<b>${cats.length}</b> 种（${cats.join('、')}）<br>
-      📅 数据更新：2026年7月<br><br>
+      📅 数据更新：${latest}<br><br>
       <i>💡 输入省份名查看该地区的场馆</i>`;
   }
 
@@ -716,10 +731,11 @@ window.RedFeatures = (() => {
     try {
       let favs = JSON.parse(localStorage.getItem('redguide_favs') || '[]');
       id = String(id);
-      if (favs.includes(id)) favs = favs.filter(f => f !== id);
-      else favs.push(id);
+      const on = !favs.includes(id);
+      favs = on ? favs.concat(id) : favs.filter(f => f !== id);
       localStorage.setItem('redguide_favs', JSON.stringify(favs));
-    } catch (e) { }
+      return on;
+    } catch (e) { return false; }
   }
 
   /* ================================================================
@@ -744,6 +760,7 @@ window.RedFeatures = (() => {
     nav.innerHTML = `
       <a href="${bp}index.html" class="${isActive('index')}">🏠<span>首页</span></a>
       <a href="${bp}pages/guide.html" class="${isActive('guide')}">📍<span>导览</span></a>
+      <a href="${bp}pages/changzheng.html" class="${isActive('changzheng')}">🚩<span>长征</span></a>
       <a href="${bp}pages/practice.html" class="${isActive('practice')}">🏆<span>实践</span></a>
       <a href="${bp}pages/message.html" class="${isActive('message')}">💬<span>留言</span></a>
       <a href="${bp}pages/policy.html" class="${isActive('policy')}">📰<span>政策</span></a>
@@ -789,8 +806,8 @@ window.RedFeatures = (() => {
       var bp = getBasePath();
       var venueLinks = ev.venues.map(function(vn) {
         var v = venuesCache.find(function(x) { return x.name.indexOf(vn) >= 0; });
-        var id = v ? v.id : vn;
-        return '<a class="tl-venue-link" href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(id) + '">🏛️ ' + vn + '</a>';
+        if (!v) return '<span class="tl-venue-link is-muted">🏛️ ' + vn + '</span>';
+        return '<a class="tl-venue-link" href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">🏛️ ' + vn + '</a>';
       }).join('');
 
       detail.innerHTML = '<h3>' + ev.title + '</h3><p>' + ev.desc + '</p><div class="tl-venues">' + venueLinks + '</div>';
