@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>(function(){try{if(localStorage.getItem('redguide_dark')==='1')document.documentElement.classList.add('dark')}catch(e){}})();</script>
+  <script>(function () { try { if (localStorage.getItem('redguide_dark') === '1') document.documentElement.classList.add('dark') } catch (e) { } })();</script>
   <script>history.scrollRestoration = "manual"</script>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="theme-color" content="#b91c1c">
@@ -12,63 +12,25 @@
   <meta property="og:title" content="全国红色场馆导览 - 赓续血脉・数绘红旅">
   <meta property="og:description" content="覆盖全国34个省级行政区的红色文旅场馆导览。">
   <meta property="og:type" content="website">
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026080316">
+  <meta property="og:url" content="https://yinxi666.github.io/shanhexu/pages/guide.html">
+  <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
+  <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/guide.html">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026080416">
   <link rel="manifest" href="../manifest.json">
   <title>全国红色场馆导览 - 赓续血脉・数绘红旅</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://unpkg.com">
-  <link rel="stylesheet" href="../css/styles.css?v=2026080316">
+  <link rel="stylesheet" href="../css/base.css?v=2026080416">
+  <link rel="stylesheet" href="../css/home.css?v=2026080416">
+  <link rel="stylesheet" href="../css/components.css?v=2026080416">
+  <link rel="stylesheet" href="../css/pages.css?v=2026080416">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026080416">
+  <link rel="stylesheet" href="../css/effects.css?v=2026080416">
+  <link rel="stylesheet" href="../css/dark.css?v=2026080416">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-
-  <style>
-    #nav-curtain {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      pointer-events: none;
-    }
-
-    .nc-front,
-    .nc-back {
-      pointer-events: auto;
-      position: absolute;
-      inset: 0;
-      transform: translateX(100%);
-      transition: transform .4s cubic-bezier(.5, 0, .3, 1)
-    }
-
-    .nc-front {
-      background: rgba(245, 210, 210, .7);
-      backdrop-filter: blur(2px);
-      z-index: 2
-    }
-
-    .nc-back {
-      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTAwIj48ZyBmaWxsPSIjYjkxYzFjIiBvcGFjaXR5PSIuMjUiPjxwb2x5Z29uIHBvaW50cz0iMzUuMCwxNi4wIDQwLjMsMzIuNyA1Ny44LDMyLjYgNDMuNiw0Mi44IDQ5LjEsNTkuNCAzNS4wLDQ5LjAgMjAuOSw1OS40IDI2LjQsNDIuOCAxMi4yLDMyLjYgMjkuNywzMi43Ii8+PHBvbHlnb24gcG9pbnRzPSI3NC4xLDkuMCA3OC40LDEzLjAgODMuNCwxMC4xIDgwLjksMTUuNCA4NS4zLDE5LjQgNzkuNSwxOC42IDc3LjAsMjMuOSA3Ni4wLDE4LjIgNzAuMiwxNy41IDc1LjMsMTQuNyIvPjxwb2x5Z29uIHBvaW50cz0iOTEuNywzMC4wIDkzLjcsMzUuNSA5OS41LDM1LjMgOTQuOSwzOC44IDk2LjksNDQuMyA5Mi4xLDQxLjAgODcuNSw0NC42IDg5LjIsMzkuMCA4NC4zLDM1LjggOTAuMiwzNS42Ii8+PHBvbHlnb24gcG9pbnRzPSI5MS4xLDU0LjYgOTAuNiw2MC40IDk2LjAsNjIuNiA5MC4zLDY0LjAgODkuOSw2OS44IDg2LjgsNjQuOCA4MS4yLDY2LjIgODUuMCw2MS44IDgxLjksNTYuOCA4Ny4zLDU5LjEiLz48cG9seWdvbiBwb2ludHM9Ijc3LjYsNzAuMyA3NS4wLDc1LjUgNzkuMiw3OS41IDczLjQsNzguNyA3MC45LDgzLjkgNjkuOSw3OC4yIDY0LjEsNzcuNCA2OS4zLDc0LjcgNjguMyw2OC45IDcyLjQsNzMuMCIvPjwvZz48L3N2Zz4=") left 8% top 15%/40% 70% no-repeat, linear-gradient(180deg, #f2c4c4 0%, #e8a8a8 50%, #f2c4c4 100%);
-      z-index: 1;
-      transition-delay: .12s
-    }
-
-    #nav-curtain.go .nc-front,
-    #nav-curtain.go .nc-back {
-      transform: translateX(0)
-    }
-
-    .nc-back::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(180deg, rgba(185, 28, 28, .4), rgba(185, 28, 28, .15), rgba(185, 28, 28, .4))
-    }
-  </style>
 </head>
 
 <body>
@@ -78,35 +40,15 @@
   </div>
 
 
-  <!-- ===== 导航栏 ===== -->
-  <header class="site-header">
-    <nav class="navbar" aria-label="主导航">
-      <a class="brand" href="../index.html">
-        <img src="../assets/学院标识_四川农业大学信息工程学院.webp" alt="川农信工" style="height:36px;width:auto;border-radius:4px;"><span
-          class="brand-mark">红</span>
-        <span>
-          <strong>赓续血脉・数绘红旅</strong>
-          <small>"青践红途・码绘山河"系列活动</small>
-        </span>
-      </a>
-      <button class="nav-toggle" type="button" aria-label="展开导航">☰</button>
-      <ul class="nav-links">
-        <li><a href="../index.html">首页</a></li>
-        <li><a href="guide.html">全国导览</a></li>
-        <li><a href="changzheng.html">重走长征</a></li>
-        <li><a href="message.html">留言墙</a></li>
-        <li><a href="policy.html">时事政策</a></li>
-        <li><a href="practice.html">实践成果</a></li>
-      </ul>
-    </nav>
-  </header>
+  <!-- ===== 导航栏（由 js/layout-loader.js 注入共享模板） ===== -->
+  <div id="site-header"></div>
 
   <main>
     <!-- ===== Cinematic Hero ===== -->
     <section class="subpage-hero">
       <video class="flag-video" src="../assets/演示视频/国旗动态壁纸【无水印】.mp4" autoplay loop muted playsinline
         aria-hidden="true"></video>
-      <img class="hero-bg animate-ken-burns" draggable="false" oncontextmenu="return false;"
+      <img class="hero-bg animate-ken-burns no-context-menu" draggable="false"
         src="../assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp" alt="红色场馆">
       <div class="subpage-hero-content">
         <h1 class="subpage-hero-title">全国红色场馆导览</h1>
@@ -127,8 +69,8 @@
         <select id="filter-category" aria-label="按类别筛选">
           <option value="all">全部类别</option>
         </select>
-        <button class="btn secondary small" id="toggle-view-btn" title="切换地图/列表视图"
-          style="white-space:nowrap;display:none;">🗺️ 地图视图</button>
+        <button class="btn secondary small btn-map-toggle is-hidden" id="toggle-view-btn" title="切换地图/列表视图">🗺️
+          地图视图</button>
       </div>
 
       <!-- 结果计数 -->
@@ -149,43 +91,20 @@
     </section>
   </main>
 
-  <!-- ===== 页脚 ===== -->
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div>
-        <div class="footer-brand">赓续血脉・数绘红旅</div>
-        <p class="footer-desc">以数字技术传承红色基因，用实践行动践行青年使命。</p>
-      </div>
-      <div>
-        <h4>快速导航</h4>
-        <ul>
-          <li><a href="../index.html">首页</a></li>
-          <li><a href="guide.html">全国导览</a></li>
-          <li><a href="changzheng.html">重走长征</a></li>
-          <li><a href="message.html">留言墙</a></li>
-          <li><a href="policy.html">时事政策</a></li>
-          <li><a href="practice.html">实践成果</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>关于</h4>
-        <ul>
-          <li>四川农业大学信息工程学院</li>
-          <li>场馆数据持续更新中</li>
-          <li>信息以官方发布为准</li>
-          <li>图文素材经授权使用，来源说明见 docs/素材说明/</li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">© 2026 赓续血脉・数绘红旅 · 四川农业大学信息工程学院</div>
-  </footer>
+  <!-- ===== 页脚扩展（覆盖共享模板第三列） ===== -->
+  <template id="footer-extra">
+    <h4>关于</h4>
+    <ul>
+      <li>四川农业大学信息工程学院</li>
+      <li>场馆数据持续更新中</li>
+      <li>信息以官方发布为准</li>
+      <li>图文素材经授权使用，来源说明见 docs/素材说明/</li>
+    </ul>
+  </template>
+  <!-- ===== 页脚（由 js/layout-loader.js 注入共享模板） ===== -->
+  <div id="site-footer"></div>
 
-  <script src="../js/data.js?v=2026080316"></script>
-  <script src="../js/renderers.js?v=2026080316"></script>
-  <script src="../js/common.js?v=2026080316"></script>
-  <script src="../js/features.js?v=2026080316"></script>
-  <script src="../js/cardgen.js?v=2026080316"></script>
-  <script>!function () { var c = document.getElementById("nav-curtain"); if (!c) return; var l = !1; document.addEventListener("click", function (e) { var a = e.target.closest("a"); if (!a || c.classList.contains("go")) return; if (l) return; var h = a.getAttribute("href"); if (!h || h.startsWith("http") || h.startsWith("#") || h.startsWith("javascript") || h.startsWith("blob:") || a.hasAttribute("download") || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.getAttribute("target") === "_blank") return; e.preventDefault(); l = !0; c.classList.add("go"); setTimeout(function () { location.href = h }, 450) }); window.addEventListener("pageshow", function () { l = !1; c.classList.remove("go") }) }();</script>
+  <script type="module" src="../js/app.js?v=2026080416"></script>
 
 </body>
 

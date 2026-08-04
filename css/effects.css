@@ -1,0 +1,1103 @@
+/* ============================================================
+   effects — 打印、焦点、动画、分享、时间线、轮播、lightbox、纪念卡等效果
+   ============================================================ */
+
+/* ============================================================
+   补充优化样式：骨架屏 / 打印 / 焦点 / 动画 / 时间线 / 分享
+   ============================================================ */
+
+/* ---------- 骨架屏加载动画 ---------- */
+.skeleton-card {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.skeleton-card .skel-img {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(90deg, var(--bg) 25%, var(--line) 50%, var(--bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-card .skel-body {
+  padding: 16px;
+}
+
+.skeleton-card .skel-line {
+  height: 14px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(90deg, var(--bg) 25%, var(--line) 50%, var(--bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 8px;
+}
+
+.skeleton-card .skel-line.short {
+  width: 60%;
+}
+
+.skeleton-card .skel-line.medium {
+  width: 80%;
+}
+
+/* ---------- 打印样式 ---------- */
+@media print {
+
+  .site-header,
+  .nav-toggle,
+  .nav-links,
+  .chat-widget,
+  .chat-fab,
+  .quiz-fab,
+  .quiz-modal-overlay,
+  .dark-toggle,
+  .back-to-top,
+  .mobile-nav,
+  .site-footer,
+  .hero-actions,
+  .video-modal-overlay,
+  .practice-modal-overlay,
+  .message-form-card,
+  .pagination {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+    padding: 0;
+  }
+
+  .eyebrow {
+    color: #666 !important;
+  }
+
+  .section {
+    padding: 20px 0;
+    max-width: 100%;
+  }
+
+  .venue-card,
+  .policy-card,
+  .practice-card,
+  .message-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+}
+
+/* ---------- 焦点可见样式（键盘导航） ---------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.venue-card:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.venue-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.3);
+}
+
+/* ---------- 页面渐入动画（全浏览器通用） ---------- */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+main {
+  animation: pageFadeIn 0.45s cubic-bezier(0.2, 0, 0.0, 1);
+}
+
+/* 卡片弹入（全浏览器通用） */
+.venue-card,
+.policy-card,
+.practice-card,
+.message-card,
+.feature-card,
+.stat-item {
+  animation: pageFadeIn 0.5s cubic-bezier(0.2, 0, 0.0, 1) backwards;
+}
+
+.venue-card:nth-child(1),
+.feature-card:nth-child(1),
+.stat-item:nth-child(1) {
+  animation-delay: 0.06s;
+}
+
+.venue-card:nth-child(2),
+.feature-card:nth-child(2),
+.stat-item:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.venue-card:nth-child(3),
+.feature-card:nth-child(3),
+.stat-item:nth-child(3) {
+  animation-delay: 0.18s;
+}
+
+.venue-card:nth-child(4),
+.feature-card:nth-child(4),
+.stat-item:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.venue-card:nth-child(5) {
+  animation-delay: 0.30s;
+}
+
+/* ---------- 分享按钮 ---------- */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.share-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--light-red);
+}
+
+.share-btn.copied {
+  border-color: #22c55e;
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+
+/* ---------- 时间线 ---------- */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -25px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  background: var(--red);
+  border: 3px solid var(--bg);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.timeline-item .tl-year {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+.timeline-item .tl-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.timeline-item .tl-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   红色记忆时间线 (Homepage Timeline)
+   ============================================================ */
+.timeline-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 20px 0 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) transparent;
+}
+
+.timeline-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb {
+  background: var(--red);
+  border-radius: 2px;
+}
+
+.timeline-track {
+  display: flex;
+  gap: 0;
+  min-width: max-content;
+  position: relative;
+  padding: 0 16px;
+}
+
+.timeline-track::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 30px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red), var(--gold), var(--red));
+  border-radius: 2px;
+}
+
+.tl-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 20px;
+  transition: transform 0.2s ease;
+  position: relative;
+  z-index: 1;
+  min-width: 80px;
+}
+
+.tl-node:hover {
+  transform: translateY(-6px);
+}
+
+.tl-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--red);
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.tl-node:hover .tl-dot,
+.tl-node.active .tl-dot {
+  background: var(--red);
+  box-shadow: 0 0 12px rgba(185, 28, 28, 0.5);
+  transform: scale(1.3);
+}
+
+.tl-year {
+  font-family: "Noto Serif SC", "SimSun", serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+.tl-label {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .tl-node {
+    padding: 0 14px;
+    min-width: 60px;
+  }
+
+  .tl-year {
+    font-size: 16px;
+  }
+
+  .tl-label {
+    font-size: 11px;
+  }
+}
+
+/* ---------- 时间线详情面板 ----------
+   显示/隐藏由 .is-hidden 工具类控制（JS showEvent 切换），基础样式须可见 */
+#timeline-detail {
+  display: block;
+  margin-top: 18px;
+  padding: 18px 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  animation: timelineFadeIn .35s ease;
+}
+
+#timeline-detail h3 {
+  color: var(--red);
+  font-size: 17px;
+  margin-bottom: 8px;
+  font-family: "Noto Serif SC", "SimSun", serif;
+}
+
+#timeline-detail p {
+  color: var(--ink);
+  line-height: 1.75;
+  font-size: 14px;
+  margin: 0;
+}
+
+.tl-venues {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tl-venue-link {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--soft-red);
+  color: var(--red);
+  font-size: 13px;
+  text-decoration: none;
+  border: 1px solid rgba(185, 28, 28, .25);
+  transition: background .2s, color .2s;
+}
+
+.tl-venue-link:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.tl-venue-link.is-muted {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+  cursor: default;
+}
+
+@keyframes timelineFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 响应式补充 ---------- */
+@media (max-width: 860px) {
+  .timeline {
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    left: 10px;
+  }
+
+  .timeline-item::before {
+    left: -19px;
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* ============================================================
+   View Transitions API — PPT 推进 + 揭开（Chrome/Edge/Safari 增强）
+   不支持 VT 的浏览器 → JS 驱动 body.page-exit + pageFadeIn
+   ============================================================ */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.25, 0, 0.0, 1);
+}
+
+/* ---- 默认：溶解淡入淡出 ---- */
+::view-transition-old(root) {
+  animation-name: vt-dissolve-out;
+}
+
+::view-transition-new(root) {
+  animation-name: vt-dissolve-in;
+}
+
+/* ---- 前进：旧页向左推出，新页从右推进 ---- */
+html[data-vt-dir="forward"]::view-transition-old(root) {
+  animation-name: vt-push-out-left;
+  animation-duration: 0.4s;
+}
+
+html[data-vt-dir="forward"]::view-transition-new(root) {
+  animation-name: vt-push-in-right;
+  animation-duration: 0.45s;
+}
+
+/* ---- 后退：旧页向右推出，新页从左推进 ---- */
+html[data-vt-dir="back"]::view-transition-old(root) {
+  animation-name: vt-push-out-right;
+  animation-duration: 0.4s;
+}
+
+html[data-vt-dir="back"]::view-transition-new(root) {
+  animation-name: vt-push-in-left;
+  animation-duration: 0.45s;
+}
+
+/* ======== 关键帧 ======== */
+@keyframes vt-dissolve-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-dissolve-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vt-push-out-left {
+  to {
+    transform: translateX(-35%);
+    opacity: 0;
+  }
+}
+
+@keyframes vt-push-in-right {
+  from {
+    transform: translateX(35%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes vt-push-out-right {
+  to {
+    transform: translateX(35%);
+    opacity: 0;
+  }
+}
+
+@keyframes vt-push-in-left {
+  from {
+    transform: translateX(-35%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================
+   图片轮播 (Carousel)
+   ============================================================ */
+.detail-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  aspect-ratio: 16/10;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  height: 100%;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-prev,
+.carousel-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  z-index: 10;
+}
+
+.carousel-prev {
+  left: 12px;
+}
+
+.carousel-next {
+  right: 12px;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.2);
+}
+
+.carousel-dot.active {
+  background: white;
+  transform: scale(1.3);
+}
+
+.carousel-counter {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  z-index: 10;
+}
+
+@media (max-width: 640px) {
+  .detail-carousel {
+    aspect-ratio: 4/3;
+  }
+
+  .carousel-prev,
+  .carousel-next {
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+  }
+
+  .carousel-prev {
+    left: 8px;
+  }
+
+  .carousel-next {
+    right: 8px;
+  }
+}
+
+/* ============================================================
+   图片画廊和 Lightbox
+   ============================================================ */
+.detail-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.gallery-item {
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lightbox {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1700;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== 导览地图：自定义红色五角星 Marker 与弹出窗样式 */
+#map-container .leaflet-popup-content {
+  font-size: 14px;
+  font-family: inherit;
+}
+
+#map-container .leaflet-popup-content b {
+  color: var(--red);
+}
+
+.red-star-marker {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+}
+
+.red-star-marker .rsm-inner {
+  position: relative;
+  width: 32px;
+  height: 38px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  transition: filter 0.25s ease, transform 0.25s ease;
+}
+
+.red-star-marker:hover .rsm-inner {
+  filter: drop-shadow(0 3px 6px rgba(185, 28, 28, 0.55)) drop-shadow(0 0 8px rgba(255, 180, 50, 0.5));
+  transform: scale(1.15);
+}
+
+.red-star-marker .rsm-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+}
+
+.red-star-marker:hover .rsm-shadow {
+  width: 16px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.red-star-marker.marker-highlight .rsm-inner {
+  animation: marker-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes marker-pulse {
+
+  0%,
+  100% {
+    transform: scale(1.2);
+  }
+
+  50% {
+    transform: scale(1.45);
+  }
+}
+
+.lightbox-caption {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 16px;
+  border-radius: var(--radius-xl);
+}
+
+@media (max-width: 640px) {
+  .detail-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+
+  .lightbox-close {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    top: 12px;
+    right: 12px;
+  }
+}
+
+/* ============================================================
+   红色纪念卡（Cardgen）
+   ============================================================ */
+.cardgen-modal {
+  max-width: 500px;
+}
+
+.cardgen-venue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--soft-red);
+  border-radius: var(--radius-pill);
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cardgen-field {
+  margin-bottom: 14px;
+}
+
+.cardgen-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.cardgen-field input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.cardgen-field input[type="text"]:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.cardgen-bgs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardgen-bg {
+  width: 82px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.cardgen-bg:hover {
+  transform: translateY(-1px);
+}
+
+.cardgen-bg.selected {
+  border-color: var(--red);
+}
+
+.cardgen-bg span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+}
+
+.cardgen-spirits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cardgen-chip {
+  border: 1px solid var(--card-border);
+  background: var(--white);
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 5px 13px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cardgen-chip:hover {
+  border-color: var(--red);
+}
+
+.cardgen-chip.selected {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.cardgen-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.cardgen-preview {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.cardgen-preview img {
+  max-width: 100%;
+  max-height: 420px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* 纪念卡 · 盖章落印动效 */
+@keyframes cardgen-stamp {
+  0% {
+    transform: scale(1.4) rotate(-2.5deg);
+    opacity: 0.3;
+  }
+
+  55% {
+    transform: scale(0.94) rotate(0.5deg);
+    opacity: 1;
+  }
+
+  72% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cardgen-preview img.cardgen-stamping {
+  animation: cardgen-stamp 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-origin: center center;
+}
+
+.cardgen-savehint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* AI 思考状态（正在检索知识库） */
+.ai-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ai-thinking-icon {
+  display: inline-block;
+  color: var(--gold);
+  animation: ai-pulse 1.1s ease-in-out infinite;
+}
+
+.ai-thinking-text {
+  font-weight: 500;
+}
+
+.ai-thinking-dots span {
+  display: inline-block;
+  animation: ai-dots 1.2s infinite;
+}
+
+.ai-thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.ai-thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes ai-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes ai-dots {
+
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+
+  30% {
+    opacity: 1;
+  }
+}
+
+/* AI 回复淡入上浮 */
+.chat-msg.bot .chat-bubble {
+  animation: ai-reply-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ai-reply-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Cardgen / Marker — 替代 JS 内联 style
+   ============================================================ */
+
+.cardgen-modal h3 {
+  margin: 0 0 4px;
+}
+
+.cardgen-modal > p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cardgen-modal .cardgen-venue {
+  display: block;
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 600;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.cardgen-field input#cardgen-slogan {
+  margin-top: 8px;
+}
+
+.cardgen-field input.is-hidden,
+.cardgen-actions button.is-hidden,
+.cardgen-preview.is-hidden,
+.cardgen-savehint.is-hidden {
+  display: none !important;
+}
+
+.red-star-marker.marker-highlight .rsm-inner {
+  filter: drop-shadow(0 0 8px rgba(255, 180, 50, 0.9)) drop-shadow(0 3px 6px rgba(185, 28, 28, 0.7));
+}

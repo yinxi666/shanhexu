@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>(function(){try{if(localStorage.getItem('redguide_dark')==='1')document.documentElement.classList.add('dark')}catch(e){}})();</script>
+  <script>(function () { try { if (localStorage.getItem('redguide_dark') === '1') document.documentElement.classList.add('dark') } catch (e) { } })();</script>
   <script>history.scrollRestoration = "manual"</script>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="theme-color" content="#b91c1c">
@@ -12,57 +12,23 @@
   <meta property="og:title" content="长征·二万五千里 - 赓续血脉・数绘红旅">
   <meta property="og:description" content="沉浸式行军叙事，跟随红星重走长征路。">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yinxi666.github.io/shanhexu/pages/changzheng.html">
+  <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
+  <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/changzheng.html">
   <title>长征·二万五千里 - 赓续血脉・数绘红旅</title>
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026080316">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026080416">
   <link rel="manifest" href="../manifest.json">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="../css/styles.css?v=2026080316">
+  <link rel="stylesheet" href="../css/base.css?v=2026080416">
+  <link rel="stylesheet" href="../css/home.css?v=2026080416">
+  <link rel="stylesheet" href="../css/components.css?v=2026080416">
+  <link rel="stylesheet" href="../css/pages.css?v=2026080416">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026080416">
+  <link rel="stylesheet" href="../css/effects.css?v=2026080416">
+  <link rel="stylesheet" href="../css/dark.css?v=2026080416">
+  <link rel="stylesheet" href="../css/changzheng.css?v=2026080416">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
-    /* ===== 帷幕样式（内联避免闪烁） ===== */
-    #nav-curtain {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      pointer-events: none
-    }
-
-    .nc-front,
-    .nc-back {
-      pointer-events: auto;
-      position: absolute;
-      inset: 0;
-      transform: translateX(100%);
-      transition: transform .4s cubic-bezier(.5, 0, .3, 1)
-    }
-
-    .nc-front {
-      background: rgba(245, 210, 210, .7);
-      backdrop-filter: blur(2px);
-      z-index: 2
-    }
-
-    .nc-back {
-      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTAwIj48ZyBmaWxsPSIjYjkxYzFjIiBvcGFjaXR5PSIuMjUiPjxwb2x5Z29uIHBvaW50cz0iMzUuMCwxNi4wIDQwLjMsMzIuNyA1Ny44LDMyLjYgNDMuNiw0Mi44IDQ5LjEsNTkuNCAzNS4wLDQ5LjAgMjAuOSw1OS40IDI2LjQsNDIuOCAxMi4yLDMyLjYgMjkuNywzMi43Ii8+PHBvbHlnb24gcG9pbnRzPSI3NC4xLDkuMCA3OC40LDEzLjAgODMuNCwxMC4xIDgwLjksMTUuNCA4NS4zLDE5LjQgNzkuNSwxOC42IDc3LjAsMjMuOSA3Ni4wLDE4LjIgNzAuMiwxNy41IDc1LjMsMTQuNyIvPjxwb2x5Z29uIHBvaW50cz0iOTEuNywzMC4wIDkzLjcsMzUuNSA5OS41LDM1LjMgOTQuOSwzOC44IDk2LjksNDQuMyA5Mi4xLDQxLjAgODcuNSw0NC42IDg5LjIsMzkuMCA4NC4zLDM1LjggOTAuMiwzNS42Ii8+PHBvbHlnb24gcG9pbnRzPSI5MS4xLDU0LjYgOTAuNiw2MC40IDk2LjAsNjIuNiA5MC4zLDY0LjAgODkuOSw2OS44IDg2LjgsNjQuOCA4MS4yLDY2LjIgODUuMCw2MS44IDgxLjksNTYuOCA4Ny4zLDU5LjEiLz48cG9seWdvbiBwb2ludHM9Ijc3LjYsNzAuMyA3NS4wLDc1LjUgNzkuMiw3OS41IDczLjQsNzguNyA3MC45LDgzLjkgNjkuOSw3OC4yIDY0LjEsNzcuNCA2OS4zLDc0LjcgNjguMyw2OC45IDcyLjQsNzMuMCIvPjwvZz48L3N2Zz4=") left 8% top 15%/40% 70% no-repeat, linear-gradient(180deg, #f2c4c4 0%, #e8a8a8 50%, #f2c4c4 100%);
-      z-index: 1;
-      transition-delay: .12s
-    }
-
-    #nav-curtain.go .nc-front,
-    #nav-curtain.go .nc-back {
-      transform: translateX(0)
-    }
-
-    .nc-back::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(180deg, rgba(185, 28, 28, .4), rgba(185, 28, 28, .15), rgba(185, 28, 28, .4))
-    }
-
     /* ===== 长征页面禁用body默认padding ===== */
     body.cz-body {
       background: #0a0604;
@@ -83,28 +49,8 @@
     <div class="nc-back"></div>
   </div>
 
-  <!-- ===== 导航栏 ===== -->
-  <header class="site-header">
-    <nav class="navbar" aria-label="主导航">
-      <a class="brand" href="../index.html">
-        <img src="../assets/学院标识_四川农业大学信息工程学院.webp" alt="川农信工" style="height:36px;width:auto;border-radius:4px;"><span
-          class="brand-mark">红</span>
-        <span>
-          <strong>赓续血脉・数绘红旅</strong>
-          <small>"青践红途・码绘山河"系列活动</small>
-        </span>
-      </a>
-      <button class="nav-toggle" type="button" aria-label="展开导航">☰</button>
-      <ul class="nav-links">
-        <li><a href="../index.html">首页</a></li>
-        <li><a href="guide.html">全国导览</a></li>
-        <li><a href="changzheng.html" style="color:var(--gold);font-weight:700;">重走长征</a></li>
-        <li><a href="message.html">留言墙</a></li>
-        <li><a href="policy.html">时事政策</a></li>
-        <li><a href="practice.html">实践成果</a></li>
-      </ul>
-    </nav>
-  </header>
+  <!-- ===== 导航栏（由 js/layout-loader.js 注入共享模板） ===== -->
+  <div id="site-header"></div>
 
   <main id="cz-main">
     <!-- ============================================================
@@ -167,11 +113,15 @@
                 </linearGradient>
               </defs>
               <!-- 远山（最淡、最高） -->
-              <path d="M0 100 L0 42 Q120 28 240 44 Q360 24 480 42 Q600 20 720 44 Q840 26 960 44 Q1080 28 1200 42 L1200 100 Z" fill="url(#czRidgeFar)" />
+              <path
+                d="M0 100 L0 42 Q120 28 240 44 Q360 24 480 42 Q600 20 720 44 Q840 26 960 44 Q1080 28 1200 42 L1200 100 Z"
+                fill="url(#czRidgeFar)" />
               <!-- 中山 -->
-              <path d="M0 100 L0 54 Q160 40 320 56 Q480 36 640 56 Q800 40 960 56 Q1080 44 1200 54 L1200 100 Z" fill="url(#czRidgeMid)" />
+              <path d="M0 100 L0 54 Q160 40 320 56 Q480 36 640 56 Q800 40 960 56 Q1080 44 1200 54 L1200 100 Z"
+                fill="url(#czRidgeMid)" />
               <!-- 近山（最深、最矮） -->
-              <path d="M0 100 L0 66 Q200 52 400 68 Q600 48 800 68 Q1000 52 1200 66 L1200 100 Z" fill="url(#czRidgeNear)" />
+              <path d="M0 100 L0 66 Q200 52 400 68 Q600 48 800 68 Q1000 52 1200 66 L1200 100 Z"
+                fill="url(#czRidgeNear)" />
             </svg>
             <div class="cz-scroll-march"></div>
           </div>
@@ -209,7 +159,8 @@
          ============================================================ -->
   <div class="cz-hud" id="cz-hud">
     <button class="cz-sound-toggle" id="cz-sound-toggle" type="button" title="环境音开关" aria-label="环境音开关">🔇</button>
-    <button class="cz-autoplay-btn" id="cz-autoplay-btn" type="button" title="自动行军" aria-label="自动行军" aria-pressed="false">▶ 自动行军</button>
+    <button class="cz-autoplay-btn" id="cz-autoplay-btn" type="button" title="自动行军" aria-label="自动行军"
+      aria-pressed="false">▶ 自动行军</button>
     <div class="cz-hud-row">
       <span class="cz-hud-index" id="cz-hud-index">第 1 / 17 站</span>
       <span class="cz-hud-station" id="cz-hud-station">瑞金</span>
@@ -262,7 +213,7 @@
   </div>
 
   <!-- ===== 文物详情弹窗 ===== -->
-  <div class="cz-relic-modal" id="cz-relic-modal">
+  <div class="cz-relic-modal" id="cz-relic-modal" role="dialog" aria-modal="true" aria-label="文物详情">
     <div class="cz-relic-modal-box">
       <button class="cz-relic-close" id="cz-relic-close" type="button" aria-label="关闭">✕</button>
       <div class="cz-relic-svg" id="cz-relic-svg"></div>
@@ -273,19 +224,21 @@
   </div>
 
   <!-- ===== 终点成就：走完全程 ===== -->
-  <div class="cz-complete" id="cz-complete" aria-hidden="true">
+  <div class="cz-complete" id="cz-complete" role="dialog" aria-modal="true" aria-label="长征终点成就" aria-hidden="true">
     <div class="cz-complete-inner">
       <div class="cz-complete-portrait"><img src="../毛主席雕像.webp" alt="毛主席雕像"></div>
       <div class="cz-complete-title">二万五千里</div>
       <div class="cz-complete-sub">走完全程 · 长征胜利</div>
-      <p class="cz-complete-desc">指尖轻划，屏幕上两万五千里转瞬便走到终点，滑动不过片刻光景。<br><br>可百年前真实的征途，却用双脚丈量了整整春秋寒暑。<br><br>屏幕里的两万五千里到此止步，可真实历史里的风雪、草地、险峰从未褪色。<br><br>一代人走完救国之路，一代人守护盛世山河，长征从未结束，它藏在每一个向前奔赴的我们身上。</p>
+      <p class="cz-complete-desc">
+        指尖轻划，屏幕上两万五千里转瞬便走到终点，滑动不过片刻光景。<br><br>可百年前真实的征途，却用双脚丈量了整整春秋寒暑。<br><br>屏幕里的两万五千里到此止步，可真实历史里的风雪、草地、险峰从未褪色。<br><br>一代人走完救国之路，一代人守护盛世山河，长征从未结束，它藏在每一个向前奔赴的我们身上。
+      </p>
       <button class="cz-complete-btn" id="cz-complete-btn" type="button">🎖️ 领取长征纪念卡</button>
       <button class="cz-complete-close" id="cz-complete-close" type="button">✕ 关闭</button>
     </div>
   </div>
 
   <!-- ===== 长征纪念卡：专属弹窗 ===== -->
-  <div class="cz-card-modal" id="cz-card-modal">
+  <div class="cz-card-modal" id="cz-card-modal" role="dialog" aria-modal="true" aria-label="长征纪念卡">
     <div class="cz-card-box">
       <button class="cz-card-close" id="cz-card-close" type="button" aria-label="关闭">✕</button>
       <div class="cz-card-head">🎖️ 长征纪念卡</div>
@@ -303,14 +256,14 @@
         <div class="cz-card-spirits" id="cz-card-spirits"></div>
       </div>
       <button class="cz-card-gen" id="cz-card-gen" type="button">✨ 生成纪念卡</button>
-      <div class="cz-card-preview" id="cz-card-preview" style="display:none;">
+      <div class="cz-card-preview is-hidden" id="cz-card-preview">
         <img id="cz-card-preview-img" alt="长征纪念卡预览">
         <div class="cz-card-actions">
           <button class="cz-card-dl" id="cz-card-download" type="button">⬇️ 下载</button>
           <button class="cz-card-share" id="cz-card-share" type="button">📤 分享</button>
         </div>
       </div>
-      <div class="cz-card-savehint" id="cz-card-savehint" style="display:none;">💡 长按图片可保存到相册</div>
+      <div class="cz-card-savehint is-hidden" id="cz-card-savehint">💡 长按图片可保存到相册</div>
     </div>
   </div>
 
@@ -327,48 +280,21 @@
     </div>
   </div>
 
-  <!-- ===== 页脚 ===== -->
-  <footer class="site-footer" id="cz-footer">
-    <div class="footer-inner">
-      <div>
-        <div class="footer-brand">赓续血脉・数绘红旅</div>
-        <p class="footer-desc">以数字技术传承红色基因，用实践行动践行青年使命。</p>
-      </div>
-      <div>
-        <h4>快速导航</h4>
-        <ul>
-          <li><a href="../index.html">首页</a></li>
-          <li><a href="guide.html">全国导览</a></li>
-          <li><a href="changzheng.html">重走长征</a></li>
-          <li><a href="practice.html">实践成果</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>声明</h4>
-        <ul>
-          <li>历史内容依据权威公开史料整理</li>
-          <li>场馆链接指向本站详情页</li>
-          <li>图文素材经授权使用，来源说明见 docs/素材说明/</li>
-          <li>仅供学习交流使用</li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">© 2026 赓续血脉・数绘红旅 · 四川农业大学信息工程学院</div>
-  </footer>
+  <!-- ===== 页脚扩展（覆盖共享模板第三列） ===== -->
+  <template id="footer-extra">
+    <h4>声明</h4>
+    <ul>
+      <li>历史内容依据权威公开史料整理</li>
+      <li>场馆链接指向本站详情页</li>
+      <li>图文素材经授权使用，来源说明见 docs/素材说明/</li>
+      <li>仅供学习交流使用</li>
+    </ul>
+  </template>
+  <!-- ===== 页脚（由 js/layout-loader.js 注入共享模板） ===== -->
+  <div id="site-footer"></div>
 
   <!-- ===== 脚本 ===== -->
-  <script src="../js/data.js?v=2026080316"></script>
-  <script src="../js/renderers.js?v=2026080316"></script>
-  <script src="../js/common.js?v=2026080316"></script>
-  <script src="../js/features.js?v=2026080316"></script>
-  <script src="../js/cardgen.js?v=2026080316"></script>
-  <!-- 长征主逻辑 -->
-  <script src="../js/longmarch.js?v=2026080316"></script>
-
-  <script>
-    /* 帷幕跳转 */
-    !function () { var c = document.getElementById("nav-curtain"); if (!c) return; var l = !1; document.addEventListener("click", function (e) { var a = e.target.closest("a"); if (!a || c.classList.contains("go")) return; if (l) return; var h = a.getAttribute("href"); if (!h || h.startsWith("http") || h.startsWith("#") || h.startsWith("javascript") || h.startsWith("blob:") || a.hasAttribute("download") || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.getAttribute("target") === "_blank") return; e.preventDefault(); l = !0; c.classList.add("go"); setTimeout(function () { location.href = h }, 450) }); window.addEventListener("pageshow", function () { l = !1; c.classList.remove("go") }) }();
-  </script>
+  <script type="module" src="../js/app.js?v=2026080416"></script>
 </body>
 
 </html>

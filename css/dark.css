@@ -1,0 +1,182 @@
+/* ============================================================
+   深色模式
+   ============================================================ */
+html.dark body {
+  background:
+    radial-gradient(ellipse 55% 45% at 92% 96%, rgba(214, 160, 60, 0.06), transparent 70%),
+    linear-gradient(180deg, #0f172a 0%, #0a0f1d 100%);
+  background-attachment: fixed;
+}
+html.dark {
+  --red: #ef4444;
+  --gold: #fbbf24;
+  --light-gold: #3d3000;
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+  --light-muted: #64748b;
+  --white: #1e293b;
+  --line: #334155;
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --light-red: #3b1010;
+  --soft-red: #2d1010;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  /* 卡片边框/阴影未覆盖 → 深色下卡片边框近乎消失 */
+  --card-border: rgba(248, 113, 113, 0.16);
+  --card-border-hover: rgba(248, 113, 113, 0.38);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.55);
+  /* --deep-red 语义是"深红"，深色下保持深红用于按钮/悬停背景，而非反转为浅粉 */
+  --deep-red: #991b1b;
+}
+
+html.dark .site-header {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+html.dark .nav-links {
+  background: var(--card-bg);
+}
+
+html.dark .nav-links li a {
+  color: #cbd5e1;
+}
+
+html.dark .nav-links li a:hover,
+html.dark .nav-links li a.active {
+  color: var(--red);
+  background: var(--light-red);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6b7280, #4b5563, #374151);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
+}
+
+html.dark {
+  scrollbar-color: #6b7280 transparent;
+}
+
+html.dark .site-footer {
+  background: #020617;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+html.dark .empty-state,
+html.dark .map-placeholder {
+  background: #1a2332;
+}
+
+/* --deep-red 同时被用作文字颜色（章节标题/表单标题）——深色下 #991b1b 在深底上对比度不足，改回亮红 */
+html.dark .section-heading h2,
+html.dark .message-form-card h3 {
+  color: var(--red);
+}
+
+/* 硬编码浅色图片占位背景在深色下的残留修复 */
+html.dark .venue-card .card-img,
+html.dark .policy-card .policy-img,
+html.dark .practice-card .practice-img {
+  background: #1e293b;
+}
+html.dark #map-container {
+  background: #0f172a;
+}
+html.dark .mini-map-svg {
+  background: #1e293b;
+}
+html.dark .heatmap-zoom-bar .hm-zoom-btn,
+html.dark .heatmap-zoom-bar .hm-zoom-reset {
+  background: #1e293b;
+  border-color: #475569;
+  color: var(--ink);
+}
+/* 留言软木板 + 便签：深色下不再整块亮色 */
+html.dark .message-list {
+  background-color: #2a2118;
+  border-color: #5c4a20;
+}
+html.dark .message-card {
+  background: #232b3b;
+}
+
+html.dark .sidebar-card .official-link {
+  background: #2d1010;
+}
+
+html.dark .msg-status.approved {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+html.dark .msg-status.pending {
+  background: #3b2f00;
+  color: #fcd34d;
+}
+
+html.dark .msg-status.rejected {
+  background: #3b1010;
+  color: #fca5a5;
+}
+
+/* ============================================================
+   深色模式切换按钮
+   ============================================================ */
+.dark-toggle {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  width: 46px;
+  height: 46px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 900;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition);
+  display: grid;
+  place-items: center;
+}
+
+.dark-toggle:hover {
+  transform: scale(1.1);
+}
+html.dark .share-btn.copied {
+  background: #052e16;
+  color: #86efac;
+}
+
+@media (max-width: 860px) {
+  .dark-toggle {
+    left: 8px !important;
+    bottom: 104px !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* 深色下搜索筛选下拉框聚焦白底浅字不可读 */
+html.dark .search-toolbar select:focus { background: var(--white); color: var(--ink); }
+/* 深色下官方链接 hover 硬编码浅粉块 */
+html.dark .sidebar-card .official-link:hover { background: #2d1010; }
+/* 深色下 tag-province 深棕字叠深底，对比度不足 */
+html.dark .tag-province { color: var(--gold); }
+/* 深色下高德静态卡片亮灰方框 */
+html.dark .amap-static-map { background: #1e293b; }
+/* 深色下 form-success 标题深绿不可读 */
+html.dark .form-success h4 { color: #4ade80; }

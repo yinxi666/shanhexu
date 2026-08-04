@@ -41,7 +41,11 @@ jobs:
           mkdir -p _site
           cp index.html favicon.png manifest.json .nojekyll _site/
           cp *.webp _site/
-          cp -r pages css js data assets images _site/
+          cp -r pages css js data assets images templates _site/
+          # 页脚链接指向 docs/素材说明/（素材来源与授权说明）。仅拷该子目录，
+          # 不部署 docs/ 下的内部部署说明（学校服务器部署说明.md）与失效参考页
+          mkdir -p _site/docs
+          cp -r docs/素材说明 _site/docs/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

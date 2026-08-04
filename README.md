@@ -14,7 +14,7 @@
 
 | 类型 | 技术 |
 |------|------|
-| 前端 | 原生 HTML / CSS / JavaScript（无框架） |
+| 前端 | 原生 HTML / CSS / JavaScript（无框架，原生 ES Module 架构，单一入口 app.js） |
 | 地图 | ECharts（热力图）+ Leaflet（场馆分布） |
 | 图标 | 高德地图（坐标导航）+ 自定义红色五角星 Marker |
 | 字体 | 弘雷卓书（CDN）+ 系统字体 |
@@ -51,21 +51,57 @@
 │   ├── policy.html         # 时事政策（时间轴竖线+日期胶囊）
 │   ├── practice.html       # 实践成果（视频卡片+日历牌日期+点赞）
 │   └── message.html        # 学习留言墙（软木板+彩色头像+图钉+印章）
-├── css/
-│   └── styles.css          # 全局样式（含深色模式+响应式+分栏+View Transitions+浮动按钮）
-├── js/
-│   ├── data.js             # 纯数据层（加载/缓存/查询/场馆详情/路径工具）
-│   ├── renderers.js        # 渲染器模块（卡片/分页/骨架屏/头像颜色）
-│   ├── common.js           # 主控制器（页面初始化/音乐播放器/帷幕/交互逻辑）
-│   ├── features.js         # 创新功能（AI助手/深色模式/知识问答/时间线）
+├── css/                    # 由原 styles.css 拆分为 8 个文件（令牌+组件+页面+特效+深色+长征）
+│   ├── base.css            # CSS 变量/令牌、reset、全局 keyframes
+│   ├── home.css            # 首页 Hero/统计 + 共享页头导航/按钮（全站共享，每个页面都加载）
+│   ├── components.css      # 搜索/场馆卡/地图/热力图
+│   ├── pages.css           # 详情/政策/实践/留言/页脚/分页/toast
+│   ├── widgets.css         # AI助手/问答/移动端导航/PWA 响应式主块
+│   ├── effects.css         # 打印/焦点/轮播/lightbox/纪念卡/时间线
+│   ├── dark.css            # 深色模式令牌覆盖与切换按钮
+│   └── changzheng.css      # 长征手卷页专属样式
+├── js/                     # 原生 ES Module 架构（高内聚低耦合）：单一入口 + 单职责模块，依赖全部单向无环
+│   ├── app.js              # 应用入口（boot 编排：布局→入场→委托→页面→数据→功能）
+│   ├── utils.js            # 纯工具：转义/URL白名单/Storage/路径/点赞数（零依赖）
+│   ├── data.js             # 纯数据层：JSON 加载/缓存/场馆合并/详情查询
+│   ├── venue-store.js      # 场馆共享状态（AI 聊天与时间线共用的唯一持有者）
+│   ├── ui.js               # 共享 UI 原子：导航折叠/返回顶部/帷幕/Toast/图片回退/跳转
+│   ├── music.js            # 背景音乐播放器
+│   ├── modals.js           # 共享弹窗：视频/实践详情/灯箱
+│   ├── heatmap.js          # 首页热力图（ECharts + SVG 降级）
+│   ├── pages.js            # 页面控制器层：6 个页面初始化 + 点赞
+│   ├── chat.js             # AI 智能导览助手（组件 + 规则问答引擎）
+│   ├── quiz.js             # 红色知识问答挑战
+│   ├── darkmode.js         # 深色模式
+│   ├── favorites.js        # 场馆收藏
+│   ├── mobile-nav.js       # 移动端底部导航
+│   ├── timeline.js         # 首页红色记忆时间线
+│   ├── homepage.js         # 首页创新功能区块注入
+│   ├── renderers.js        # 渲染器模块（卡片/分页/骨架屏）
 │   ├── cardgen.js          # 红色纪念卡 Canvas 生成
-│   └── longmarch.js        # 重走长征手卷交互
+│   ├── longmarch.js        # 重走长征手卷交互
+│   ├── cz-stations.js      # 长征站数据/照片/场馆映射/贝塞尔路径（纯数据+纯几何，零依赖）
+│   ├── action-delegate.js  # data-action 事件委托（替代 innerHTML+onclick）
+│   ├── layout-loader.js    # 共享 header/footer 模板运行时注入（{{BASE}} 占位符）
+│   ├── entrance-animation.js # 首页入场动画
+│   ├── hero-carousel.js    # 首页 Hero 背景轮播
+│   ├── focus-trap.js       # 弹窗焦点圈定 + 全站滚动锁
+│   └── version.js          # ASSET_VERSION 缓存破击单源
+├── templates/
+│   ├── site-header.html    # 共享导航模板
+│   └── site-footer.html    # 共享页脚模板
+├── scripts/
+│   ├── bump-version.js     # 版本号同步脚本（HTML 的 ?v= + JS import 的 ?v= 模块级缓存破击）
+│   └── audit.js            # 零依赖静态审计（版本一致性/import 完整/无死引用/数据健康报告）
 ├── data/
 │   ├── venues.json         # 15 个核心场馆
-│   ├── province-candidates.json  # 17 个扩展候选场馆
-│   ├── policies.json       # 10 条政策文章
-│   ├── practices.json      # 20 项实践成果
-│   ├── reflections.json    # 15 条学习留言
+│   ├── province-candidates.json  # 扩展候选场馆
+│   ├── extended-venues-meta.json # 扩展场馆元数据（城市/坐标/图片/来源）
+│   ├── venue-details.json  # 场馆详情（历史/教育意义/图集）
+│   ├── venue-aliases.json  # 场馆别名（合并去重用）
+│   ├── policies.json       # 政策文章
+│   ├── practices.json      # 实践成果
+│   ├── reflections.json    # 学习留言
 │   └── china.json          # 中国地图 GeoJSON 数据
 ├── assets/
 │   ├── 全国红色场馆图片/    # 34 张场馆图
@@ -89,7 +125,7 @@
 
 ## 本地运行
 
-纯静态网页，无需安装依赖。直接双击 `index.html`，或使用任意静态服务器：
+纯静态网页，无需安装依赖。**注意：采用 ES Module 与运行时模板注入，不能直接双击 `index.html`**（file:// 协议下模块加载与 `fetch` 会被 CORS 拦截），请使用任意静态服务器，并确保 `templates/` 目录随站点一起部署：
 
 ```bash
 # Python

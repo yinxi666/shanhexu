@@ -1,0 +1,283 @@
+/* ============================================================
+   base — CSS 变量、reset、基础排版、全局 keyframes
+   ============================================================ */
+
+/* ============================================================
+   赓续血脉・数绘红旅 — 红色文旅数字导览 全局样式
+   ============================================================ */
+
+/* ============================================================
+   目录 / Split Notes
+   ============================================================
+   本文件已拆分，以下为保留的核心共享样式：
+   1. CSS Variables / Reset / Base
+   2. 入场动画 / Hero / Header / 通用组件
+   3. 首页模块 / 卡片 / 详情 / 政策 / 实践 / 留言
+   4. 弹窗 / 分页 / 响应式
+   5. AI 助手 / 音乐播放器 / 纪念卡 / 灯箱 / 收藏
+   6. 地图 / 热力图 / 打印与辅助功能
+   
+   已拆出：
+   - css/dark.css      ：深色模式与切换按钮
+   - css/changzheng.css：长征手卷页面专属样式
+   ============================================================ */
+/* ---------- CSS Variables ---------- */
+:root {
+  --red: #b91c1c;
+  --deep-red: #7f1d1d;
+  --bright-red: #dc2626;
+  --light-red: #fef2f2;
+  --soft-red: #fef5f5;
+  --gold: #d9a441;
+  --light-gold: #f5e6c8;
+  --ink: #1f2933;
+  --muted: #64748b;
+  --light-muted: #9ca3af;
+  --white: #ffffff;
+  --line: #e6dccf;
+  --bg: #fdfbf7;
+  --card-bg: #ffffff;
+  --shadow: 0 18px 45px rgba(185, 28, 28, 0.08);
+  --shadow-sm: 0 4px 12px rgba(185, 28, 28, 0.04);
+  --shadow-md: 0 8px 24px rgba(185, 28, 28, 0.06);
+  --radius: 10px;
+  --radius-sm: 6px;
+  /* 扩展圆角刻度：xs=小角 / md=中角 / lg=大角 / xl=更大 / pill=胶囊，收敛散落的魔法值 */
+  --radius-xs: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+  /* 红金主渐变与印章红：多处重复的硬编码颜色收敛 */
+  --grad-primary: linear-gradient(135deg, #c0392b, #8b1a1a);
+  --seal-red: #c0392b;
+  --transition: 0.25s ease;
+  --max-width: 1180px;
+
+  /* ============================================================
+     红色文化主题令牌 (Red Culture Design Tokens)
+     红色代表革命热血，金色代表辉煌荣耀，米色代表大地温暖
+     ============================================================ */
+  /* 红底/深底上的文字与边框色：两种主题下都保持白色（--white 在深色下是深色表面，不能用于红底文字） */
+  --on-primary: #ffffff;
+  --hero-text: #ffffff;
+
+  --card-border: rgba(185, 28, 28, 0.1);
+  --card-border-hover: rgba(185, 28, 28, 0.3);
+  --card-shadow: 0 4px 20px rgba(185, 28, 28, 0.08);
+  --card-shadow-hover: 0 8px 30px rgba(185, 28, 28, 0.15);
+
+  --stat-label: #64748b;
+
+  --hero-title-size: clamp(3rem, 10vw, 7rem);
+  --hero-subtitle-size: clamp(1.1rem, 3vw, 1.6rem);
+  --section-title-size: clamp(2rem, 6vw, 3.5rem);
+
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 0.3s;
+  --duration-normal: 0.6s;
+}
+
+/* ---------- Google Fonts（国内用户已注释，使用系统字体提升加载速度） ---------- */
+/* @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap'); */
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* 全局滚动条 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #b0b7c3, #7c8794, #5c6670);
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #6b7280 transparent;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  /* 背景：暖米渐变 + 右下淡金光 */
+  background:
+    radial-gradient(ellipse 55% 45% at 92% 96%, rgba(214, 160, 60, 0.07), transparent 70%),
+    linear-gradient(180deg, #fdfbf7 0%, #f7f1e5 100%);
+  background-attachment: fixed;
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  line-height: 1.3;
+}
+
+p {
+  margin: 0;
+}
+
+/* ============================================================
+   沉浸式动画 (Cinematic Animations)
+   ============================================================ */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+
+  25% {
+    transform: scale(1.05) translate(-1%, -1%);
+  }
+
+  50% {
+    transform: scale(1.08) translate(1%, 0.5%);
+  }
+
+  75% {
+    transform: scale(1.05) translate(-0.5%, 1%);
+  }
+
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scroll-indicator {
+
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateY(10px);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 20s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up var(--duration-normal) var(--ease-cinematic) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-smooth) forwards;
+}
+
+.animate-scroll-indicator {
+  animation: scroll-indicator 2s ease-in-out infinite;
+}
+
+/* 滚动触发动画 */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity var(--duration-normal) var(--ease-cinematic), transform var(--duration-normal) var(--ease-cinematic);
+}
+
+.scroll-animate.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-animate-delay-1 {
+  transition-delay: 0.1s;
+}
+
+.scroll-animate-delay-2 {
+  transition-delay: 0.2s;
+}
+
+.scroll-animate-delay-3 {
+  transition-delay: 0.3s;
+}
+
+.scroll-animate-delay-4 {
+  transition-delay: 0.4s;
+}
+
+.scroll-animate-delay-5 {
+  transition-delay: 0.5s;
+}
+

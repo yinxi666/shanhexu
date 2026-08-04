@@ -2,373 +2,280 @@
   {
     "province": "北京市",
     "name": "中国共产党历史展览馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "中国共产党历史展览馆",
     "officialUrl": "https://www.cpcmuseum.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "国家级场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "天津市",
     "name": "周恩来邓颖超纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "周恩来邓颖超纪念馆",
     "officialUrl": "http://www.mzhoudeng.com/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "河北省",
     "name": "西柏坡纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "西柏坡纪念馆",
     "officialUrl": "http://www.xbpjng.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "山西省",
     "name": "八路军太行纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "八路军太行纪念馆",
     "officialUrl": "http://www.sxajyun.com/vr/taihang/",
     "officialLinkType": "VR网址",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "八路军太行纪念馆官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "内蒙古自治区",
     "name": "乌兰夫纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "乌兰夫纪念馆",
     "officialUrl": "https://www.wlfjng.org.cn",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "乌兰夫纪念馆官方网站（CONAC认证）"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "辽宁省",
     "name": "九一八历史博物馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "沈阳“九·一八”历史博物馆",
     "officialUrl": "http://www.918museum.org.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "吉林省",
     "name": "四平战役纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "四平战役纪念馆",
     "officialUrl": "https://www.spzyjng.cn",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "四平战役纪念馆官方网站（CONAC认证）"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "黑龙江省",
     "name": "东北烈士纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "东北烈士纪念馆",
     "officialUrl": "https://www.jn1948.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "东北烈士纪念馆官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "上海市",
     "name": "中共一大纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "中共一大纪念馆",
     "officialUrl": "https://www.zgyd1921.com/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "江苏省",
     "name": "雨花台烈士纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "雨花台烈士纪念馆",
     "officialUrl": "https://yht.nanjing.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "未确认稳定独立官网，使用南京市雨花台区人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "浙江省",
     "name": "南湖革命纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "南湖革命纪念馆",
     "officialUrl": "http://www.nanhu.com.cn/",
     "officialLinkType": "场馆/景区官网",
     "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "南湖红色旅游官方入口"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "安徽省",
     "name": "金寨县革命博物馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "金寨县革命博物馆",
     "officialUrl": "https://www.ahjinzhai.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已核验官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "未确认稳定独立官网，使用金寨县人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "福建省",
     "name": "古田会议纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "古田会议纪念馆",
     "officialUrl": "https://www.gthyjng.com/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "江西省",
     "name": "井冈山革命博物馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "井冈山革命博物馆",
     "officialUrl": "http://www.jgs.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "未确认稳定独立官网，使用井冈山市人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "山东省",
     "name": "孟良崮战役纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "孟良崮战役纪念馆",
     "officialUrl": "https://www.linyi.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "使用临沂市人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "河南省",
     "name": "红旗渠纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "红旗渠纪念馆",
     "officialUrl": "https://www.cnhqq.com/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "红旗渠纪念馆官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "湖北省",
     "name": "黄麻起义和鄂豫皖苏区纪念园",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "黄麻起义和鄂豫皖苏区纪念园",
     "officialUrl": "https://www.hmjny.com.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "黄麻起义和鄂豫皖苏区纪念园官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "湖南省",
     "name": "韶山毛泽东同志纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "韶山毛泽东同志纪念馆",
     "officialUrl": "http://www.ssmzd.com/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "场馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "广东省",
     "name": "广州起义烈士陵园",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "广州起义烈士陵园",
     "officialUrl": "http://lsly.yuway.com.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "广州起义烈士陵园官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "广西壮族自治区",
     "name": "百色起义纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "百色起义纪念馆",
     "officialUrl": "http://www.baise.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "未确认稳定独立官网，使用百色市人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "海南省",
     "name": "母瑞山革命根据地纪念园",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "母瑞山革命根据地纪念园",
     "officialUrl": "http://www.hnmuruishan.com/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "母瑞山革命根据地纪念园官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "重庆市",
     "name": "红岩革命纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "红岩革命纪念馆",
     "officialUrl": "https://www.hongyan.info/",
     "officialLinkType": "上级机构官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "重庆红岩革命历史博物馆官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "四川省",
     "name": "泸定桥革命文物陈列馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "泸定桥革命文物陈列馆",
     "officialUrl": "http://www.luding.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "使用泸定县人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "贵州省",
     "name": "遵义会议纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "遵义会议纪念馆",
     "officialUrl": "https://www.zunyi.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "未确认稳定独立官网，使用遵义市人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "云南省",
     "name": "云南陆军讲武堂历史博物馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "云南陆军讲武堂历史博物馆",
     "officialUrl": "https://www.yunnanmilitaryacademymuseum.com",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "云南陆军讲武堂历史博物馆官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "西藏自治区",
     "name": "西藏百万农奴解放纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "西藏百万农奴解放纪念馆",
     "officialUrl": "https://www.xzxw.com/resource/2022xzbwnnjf/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "西藏百万农奴解放纪念馆官方网站"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "陕西省",
     "name": "延安革命纪念馆",
-    "imageStatus": "基础包已有代表图片",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "延安革命纪念馆",
     "officialUrl": "http://www.yanan.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "未确认稳定独立官网，使用延安市人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "甘肃省",
     "name": "会宁红军长征胜利纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "会宁红军长征胜利纪念馆",
     "officialUrl": "https://www.huining.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "使用会宁县人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "青海省",
     "name": "西路军纪念馆相关红色场馆（需进一步核验）",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "青海原子城纪念馆",
     "officialUrl": "http://www.haibei.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "名称已调整",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "原条目不够具体，改为青海省代表性红色场馆“青海原子城纪念馆”，链接至海北州人民政府官网"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "宁夏回族自治区",
     "name": "六盘山红军长征纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "六盘山红军长征纪念馆",
     "officialUrl": "http://roam.gyart.com/vrpano/vrpano2/",
     "officialLinkType": "VR网址",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "六盘山红军长征纪念馆VR全景"
+    "officialVerificationDate": "2026-07-12"
   },
   {
     "province": "新疆维吾尔自治区",
     "name": "三五九旅屯垦纪念馆",
-    "imageStatus": "待参赛队补充",
-    "verificationGuide": "正式上线前核验场馆名称、开放信息、经纬度和素材授权",
     "standardName": "三五九旅屯垦纪念馆",
     "officialUrl": "http://www.ale.gov.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12",
-    "officialNote": "暂未找到独立官网，使用属地政府网站"
+    "officialVerificationDate": "2026-07-12"
   }
 ]
