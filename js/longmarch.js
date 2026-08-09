@@ -3,14 +3,15 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026080416';
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026080416';
-import { showToast } from './ui.js?v=2026080416';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026080416';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080416';
+import * as RedData from './data.js?v=2026080502';
+import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026080502';
+import { showToast } from './ui.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026080502';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080502';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026080416';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026080502';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化） */
 const _reduceMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');
@@ -357,7 +358,7 @@ function buildContents(totalW, vh, perStationW, sidePad) {
         ${relicHtml}
         ${s._venueResolved ? `
         <a class="cz-note-venue" href="${s._venueHref}">
-          📍 探访${s.venue}
+          ${icon('pin')} 探访${s.venue}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>` : ''}
       `;
@@ -745,7 +746,7 @@ function updateSoundscape(mood) {
   playSoundscape(mood);
 }
 function updateSoundToggle() {
-  if (soundToggle) soundToggle.textContent = _soundOn ? '🔊' : '🔇';
+  if (soundToggle) soundToggle.innerHTML = _soundOn ? icon('speaker') : icon('speaker-off');
 }
 function initSound() {
   if (_audioCtx) return;
@@ -808,7 +809,7 @@ function stopAutoScroll() {
 }
 function updateAutoBtn() {
   if (autoplayBtn) {
-    autoplayBtn.textContent = _autoRaf ? '⏸ 停止' : '▶ 自动行军';
+    autoplayBtn.innerHTML = _autoRaf ? icon('pause') + ' 停止' : icon('play') + ' 自动行军';
     autoplayBtn.setAttribute('aria-pressed', _autoRaf ? 'true' : 'false');
   }
 }
@@ -945,8 +946,8 @@ function closeCardModal() {
 function generateLongMarchCard() {
   const genBtn = $('#cz-card-gen');
   if (genBtn && genBtn.disabled) return;
-  if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '⏳ 正在盖章…'; }
-  const resetBtn = () => { if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = '✨ 生成纪念卡'; } };
+  if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '正在盖章…'; }
+  const resetBtn = () => { if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = icon('sparkle') + ' 生成纪念卡'; } };
   const name = (czCardName && czCardName.value.trim()) || '同学';
   const spirit = CZ_CARD_SPIRITS[_czCardSpirit] || '长征';
   const bg = CZ_CARD_BGS[_czCardBg] || CZ_CARD_BGS[0];

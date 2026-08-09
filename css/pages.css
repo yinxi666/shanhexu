@@ -49,19 +49,19 @@
 
 .detail-main .detail-body .detail-tags .tag-province {
   background: var(--light-gold);
-  color: #8b6914;
+  color: var(--gold-ink);
 }
 
 .detail-main .detail-body h2 {
   font-size: 28px;
   color: var(--ink);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .detail-main .detail-body .detail-location {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--muted);
   font-size: 14px;
   margin-bottom: 20px;
@@ -104,7 +104,7 @@
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
-  padding: 22px;
+  padding: 24px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--card-shadow);
@@ -114,7 +114,7 @@
   font-size: 16px;
   color: var(--red);
   margin-bottom: 12px;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   border-bottom: 2px solid rgba(220, 38, 38, 0.2);
 }
 
@@ -145,7 +145,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   background: var(--light-red);
   border-radius: var(--radius-sm);
   color: var(--red);
@@ -177,7 +177,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 16px 20px;
   margin-bottom: 20px;
   background: var(--white);
   border: 1px solid var(--card-border);
@@ -188,10 +188,10 @@
 .detail-action-bar .action-back {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
+  gap: 8px;
+  padding: 8px 16px;
   border: 1px solid var(--card-border);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
@@ -215,10 +215,10 @@
 .detail-action-bar .action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
+  gap: 8px;
+  padding: 8px 16px;
   border: 1px solid var(--card-border);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
@@ -264,7 +264,7 @@
       var(--red) 8%,
       var(--red) 85%,
       rgba(185, 28, 28, 0.15) 100%);
-  border-radius: 1px;
+  border-radius: var(--radius-xs);
 }
 
 /* 每一行：时间轴区 + 卡片 */
@@ -283,15 +283,15 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding-right: 14px;
-  padding-top: 22px;
+  padding-right: 16px;
+  padding-top: 24px;
 }
 
 /* 日期胶囊 */
 .policy-date-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 12px;
+  padding: 4px 12px;
   background: var(--light-red);
   color: var(--red);
   font-size: 12px;
@@ -365,14 +365,14 @@
   border-radius: var(--radius-sm);
   overflow: hidden;
   flex-shrink: 0;
-  background: #e5e7eb;
+  background: var(--img-placeholder);
 }
 
 .policy-card .policy-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform var(--duration-fast) ease;
 }
 
 .policy-card:hover .policy-img img {
@@ -390,7 +390,7 @@
 .policy-card .policy-info h3 {
   font-size: 17px;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .policy-card .policy-info .policy-summary {
@@ -406,14 +406,14 @@
 
 .policy-card .policy-info .policy-meta {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: center;
   font-size: 12px;
   color: var(--light-muted);
 }
 
 .policy-card .policy-info .policy-meta .policy-source {
-  padding: 3px 10px;
+  padding: 4px 12px;
   background: var(--light-red);
   color: var(--red);
   border-radius: var(--radius-xs);
@@ -429,11 +429,11 @@
 .policy-card .policy-link a {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
+  gap: 8px;
+  padding: 12px 20px;
   background: var(--red);
   color: var(--on-primary);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   font-size: 13px;
   font-weight: 600;
   transition: all 0.25s ease;
@@ -450,7 +450,7 @@
 /* 第一条特殊：带"最早"角标 */
 .policy-row:first-of-type .policy-date-badge::after {
   content: ' 最早';
-  font-size: 9px;
+  font-size: 12px;
   color: var(--gold);
   letter-spacing: 0.1em;
   font-weight: 500;
@@ -472,13 +472,13 @@
   }
 
   .policy-timeline {
-    padding-right: 10px;
+    padding-right: 12px;
     gap: 4px;
   }
 
   .policy-date-badge {
-    font-size: 10px;
-    padding: 3px 8px;
+    font-size: 12px;
+    padding: 4px 8px;
   }
 
   .policy-dot {
@@ -487,7 +487,7 @@
 
   .policy-card {
     flex-direction: column;
-    padding: 14px;
+    padding: 16px;
   }
 
   .policy-card .policy-img {
@@ -530,7 +530,7 @@
   top: 16px;
   bottom: 16px;
   width: 3px;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   background: linear-gradient(to bottom, var(--red), rgba(185, 28, 28, 0.3));
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -551,7 +551,7 @@
   position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #e5e7eb;
+  background: var(--img-placeholder);
 }
 
 /* 图片底部渐变遮罩 */
@@ -571,7 +571,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform var(--duration-normal) ease;
 }
 
 .practice-card:hover .practice-img img {
@@ -603,12 +603,12 @@
   position: absolute;
   top: 12px;
   left: 12px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   background: var(--red);
   color: var(--on-primary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -630,26 +630,26 @@
 }
 
 .practice-card .practice-body {
-  padding: 18px 20px 12px;
+  padding: 16px 20px 12px;
 }
 
 .practice-card .practice-body h3 {
   font-size: 17px;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   line-height: 1.4;
   font-weight: 700;
 }
 
 .practice-card .practice-body .team-name {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--red);
   font-weight: 600;
   background: var(--light-red);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .practice-card .practice-body p {
@@ -664,7 +664,7 @@
 }
 
 .practice-card .practice-footer {
-  padding: 10px 20px 14px;
+  padding: 12px 20px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -684,21 +684,21 @@
 }
 
 .practice-date .pd-year {
-  padding: 6px 6px;
+  padding: 8px 8px;
   font-size: 13px;
   color: var(--muted);
   background: var(--line);
 }
 
 .practice-date .pd-month {
-  padding: 6px 8px;
+  padding: 8px 8px;
   font-size: 13px;
   color: var(--ink);
   background: var(--light-red);
 }
 
 .practice-date .pd-day {
-  padding: 6px 8px;
+  padding: 8px 8px;
   font-size: 13px;
   color: var(--ink);
   min-width: 24px;
@@ -718,7 +718,7 @@
   padding: 4px 12px;
   border-radius: var(--radius-lg);
   background: var(--light-red);
-  transition: all 0.2s ease;
+  transition: all var(--transition) ease;
 }
 
 .practice-card .practice-footer .practice-likes:hover {
@@ -739,8 +739,8 @@
   z-index: 1100;
   display: flex;
   align-items: center;
-  padding: 7px;
-  border-radius: 34px;
+  padding: 8px;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   transition: all 0.3s ease;
 }
@@ -749,7 +749,7 @@
   border-color: var(--card-border);
   background: var(--white);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  padding-left: 14px;
+  padding-left: 16px;
   padding-right: 8px;
 }
 
@@ -784,7 +784,7 @@
   appearance: none;
   width: 0;
   height: 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   background: var(--line);
   outline: none;
   cursor: pointer;
@@ -795,13 +795,13 @@
 .music-player:hover .music-volume {
   width: 90px;
   opacity: 1;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 /* 滑块轨道 */
 .music-volume::-webkit-slider-runnable-track {
   height: 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   background: transparent;
 }
 
@@ -809,7 +809,7 @@
 .music-volume::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  margin-top: -5px;
+  margin-top: -4px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -831,7 +831,7 @@
 
 .music-volume::-moz-range-track {
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: var(--line);
 }
 
@@ -850,9 +850,9 @@
   gap: 24px 20px;
   align-items: start;
   /* 软木板 */
-  background-color: #c9a87c;
+  background-color: var(--corkboard);
   padding: 24px;
-  border: 8px solid #8b6914;
+  border: 8px solid var(--corkboard-border);
   box-shadow:
     inset 0 1px 4px rgba(0, 0, 0, 0.10),
     0 4px 16px rgba(0, 0, 0, 0.10);
@@ -861,8 +861,8 @@
 .message-card {
   background: #fefcf7;
   border: none;
-  border-radius: 3px;
-  padding: 24px 26px 20px;
+  border-radius: var(--radius-xs);
+  padding: 24px 28px 20px;
   box-shadow:
     2px 3px 10px rgba(0, 0, 0, 0.12),
     0 1px 3px rgba(0, 0, 0, 0.08);
@@ -881,7 +881,7 @@
   background:
     repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(180, 160, 130, 0.03) 4px, rgba(180, 160, 130, 0.03) 5px);
   pointer-events: none;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }
 
 .message-card:hover {
@@ -922,7 +922,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .message-card .msg-avatar {
@@ -963,7 +963,7 @@
 
 .message-card .msg-footer {
   margin-top: 12px;
-  padding-top: 10px;
+  padding-top: 12px;
   border-top: 1px solid var(--card-border);
   display: flex;
   justify-content: space-between;
@@ -972,10 +972,10 @@
 }
 
 .message-card .msg-status {
-  padding: 2px 8px;
+  padding: 4px 8px;
   border-radius: var(--radius-xs);
   font-weight: 600;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .msg-status.approved {
@@ -1014,7 +1014,7 @@
 /* 横向字段行 */
 .form-row {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
@@ -1024,7 +1024,7 @@
 }
 
 .message-form-card .form-group {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .message-form-card .form-group label {
@@ -1043,7 +1043,7 @@
 .message-form-card .form-group textarea,
 .message-form-card .form-group select {
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -1125,7 +1125,7 @@
 .submit-stamp .stamp-text {
   font-size: 12px;
   letter-spacing: 0.3em;
-  margin-top: 2px;
+  margin-top: 4px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   text-indent: 0.3em;
 }
@@ -1173,7 +1173,7 @@
 .form-success h4 {
   color: #065f46;
   font-size: 18px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .form-success p {
@@ -1272,7 +1272,7 @@
   pointer-events: auto;
 }
 
-.back-to-top:hover {
+.back-to-top.visible:hover {
   background: var(--deep-red);
   transform: translateY(-2px);
 }
@@ -1297,7 +1297,7 @@
   font-size: 20px;
   font-weight: 700;
   color: var(--on-primary);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .site-footer .footer-desc {
@@ -1324,7 +1324,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   margin-top: 28px;
-  padding-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   text-align: center;
   font-size: 12px;
@@ -1335,7 +1335,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-top: 32px;
   grid-column: 1 / -1;
   width: 100%;
@@ -1351,7 +1351,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition) ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1395,8 +1395,8 @@
   border: 2px solid var(--muted);
   border-top: 0;
   border-right: 0;
-  border-radius: 1px;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-xs);
+  transition: all var(--transition) ease;
 }
 
 .pagination button:first-child::after {

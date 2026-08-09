@@ -5,9 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, safeStorage } from './utils.js?v=2026080416';
-import * as RedData from './data.js?v=2026080416';
-import { getVenues } from './venue-store.js?v=2026080416';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, safeStorage } from './utils.js?v=2026080502';
+import * as RedData from './data.js?v=2026080502';
+import { getVenues } from './venue-store.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
 
 const $ = (s, c) => (c || document).querySelector(s);
 const $$ = (s, c) => [...(c || document).querySelectorAll(s)];
@@ -18,13 +19,13 @@ function initChatWidget() {
   const html = `
       <div class="chat-widget">
         <button class="chat-fab" aria-label="AI导览助手" title="AI智能导览助手">
-          <span class="chat-fab-icon">🤖</span>
+          <span class="chat-fab-icon">${icon('book')}</span>
           <span class="chat-fab-badge">AI</span>
         </button>
         <div class="chat-panel">
           <div class="chat-header">
             <div class="chat-header-left">
-              <span class="chat-avatar">🤖</span>
+              <span class="chat-avatar">${icon('book')}</span>
               <div>
                 <strong>红旅AI助手</strong>
                 <small>智能导览 · 知识库 Agent</small>
@@ -35,26 +36,26 @@ function initChatWidget() {
           <div class="chat-messages" id="chat-messages">
             <div class="chat-msg bot">
               <div class="chat-bubble">
-                你好！我是<b>红旅AI助手</b> 🤖<br><br>
-                🗺️ <b>查场馆</b>：「延安有哪些场馆」「介绍井冈山」<br>
-                📖 <b>学历史</b>：「长征」「遵义会议」「九一八」<br>
-                🚩 <b>悟精神</b>：「红船精神」「红旗渠精神」<br>
-                📊 <b>看数据</b>：「有多少场馆」「哪些省份最多」<br>
-                🛤️ <b>找路线</b>：「推荐红色旅游路线」<br>
-                ⚖️ <b>对比</b>：「比较井冈山和延安」<br>
-                📅 <b>历史查询</b>：「1935年发生了什么」<br><br>
+                你好！我是<b>红旅AI助手</b><br><br>
+                 <b>查场馆</b>：「延安有哪些场馆」「介绍井冈山」<br>
+                 <b>学历史</b>：「长征」「遵义会议」「九一八」<br>
+                 <b>悟精神</b>：「红船精神」「红旗渠精神」<br>
+                 <b>看数据</b>：「有多少场馆」「哪些省份最多」<br>
+                 <b>找路线</b>：「推荐红色旅游路线」<br>
+                 <b>对比</b>：「比较井冈山和延安」<br>
+                 <b>历史查询</b>：「1935年发生了什么」<br><br>
                 <i>试试输入你想了解的内容吧！</i>
               </div>
             </div>
           </div>
           <div class="chat-input-area">
             <div class="chat-quick-btns" id="chat-quick-btns">
-              <button data-q="推荐红色旅游路线">🗺️ 推荐路线</button>
-              <button data-q="有多少场馆">📊 数据统计</button>
-              <button data-q="红船精神是什么">🚩 红色精神</button>
-              <button data-q="长征">📖 历史事件</button>
-              <button data-q="延安有哪些场馆">📍 查场馆</button>
-              <button data-q="有哪些省份">🗺️ 省份分布</button>
+              <button data-q="推荐红色旅游路线">${icon('route')} 推荐路线</button>
+              <button data-q="有多少场馆">${icon('chart')} 数据统计</button>
+              <button data-q="红船精神是什么">${icon('flag')} 红色精神</button>
+              <button data-q="长征">${icon('book')} 历史事件</button>
+              <button data-q="延安有哪些场馆">${icon('pin')} 查场馆</button>
+              <button data-q="有哪些省份">${icon('map')} 省份分布</button>
             </div>
             <div class="chat-input-row">
               <input type="text" id="chat-input" placeholder="输入问题…" aria-label="输入问题" maxlength="200">
@@ -159,43 +160,43 @@ function initChatWidget() {
 /* ---- AI 回答生成引擎 ---- */
 function generateReply(query) {
   const q = query.trim();
-  if (!q) return '请告诉我你想了解什么 😊';
+  if (!q) return '请告诉我你想了解什么 ';
 
   const venues = getVenues();
   if (venues.length === 0) return '场馆数据正在加载中，请稍后再试…';
 
   // ===== 第一层：历史事件与精神知识库 =====
   const knowledge = [
-    { re: /(四渡赤水|四渡赤水河)/, answer: '📍 <b>四渡赤水</b>是遵义会议后，中央红军在长征途中进行的一次具有决定性意义的运动战战役。1935年1月至3月，红军在贵州、四川、云南交界的赤水河地区，巧妙穿插于国民党军重兵集团之间，取得了战略转移中具有决定意义的胜利。主要地点包括贵州遵义、赤水，四川古蔺等地。', related: ['遵义会议', '长征路线', '飞夺泸定桥'] },
-    { re: /(长征|二万五千里)(?!.*(?:精神|纪念馆|路线|推荐))/, answer: '🚶 <b>长征</b>（1934.10—1936.10）是中国工农红军在第五次反"围剿"失利后进行的战略转移，历经二万五千里，跨越14个省，翻越夹金山、雪山草地，胜利会师甘肃会宁，铸就了伟大的<b>长征精神</b>。', related: ['长征精神', '遵义会议', '飞夺泸定桥', '会宁会师'] },
-    { re: /(遵义会议)(?!.*(?:会址|纪念馆))/, answer: '🏛️ <b>遵义会议</b>于1935年1月在贵州遵义召开，确立了毛泽东同志在党中央和红军的领导地位，是中国共产党历史上一个生死攸关的转折点。', related: ['遵义会议会址', '长征', '四渡赤水'] },
-    { re: /(古田会议)(?!.*(?:会址|纪念馆))/, answer: '📜 <b>古田会议</b>于1929年12月在福建上杭古田召开，确立了"思想建党、政治建军"的原则，是中国共产党和红军建设史上的重要里程碑。', related: ['古田会议会址', '南昌起义'] },
-    { re: /(西柏坡|进京赶考|两个务必)/, answer: '🏠 <b>西柏坡</b>（1947.5—1949.3）是解放战争时期中共中央所在地。在这里指挥了三大战役，召开七届二中全会，毛泽东同志提出"两个务必"和"进京赶考"的历史命题。', related: ['西柏坡纪念馆', '延安革命纪念馆', '开国大典'] },
-    { re: /延安精神/, answer: '🔥 <b>延安精神</b>：坚定正确的政治方向、解放思想实事求是、全心全意为人民服务、自力更生艰苦奋斗。延安时期（1935—1948）是党走向成熟的关键阶段。', related: ['延安革命纪念馆', '西柏坡', '南泥湾精神'] },
-    { re: /井冈山精神/, answer: '⛰️ <b>井冈山精神</b>：坚定信念、艰苦奋斗，实事求是、敢闯新路，依靠群众、勇于胜利。井冈山是中国第一个农村革命根据地（1927年创建）。', related: ['井冈山革命博物馆', '秋收起义', '南昌起义'] },
-    { re: /百色起义/, answer: '🔫 <b>百色起义</b>于1929年12月11日在广西百色举行，由邓小平、张云逸等领导，建立了中国工农红军第七军和右江革命根据地，是党在少数民族地区开展武装斗争的成功范例。', related: ['百色起义纪念馆', '南昌起义'] },
-    { re: /(九一八|918)(?!.*(?:博物馆|纪念馆))/, answer: '⚠️ <b>九一八事变</b>发生于1931年9月18日，日本关东军炸毁沈阳柳条湖附近南满铁路路轨，以此为借口发动侵华战争，是中国人民14年抗战的开端。', related: ['九一八历史博物馆', '抗日战争'] },
-    { re: /(中共一大|一大)(?!.*(?:会址|纪念馆|南湖))/, answer: '🌟 <b>中共一大</b>于1921年7月23日在上海开幕，后转移至浙江嘉兴南湖的游船上闭幕，宣告中国共产党正式成立，是中国历史上开天辟地的大事变。', related: ['中共一大会址纪念馆', '嘉兴南湖红船', '红船精神'] },
-    { re: /(南昌起义|八一起义)(?!.*(?:纪念馆))/, answer: '🔫 <b>南昌起义</b>于1927年8月1日在江西南昌举行，周恩来、贺龙、叶挺、朱德、刘伯承等领导，打响了武装反抗国民党反动派的第一枪，8月1日后来被定为建军节。', related: ['南昌八一起义纪念馆', '秋收起义', '井冈山'] },
-    { re: /(秋收起义)(?!.*(?:纪念馆|会师))/, answer: '🌾 <b>秋收起义</b>于1927年9月由毛泽东在湘赣边界领导，起义受挫后率部上井冈山，创建了中国第一个农村革命根据地，开创"农村包围城市"的革命道路。', related: ['井冈山革命博物馆', '南昌起义'] },
-    { re: /(广州起义)(?!.*(?:烈士|陵园|纪念馆))/, answer: '🏙️ <b>广州起义</b>于1927年12月11日在广州举行，张太雷、叶挺、叶剑英等领导，建立了中国第一个城市苏维埃政权——广州苏维埃政府。', related: ['广州起义烈士陵园', '南昌起义'] },
-    { re: /(抗日战争|抗战)(?!.*(?:纪念馆|博物馆))/, answer: '⚔️ <b>抗日战争</b>（1931—1945）是中华民族全面抵抗日本侵略的民族解放战争。中国共产党领导八路军、新四军开辟敌后战场，是全民族抗战的中流砥柱。', related: ['九一八历史博物馆', '八路军太行纪念馆', '东北烈士纪念馆'] },
-    { re: /(解放战争|三大战役)/, answer: '⚔️ <b>解放战争</b>（1946—1949）是推翻国民党统治的决定性阶段。辽沈、淮海、平津三大战役奠定胜局，1949年10月1日中华人民共和国成立。', related: ['西柏坡纪念馆', '孟良崮战役纪念馆', '开国大典'] },
-    { re: /开国大典/, answer: '🎉 <b>开国大典</b>于1949年10月1日在北京天安门广场举行，毛泽东同志庄严宣告中华人民共和国中央人民政府成立，标志着中国新民主主义革命的伟大胜利。', related: ['中国共产党历史展览馆', '西柏坡纪念馆'] },
-    { re: /(长征胜利|会宁会师)/, answer: '🎯 <b>长征胜利</b>以1936年10月红军三大主力在甘肃会宁会师为标志。长征的胜利是中国革命转危为安的关键，铸就了长征精神。', related: ['会宁红军长征胜利纪念馆', '六盘山红军长征纪念馆', '遵义会议'] },
-    { re: /(湘江战役)/, answer: '💧 <b>湘江战役</b>（1934.11—12）是中央红军长征中突破国民党第四道封锁线的关键战役，红军付出巨大牺牲突破湘江，为遵义会议的召开创造了条件。', related: ['遵义会议', '长征'] },
-    { re: /(飞夺泸定桥)/, answer: '🌉 <b>飞夺泸定桥</b>（1935.5.29）是长征中的关键战斗。红四团22名勇士冒着枪林弹雨攀爬13根铁索夺取泸定桥，为红军北上打开了通道。', related: ['泸定桥景区', '长征', '大渡河'] },
-    { re: /红船精神/, answer: '🚢 <b>红船精神</b>来源于中共一大在南湖红船上闭幕的历史事件，内涵：开天辟地敢为人先的首创精神、坚定理想百折不挠的奋斗精神、立党为公忠诚为民的奉献精神。', related: ['嘉兴南湖红船', '中共一大会址'] },
-    { re: /苏区精神/, answer: '🏛️ <b>苏区精神</b>：坚定信念、求真务实、一心为民、清正廉洁、艰苦奋斗、争创一流、无私奉献。中央苏区（1929—1934）以瑞金为中心，是共和国的摇篮。', related: ['井冈山革命博物馆', '南昌八一起义纪念馆'] },
-    { re: /长征精神/, answer: '🚩 <b>长征精神</b>：把全国人民和中华民族的根本利益看得高于一切，坚定革命的理想和信念，坚信正义事业必然胜利；不怕任何艰难险阻、不惜付出一切牺牲；坚持独立自主、实事求是、一切从实际出发；顾全大局、严守纪律、紧密团结；紧紧依靠人民群众，生死相依、艰苦奋斗。', related: ['长征', '遵义会议', '会宁会师', '泸定桥'] },
-    { re: /(红旗渠|红旗渠精神)/, answer: '💪 <b>红旗渠精神</b>：自力更生、艰苦创业、团结协作、无私奉献。20世纪60年代，河南林县人民在太行山悬崖峭壁上历时10年开凿出1500公里的"人工天河"红旗渠。', related: ['红旗渠纪念馆', '南泥湾精神'] },
-    { re: /(两弹一星|两弹精神|邓稼先|钱学森)/, answer: '🚀 <b>"两弹一星"精神</b>：热爱祖国、无私奉献、自力更生、艰苦奋斗、大力协同、勇于攀登。1964年中国第一颗原子弹爆炸成功，1967年氢弹成功，1970年东方红卫星发射。', related: ['青海原子城纪念馆', '延安精神'] },
-    { re: /(红岩精神)/, answer: '🔥 <b>红岩精神</b>诞生于抗日战争时期的重庆红岩村，内涵：崇高思想境界、坚定理想信念、巨大人格力量和浩然革命正气。以周恩来为代表的南方局在险恶环境中坚持斗争。', related: ['红岩革命纪念馆', '重庆'] },
-    { re: /(大别山精神|金寨)/, answer: '⛰️ <b>大别山精神</b>：坚守信念、胸怀大局、团结奋斗、勇当前锋。大别山是全国第二大革命根据地——鄂豫皖苏区的核心区域。金寨县走出了59位开国将军。', related: ['金寨县革命烈士纪念塔', '黄麻起义和鄂豫皖苏区纪念园'] },
-    { re: /(东北抗联|杨靖宇|赵尚志|赵一曼)/, answer: '🌲 <b>东北抗联</b>是中国共产党领导下在东北坚持抗日游击战争的英雄部队。在零下40度的严寒中，杨靖宇、赵尚志、赵一曼等英雄与日寇进行了长达14年的艰苦斗争。', related: ['东北烈士纪念馆', '九一八历史博物馆'] },
-    { re: /(一二九运动|一二九)/, answer: '📢 <b>一二·九运动</b>爆发于1935年12月9日，北平大中学生数千人举行了抗日救国示威游行，掀起了全国抗日救国的新高潮。', related: ['抗日战争', '延安'] },
-    { re: /(南泥湾|大生产|屯垦)/, answer: '🌾 <b>南泥湾精神</b>：自力更生、艰苦奋斗。1941年八路军三五九旅开进南泥湾开展大生产运动，将荒山野岭变成"陕北好江南"。后来三五九旅转战新疆，继续屯垦戍边。', related: ['三五九旅屯垦纪念馆', '延安革命纪念馆'] },
-    { re: /(琼崖|琼崖纵队|二十三年红旗不倒|冯白驹)/, answer: '🌴 <b>琼崖革命</b>创造了"二十三年红旗不倒"的奇迹（1927—1950）。冯白驹领导琼崖纵队在孤岛环境下坚持武装斗争，直至配合渡海大军解放海南岛。', related: ['母瑞山革命根据地纪念园', '梅山老区革命烈士陵园'] },
+    { re: /(四渡赤水|四渡赤水河)/, answer: ' <b>四渡赤水</b>是遵义会议后，中央红军在长征途中进行的一次具有决定性意义的运动战战役。1935年1月至3月，红军在贵州、四川、云南交界的赤水河地区，巧妙穿插于国民党军重兵集团之间，取得了战略转移中具有决定意义的胜利。主要地点包括贵州遵义、赤水，四川古蔺等地。', related: ['遵义会议', '长征路线', '飞夺泸定桥'] },
+    { re: /(长征|二万五千里)(?!.*(?:精神|纪念馆|路线|推荐))/, answer: ' <b>长征</b>（1934.10—1936.10）是中国工农红军在第五次反"围剿"失利后进行的战略转移，历经二万五千里，跨越14个省，翻越夹金山、雪山草地，胜利会师甘肃会宁，铸就了伟大的<b>长征精神</b>。', related: ['长征精神', '遵义会议', '飞夺泸定桥', '会宁会师'] },
+    { re: /(遵义会议)(?!.*(?:会址|纪念馆))/, answer: ' <b>遵义会议</b>于1935年1月在贵州遵义召开，确立了毛泽东同志在党中央和红军的领导地位，是中国共产党历史上一个生死攸关的转折点。', related: ['遵义会议会址', '长征', '四渡赤水'] },
+    { re: /(古田会议)(?!.*(?:会址|纪念馆))/, answer: ' <b>古田会议</b>于1929年12月在福建上杭古田召开，确立了"思想建党、政治建军"的原则，是中国共产党和红军建设史上的重要里程碑。', related: ['古田会议会址', '南昌起义'] },
+    { re: /(西柏坡|进京赶考|两个务必)/, answer: ' <b>西柏坡</b>（1947.5—1949.3）是解放战争时期中共中央所在地。在这里指挥了三大战役，召开七届二中全会，毛泽东同志提出"两个务必"和"进京赶考"的历史命题。', related: ['西柏坡纪念馆', '延安革命纪念馆', '开国大典'] },
+    { re: /延安精神/, answer: ' <b>延安精神</b>：坚定正确的政治方向、解放思想实事求是、全心全意为人民服务、自力更生艰苦奋斗。延安时期（1935—1948）是党走向成熟的关键阶段。', related: ['延安革命纪念馆', '西柏坡', '南泥湾精神'] },
+    { re: /井冈山精神/, answer: ' <b>井冈山精神</b>：坚定信念、艰苦奋斗，实事求是、敢闯新路，依靠群众、勇于胜利。井冈山是中国第一个农村革命根据地（1927年创建）。', related: ['井冈山革命博物馆', '秋收起义', '南昌起义'] },
+    { re: /百色起义/, answer: ' <b>百色起义</b>于1929年12月11日在广西百色举行，由邓小平、张云逸等领导，建立了中国工农红军第七军和右江革命根据地，是党在少数民族地区开展武装斗争的成功范例。', related: ['百色起义纪念馆', '南昌起义'] },
+    { re: /(九一八|918)(?!.*(?:博物馆|纪念馆))/, answer: ' <b>九一八事变</b>发生于1931年9月18日，日本关东军炸毁沈阳柳条湖附近南满铁路路轨，以此为借口发动侵华战争，是中国人民14年抗战的开端。', related: ['九一八历史博物馆', '抗日战争'] },
+    { re: /(中共一大|一大)(?!.*(?:会址|纪念馆|南湖))/, answer: ' <b>中共一大</b>于1921年7月23日在上海开幕，后转移至浙江嘉兴南湖的游船上闭幕，宣告中国共产党正式成立，是中国历史上开天辟地的大事变。', related: ['中共一大会址纪念馆', '嘉兴南湖红船', '红船精神'] },
+    { re: /(南昌起义|八一起义)(?!.*(?:纪念馆))/, answer: ' <b>南昌起义</b>于1927年8月1日在江西南昌举行，周恩来、贺龙、叶挺、朱德、刘伯承等领导，打响了武装反抗国民党反动派的第一枪，8月1日后来被定为建军节。', related: ['南昌八一起义纪念馆', '秋收起义', '井冈山'] },
+    { re: /(秋收起义)(?!.*(?:纪念馆|会师))/, answer: ' <b>秋收起义</b>于1927年9月由毛泽东在湘赣边界领导，起义受挫后率部上井冈山，创建了中国第一个农村革命根据地，开创"农村包围城市"的革命道路。', related: ['井冈山革命博物馆', '南昌起义'] },
+    { re: /(广州起义)(?!.*(?:烈士|陵园|纪念馆))/, answer: ' <b>广州起义</b>于1927年12月11日在广州举行，张太雷、叶挺、叶剑英等领导，建立了中国第一个城市苏维埃政权——广州苏维埃政府。', related: ['广州起义烈士陵园', '南昌起义'] },
+    { re: /(抗日战争|抗战)(?!.*(?:纪念馆|博物馆))/, answer: ' <b>抗日战争</b>（1931—1945）是中华民族全面抵抗日本侵略的民族解放战争。中国共产党领导八路军、新四军开辟敌后战场，是全民族抗战的中流砥柱。', related: ['九一八历史博物馆', '八路军太行纪念馆', '东北烈士纪念馆'] },
+    { re: /(解放战争|三大战役)/, answer: ' <b>解放战争</b>（1946—1949）是推翻国民党统治的决定性阶段。辽沈、淮海、平津三大战役奠定胜局，1949年10月1日中华人民共和国成立。', related: ['西柏坡纪念馆', '孟良崮战役纪念馆', '开国大典'] },
+    { re: /开国大典/, answer: ' <b>开国大典</b>于1949年10月1日在北京天安门广场举行，毛泽东同志庄严宣告中华人民共和国中央人民政府成立，标志着中国新民主主义革命的伟大胜利。', related: ['中国共产党历史展览馆', '西柏坡纪念馆'] },
+    { re: /(长征胜利|会宁会师)/, answer: ' <b>长征胜利</b>以1936年10月红军三大主力在甘肃会宁会师为标志。长征的胜利是中国革命转危为安的关键，铸就了长征精神。', related: ['会宁红军长征胜利纪念馆', '六盘山红军长征纪念馆', '遵义会议'] },
+    { re: /(湘江战役)/, answer: ' <b>湘江战役</b>（1934.11—12）是中央红军长征中突破国民党第四道封锁线的关键战役，红军付出巨大牺牲突破湘江，为遵义会议的召开创造了条件。', related: ['遵义会议', '长征'] },
+    { re: /(飞夺泸定桥)/, answer: ' <b>飞夺泸定桥</b>（1935.5.29）是长征中的关键战斗。红四团22名勇士冒着枪林弹雨攀爬13根铁索夺取泸定桥，为红军北上打开了通道。', related: ['泸定桥景区', '长征', '大渡河'] },
+    { re: /红船精神/, answer: ' <b>红船精神</b>来源于中共一大在南湖红船上闭幕的历史事件，内涵：开天辟地敢为人先的首创精神、坚定理想百折不挠的奋斗精神、立党为公忠诚为民的奉献精神。', related: ['嘉兴南湖红船', '中共一大会址'] },
+    { re: /苏区精神/, answer: ' <b>苏区精神</b>：坚定信念、求真务实、一心为民、清正廉洁、艰苦奋斗、争创一流、无私奉献。中央苏区（1929—1934）以瑞金为中心，是共和国的摇篮。', related: ['井冈山革命博物馆', '南昌八一起义纪念馆'] },
+    { re: /长征精神/, answer: ' <b>长征精神</b>：把全国人民和中华民族的根本利益看得高于一切，坚定革命的理想和信念，坚信正义事业必然胜利；不怕任何艰难险阻、不惜付出一切牺牲；坚持独立自主、实事求是、一切从实际出发；顾全大局、严守纪律、紧密团结；紧紧依靠人民群众，生死相依、艰苦奋斗。', related: ['长征', '遵义会议', '会宁会师', '泸定桥'] },
+    { re: /(红旗渠|红旗渠精神)/, answer: ' <b>红旗渠精神</b>：自力更生、艰苦创业、团结协作、无私奉献。20世纪60年代，河南林县人民在太行山悬崖峭壁上历时10年开凿出1500公里的"人工天河"红旗渠。', related: ['红旗渠纪念馆', '南泥湾精神'] },
+    { re: /(两弹一星|两弹精神|邓稼先|钱学森)/, answer: ' <b>"两弹一星"精神</b>：热爱祖国、无私奉献、自力更生、艰苦奋斗、大力协同、勇于攀登。1964年中国第一颗原子弹爆炸成功，1967年氢弹成功，1970年东方红卫星发射。', related: ['青海原子城纪念馆', '延安精神'] },
+    { re: /(红岩精神)/, answer: ' <b>红岩精神</b>诞生于抗日战争时期的重庆红岩村，内涵：崇高思想境界、坚定理想信念、巨大人格力量和浩然革命正气。以周恩来为代表的南方局在险恶环境中坚持斗争。', related: ['红岩革命纪念馆', '重庆'] },
+    { re: /(大别山精神|金寨)/, answer: ' <b>大别山精神</b>：坚守信念、胸怀大局、团结奋斗、勇当前锋。大别山是全国第二大革命根据地——鄂豫皖苏区的核心区域。金寨县走出了59位开国将军。', related: ['金寨县革命烈士纪念塔', '黄麻起义和鄂豫皖苏区纪念园'] },
+    { re: /(东北抗联|杨靖宇|赵尚志|赵一曼)/, answer: ' <b>东北抗联</b>是中国共产党领导下在东北坚持抗日游击战争的英雄部队。在零下40度的严寒中，杨靖宇、赵尚志、赵一曼等英雄与日寇进行了长达14年的艰苦斗争。', related: ['东北烈士纪念馆', '九一八历史博物馆'] },
+    { re: /(一二九运动|一二九)/, answer: ' <b>一二·九运动</b>爆发于1935年12月9日，北平大中学生数千人举行了抗日救国示威游行，掀起了全国抗日救国的新高潮。', related: ['抗日战争', '延安'] },
+    { re: /(南泥湾|大生产|屯垦)/, answer: ' <b>南泥湾精神</b>：自力更生、艰苦奋斗。1941年八路军三五九旅开进南泥湾开展大生产运动，将荒山野岭变成"陕北好江南"。后来三五九旅转战新疆，继续屯垦戍边。', related: ['三五九旅屯垦纪念馆', '延安革命纪念馆'] },
+    { re: /(琼崖|琼崖纵队|二十三年红旗不倒|冯白驹)/, answer: ' <b>琼崖革命</b>创造了"二十三年红旗不倒"的奇迹（1927—1950）。冯白驹领导琼崖纵队在孤岛环境下坚持武装斗争，直至配合渡海大军解放海南岛。', related: ['母瑞山革命根据地纪念园', '梅山老区革命烈士陵园'] },
   ];
 
   // ===== 第一层匹配：历史知识库 =====
@@ -228,7 +229,7 @@ function generateReply(query) {
     // 问候/帮助
     { re: /你好|嗨|hello|hi|在吗|帮助|help|能做什么|功能|怎么用|使用说明/, handler: () => getHelp() },
     // 感谢
-    { re: /谢谢|感谢|多谢|thank/, handler: () => '不客气！😊 随时为你解答红色文旅相关问题。有什么想了解的可以继续问我～' },
+    { re: /谢谢|感谢|多谢|thank/, handler: () => '不客气！ 随时为你解答红色文旅相关问题。有什么想了解的可以继续问我～' },
     // 历史时间线
     { re: /(\d{4})年.*(?:发生|事件|历史|大事)/, handler: (m) => getYearEvents(m[1]) },
     // 精神/文化专题
@@ -246,7 +247,7 @@ function generateReply(query) {
   // 先尝试场馆名模糊搜索
   const fuzzyVenue = findVenue(q);
   if (fuzzyVenue) {
-    return formatVenueDetail(fuzzyVenue) + '<br><i>💡 输入「推荐路线」可获取主题游览建议</i>';
+    return formatVenueDetail(fuzzyVenue) + '<br><i> 输入「推荐路线」可获取主题游览建议</i>';
   }
 
   // 尝试省份/城市模糊匹配
@@ -260,18 +261,18 @@ function generateReply(query) {
   // 尝试在简介中全文搜索
   const summaryMatch = venues.filter(v => v.summary && v.summary.includes(q.slice(0, 3)));
   if (summaryMatch.length > 0) {
-    return `🔍 在简介中搜索「${escapeHtml(q.slice(0, 6))}」找到 <b>${summaryMatch.length}</b> 个相关场馆：<br>` +
+    return ` 在简介中搜索「${escapeHtml(q.slice(0, 6))}」找到 <b>${summaryMatch.length}</b> 个相关场馆：<br>` +
       summaryMatch.slice(0, 5).map(v => `• <b>${escapeHtml(v.name)}</b> — ${escapeHtml(v.province)} ${escapeHtml(v.city || '')}<br><small>${escapeHtml((v.summary || '').slice(0, 60))}…</small>`).join('<br><br>') +
-      `<br><i>💡 点击场馆名可在导览页查看详情</i>`;
+      `<br><i> 点击场馆名可在导览页查看详情</i>`;
   }
 
   // 真正的智能降级：给出有帮助的建议
-  return `🤔 关于「<b>${escapeHtml(q.slice(0, 30))}</b>」，我还在学习中。试试这些：<br><br>
-      🗺️ <b>查场馆</b>：「延安有什么场馆」「介绍井冈山革命博物馆」<br>
-      📖 <b>学历史</b>：「长征」「遵义会议」「九一八事变」<br>
-      🚩 <b>悟精神</b>：「红船精神」「长征精神」「红旗渠精神」<br>
-      📊 <b>看数据</b>：「有多少场馆」「哪些省份最多」「场馆类别」<br>
-      🛤️ <b>找路线</b>：「推荐红色旅游路线」「长征路线怎么走」<br><br>
+  return ` 关于「<b>${escapeHtml(q.slice(0, 30))}</b>」，我还在学习中。试试这些：<br><br>
+       <b>查场馆</b>：「延安有什么场馆」「介绍井冈山革命博物馆」<br>
+       <b>学历史</b>：「长征」「遵义会议」「九一八事变」<br>
+       <b>悟精神</b>：「红船精神」「长征精神」「红旗渠精神」<br>
+       <b>看数据</b>：「有多少场馆」「哪些省份最多」「场馆类别」<br>
+       <b>找路线</b>：「推荐红色旅游路线」「长征路线怎么走」<br><br>
       <i>或者到<a href="${escapeAttr(getBasePath())}pages/guide.html">全国导览</a>页面浏览全部 ${venues.length} 个场馆</i>`;
 }
 
@@ -294,16 +295,16 @@ function searchByRegion(region) {
   }
   const esc = escapeHtml;
   const cats = [...new Set(found.map(v => v.category).filter(Boolean))];
-  return `📍 <b>${esc(region)}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
+  return ` <b>${esc(region)}</b> 共有 <b>${found.length}</b> 个红色场馆<br><br>` +
     found.map(v => `• <b>${esc(v.name)}</b> — ${esc(v.category || '红色场馆')}｜${esc(v.city || '')}${esc(v.district || '')}<br><small>${esc((v.summary || '').slice(0, 50))}…</small>`).join('<br>') +
-    `<br>🏷️ 类别分布：${cats.map(esc).join(' · ')}` +
-    `<br><i>💡 输入场馆名称可查看详细信息</i>`;
+    `<br> 类别分布：${cats.map(esc).join(' · ')}` +
+    `<br><i> 输入场馆名称可查看详细信息</i>`;
 }
 
 function searchVenue(name) {
   const v = findVenue(name.replace(/[的了吗呢]$/, '').trim());
-  if (!v) return `没找到「<b>${escapeHtml(name.slice(0, 15))}</b>」的详细信息。<br><br>🔍 试试：<br>• 输入完整场馆名称<br>• 输入省份名称查看当地全部场馆<br>• 到<a href="${escapeAttr(getBasePath())}pages/guide.html">全国导览</a>搜索`;
-  return formatVenueDetail(v) + '<br><i>💡 问「' + escapeHtml(v.name.slice(0, 4)) + '附近有什么」查看周边场馆</i>';
+  if (!v) return `没找到「<b>${escapeHtml(name.slice(0, 15))}</b>」的详细信息。<br><br> 试试：<br>• 输入完整场馆名称<br>• 输入省份名称查看当地全部场馆<br>• 到<a href="${escapeAttr(getBasePath())}pages/guide.html">全国导览</a>搜索`;
+  return formatVenueDetail(v) + '<br><i> 问「' + escapeHtml(v.name.slice(0, 4)) + '附近有什么」查看周边场馆</i>';
 }
 
 function searchVenueLocation(name) {
@@ -314,11 +315,11 @@ function searchVenueLocation(name) {
   const esc = escapeHtml;
   // 仅允许 http(s) 链接，杜绝 javascript: 注入
   const safeUrl = (v.officialUrl && /^https?:\/\//i.test(v.officialUrl)) ? v.officialUrl : '';
-  return `🏛️ <b>${esc(v.name)}</b><br>
-      📍 <b>详细地址</b>：${esc(v.province || '')}${esc(v.city || '')}${esc(v.district || '')}<br>
-      ${coord ? `🌐 <b>经纬度</b>：${coord.lat.toFixed(4)}, ${coord.lng.toFixed(4)}<br>` : ''}
-      ${safeUrl ? `🔗 <a href="${escapeAttr(safeUrl)}" target="_blank" rel="noopener">官方网站（含交通指引）</a><br>` : ''}
-      <br><i>💡 建议出行前通过官网或电话确认开放时间和预约方式</i>`;
+  return ` <b>${esc(v.name)}</b><br>
+       <b>详细地址</b>：${esc(v.province || '')}${esc(v.city || '')}${esc(v.district || '')}<br>
+      ${coord ? ` <b>经纬度</b>：${coord.lat.toFixed(4)}, ${coord.lng.toFixed(4)}<br>` : ''}
+      ${safeUrl ? ` <a href="${escapeAttr(safeUrl)}" target="_blank" rel="noopener">官方网站（含交通指引）</a><br>` : ''}
+      <br><i> 建议出行前通过官网或电话确认开放时间和预约方式</i>`;
 }
 
 /* ---- 场馆详情格式化（AI 聊天用） ---- */
@@ -338,24 +339,24 @@ function formatVenueDetail(v) {
   const attr = escapeAttr;
 
   let html = '<div class="ai-card">';
-  html += '<div class="ai-card-title">🏛️ ' + esc(v.name) + '</div>';
-  html += '<div class="ai-card-meta">📍 ' + esc(v.province || '') +
+  html += '<div class="ai-card-title"> ' + esc(v.name) + '</div>';
+  html += '<div class="ai-card-meta"> ' + esc(v.province || '') +
     (v.city ? ' · ' + esc(v.city) : '') +
     (v.district ? ' · ' + esc(v.district) : '') +
     (v.category ? ' · ' + esc(v.category) : '') + '</div>';
   if (coord && coord.lat != null && coord.lng != null) {
-    html += '<div class="ai-card-meta">🌐 坐标：' + coord.lat.toFixed(4) + ', ' + coord.lng.toFixed(4) + '</div>';
+    html += '<div class="ai-card-meta"> 坐标：' + coord.lat.toFixed(4) + ', ' + coord.lng.toFixed(4) + '</div>';
   }
   if (imgSrc) {
     html += '<img class="ai-card-img" src="' + attr(imgSrc) + '" alt="' + esc(v.name) + '" loading="lazy">';
   }
   if (detail && detail.history) {
-    html += '<br><b>📖 历史背景</b><br>' + esc(truncate(detail.history, 110));
+    html += '<br><b> 历史背景</b><br>' + esc(truncate(detail.history, 110));
   } else if (v.summary) {
-    html += '<br><b>📖 简介</b><br>' + esc(truncate(v.summary, 110));
+    html += '<br><b> 简介</b><br>' + esc(truncate(v.summary, 110));
   }
   if (detail && detail.education) {
-    html += '<br><b>🎓 教育意义</b><br>' + esc(truncate(detail.education, 80));
+    html += '<br><b> 教育意义</b><br>' + esc(truncate(detail.education, 80));
   }
   html += '<br><br><a class="ai-card-link" href="' + attr(bp) + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">查看完整详情 →</a>';
   html += '</div>';
@@ -366,11 +367,11 @@ function searchByCategory(cat) {
   const found = getVenues().filter(v => v.category && v.category.includes(cat));
   if (found.length === 0) {
     const allCats = getCategoriesRaw();
-    return `没找到「${escapeHtml(cat)}」类别。当前场馆类别有：${allCats.join('、')}<br><br><i>💡 输入类别名查看该类别下的场馆</i>`;
+    return `没找到「${escapeHtml(cat)}」类别。当前场馆类别有：${allCats.join('、')}<br><br><i> 输入类别名查看该类别下的场馆</i>`;
   }
-  return `🏷️ <b>${escapeHtml(cat)}</b> 类场馆共 <b>${found.length}</b> 个：<br><br>` +
+  return ` <b>${escapeHtml(cat)}</b> 类场馆共 <b>${found.length}</b> 个：<br><br>` +
     found.map(v => `• <b>${escapeHtml(v.name)}</b> — ${escapeHtml(v.province)} ${escapeHtml(v.city || '')}`).join('<br>') +
-    `<br><i>💡 输入场馆名了解详情</i>`;
+    `<br><i> 输入场馆名了解详情</i>`;
 }
 
 function compareVenues(a, b) {
@@ -378,13 +379,13 @@ function compareVenues(a, b) {
   const vb = findVenue(b.trim());
   if (!va || !vb) return `需要两个有效场馆名才能对比哦。试试如「比较井冈山和延安」`;
   const esc = escapeHtml;
-  return `⚖️ <b>场馆对比</b><br><br>
+  return ` <b>场馆对比</b><br><br>
       <table class="ai-compare-table">
       <tr><td></td><td><b>${esc(va.name)}</b></td><td><b>${esc(vb.name)}</b></td></tr>
-      <tr><td>📍 地区</td><td>${esc(va.province)} ${esc(va.city || '')}</td><td>${esc(vb.province)} ${esc(vb.city || '')}</td></tr>
-      <tr><td>🏷️ 类别</td><td>${esc(va.category || '—')}</td><td>${esc(vb.category || '—')}</td></tr>
-      <tr><td>📝 简介</td><td>${esc((va.summary || '').slice(0, 40))}…</td><td>${esc((vb.summary || '').slice(0, 40))}…</td></tr>
-      </table><br><i>💡 输入场馆名查看完整详情</i>`;
+      <tr><td> 地区</td><td>${esc(va.province)} ${esc(va.city || '')}</td><td>${esc(vb.province)} ${esc(vb.city || '')}</td></tr>
+      <tr><td> 类别</td><td>${esc(va.category || '—')}</td><td>${esc(vb.category || '—')}</td></tr>
+      <tr><td> 简介</td><td>${esc((va.summary || '').slice(0, 40))}…</td><td>${esc((vb.summary || '').slice(0, 40))}…</td></tr>
+      </table><br><i> 输入场馆名查看完整详情</i>`;
 }
 
 function searchNearby(name) {
@@ -394,11 +395,11 @@ function searchNearby(name) {
   const sameCity = sameProv.filter(x => x.city === v.city);
   const nearby = sameCity.length > 0 ? sameCity : sameProv;
   const esc = escapeHtml;
-  return `📍 <b>${esc(v.name)}</b> 位于 <b>${esc(v.province)}${esc(v.city || '')}</b><br><br>` +
+  return ` <b>${esc(v.name)}</b> 位于 <b>${esc(v.province)}${esc(v.city || '')}</b><br><br>` +
     (nearby.length > 0
       ? `同地区的其他场馆（${nearby.length}个）：<br>` + nearby.slice(0, 6).map(x => `• <b>${esc(x.name)}</b> — ${esc(x.category || '')}`).join('<br>')
       : `该地区目前仅收录了这一个场馆`) +
-    `<br><i>💡 输入「${esc(v.province.replace(/省|市|自治区/g, ''))}有哪些场馆」查看全部</i>`;
+    `<br><i> 输入「${esc(v.province.replace(/省|市|自治区/g, ''))}有哪些场馆」查看全部</i>`;
 }
 
 function getStats() {
@@ -411,12 +412,12 @@ function getStats() {
     const mm = String(dates[dates.length - 1]).match(/^(\d{4})-(\d{2})/);
     latest = mm ? mm[1] + '年' + String(parseInt(mm[2], 10)) + '月' : String(dates[dates.length - 1]);
   }
-  return `📊 <b>红色场馆数据统计</b><br><br>
-      🏛️ 场馆总数：<b>${v.length}</b> 个<br>
-      🗺️ 覆盖省区市：<b>${provinces}</b> 个<br>
-      🏷️ 场馆类别：<b>${cats.length}</b> 种（${cats.join('、')}）<br>
-      📅 数据更新：${latest}<br><br>
-      <i>💡 输入省份名查看该地区的场馆</i>`;
+  return ` <b>红色场馆数据统计</b><br><br>
+       场馆总数：<b>${v.length}</b> 个<br>
+       覆盖省区市：<b>${provinces}</b> 个<br>
+       场馆类别：<b>${cats.length}</b> 种（${cats.join('、')}）<br>
+       数据更新：${latest}<br><br>
+      <i> 输入省份名查看该地区的场馆</i>`;
 }
 
 function getProvinceRanking() {
@@ -426,15 +427,15 @@ function getProvinceRanking() {
     count[p] = (count[p] || 0) + 1;
   });
   const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-  return `📊 <b>各省区市场馆数量排名</b><br><br>` +
-    sorted.slice(0, 10).map(([p, c], i) => `${['🥇', '🥈', '🥉'][i] || (i + 1)} <b>${p}</b>：${c} 个`).join('<br>') +
-    `<br><i>💡 输入省份名查看该地区的具体场馆</i>`;
+  return ` <b>各省区市场馆数量排名</b><br><br>` +
+    sorted.slice(0, 10).map(([p, c], i) => `${['①', '②', '③'][i] || (i + 1)} <b>${p}</b>：${c} 个`).join('<br>') +
+    `<br><i> 输入省份名查看该地区的具体场馆</i>`;
 }
 
 function getCategories() {
-  return `🏷️ 当前场馆覆盖的类别：<br><br>` +
+  return ` 当前场馆覆盖的类别：<br><br>` +
     getCategoriesRaw().map(c => `• <b>${c}</b>`).join('<br>') +
-    `<br><i>💡 输入类别名查看该类别下的场馆，如「革命纪念馆有哪些」</i>`;
+    `<br><i> 输入类别名查看该类别下的场馆，如「革命纪念馆有哪些」</i>`;
 }
 
 function getCategoriesRaw() {
@@ -446,36 +447,36 @@ function getProvinceCount() {
 }
 
 function getHelp() {
-  return `🤖 <b>红旅AI助手 使用指南</b><br><br>
-      🗺️ <b>查场馆</b><br>「延安有哪些场馆」「介绍井冈山革命博物馆」「韶山在哪」<br><br>
-      📖 <b>学历史</b><br>「长征」「遵义会议」「九一八事变」「飞夺泸定桥」<br><br>
-      🚩 <b>悟精神</b><br>「红船精神」「长征精神」「延安精神」「红旗渠精神」<br><br>
-      📊 <b>看数据</b><br>「有多少场馆」「哪些省份最多」「场馆类别有哪些」<br><br>
-      🛤️ <b>找路线</b><br>「推荐红色旅游路线」「长征路线怎么走」<br><br>
-      ⚖️ <b>对比</b><br>「比较井冈山和延安」「对比西柏坡和遵义」<br><br>
+  return ` <b>红旅AI助手 使用指南</b><br><br>
+       <b>查场馆</b><br>「延安有哪些场馆」「介绍井冈山革命博物馆」「韶山在哪」<br><br>
+       <b>学历史</b><br>「长征」「遵义会议」「九一八事变」「飞夺泸定桥」<br><br>
+       <b>悟精神</b><br>「红船精神」「长征精神」「延安精神」「红旗渠精神」<br><br>
+       <b>看数据</b><br>「有多少场馆」「哪些省份最多」「场馆类别有哪些」<br><br>
+       <b>找路线</b><br>「推荐红色旅游路线」「长征路线怎么走」<br><br>
+       <b>对比</b><br>「比较井冈山和延安」「对比西柏坡和遵义」<br><br>
       <i>现在就开始提问吧！</i>`;
 }
 
 function getYearEvents(year) {
   const timeline = {
-    '1921': '🌟 1921年7月23日，<b>中共一大</b>在上海开幕，后转移至嘉兴南湖闭幕，中国共产党正式成立。',
-    '1927': '🔫 1927年8月1日<b>南昌起义</b>、9月<b>秋收起义</b>、12月<b>广州起义</b>，是我党独立领导武装斗争的开端。',
-    '1929': '📜 1929年12月，<b>古田会议</b>在福建上杭召开，确立"思想建党、政治建军"原则。',
-    '1931': '⚠️ 1931年9月18日<b>九一八事变</b>，日本侵占东北；11月<b>中华苏维埃共和国</b>在瑞金成立。',
-    '1934': '🚶 1934年10月，中央红军从江西出发，开始<b>长征</b>。',
-    '1935': '🏛️ 1935年1月<b>遵义会议</b>、5月<b>飞夺泸定桥</b>、10月中央红军到达陕北。',
-    '1936': '🎯 1936年10月，红军三大主力在<b>甘肃会宁</b>胜利会师，长征结束。',
-    '1937': '⚔️ 1937年7月7日<b>卢沟桥事变</b>，全面抗战爆发。',
-    '1945': '🎉 1945年8月15日，<b>日本宣布无条件投降</b>，抗日战争胜利。',
-    '1949': '🏛️ 1949年3月<b>七届二中全会</b>在西柏坡召开；10月1日<b>开国大典</b>。',
-    '1964': '🚀 1964年10月16日，中国第一颗<b>原子弹</b>在青海原子城爆炸成功。',
+    '1921': ' 1921年7月23日，<b>中共一大</b>在上海开幕，后转移至嘉兴南湖闭幕，中国共产党正式成立。',
+    '1927': ' 1927年8月1日<b>南昌起义</b>、9月<b>秋收起义</b>、12月<b>广州起义</b>，是我党独立领导武装斗争的开端。',
+    '1929': ' 1929年12月，<b>古田会议</b>在福建上杭召开，确立"思想建党、政治建军"原则。',
+    '1931': ' 1931年9月18日<b>九一八事变</b>，日本侵占东北；11月<b>中华苏维埃共和国</b>在瑞金成立。',
+    '1934': ' 1934年10月，中央红军从江西出发，开始<b>长征</b>。',
+    '1935': ' 1935年1月<b>遵义会议</b>、5月<b>飞夺泸定桥</b>、10月中央红军到达陕北。',
+    '1936': ' 1936年10月，红军三大主力在<b>甘肃会宁</b>胜利会师，长征结束。',
+    '1937': ' 1937年7月7日<b>卢沟桥事变</b>，全面抗战爆发。',
+    '1945': ' 1945年8月15日，<b>日本宣布无条件投降</b>，抗日战争胜利。',
+    '1949': ' 1949年3月<b>七届二中全会</b>在西柏坡召开；10月1日<b>开国大典</b>。',
+    '1964': ' 1964年10月16日，中国第一颗<b>原子弹</b>在青海原子城爆炸成功。',
   };
-  if (timeline[year]) return `📅 <b>${year}年</b>${timeline[year]}`;
-  return `📅 <b>${year}年</b>的具体红色历史事件我还在整理中。<br><br>目前已收录：${Object.keys(timeline).join('、')} 年的重要事件。<br><i>💡 输入具体事件名如「长征」「开国大典」了解更多</i>`;
+  if (timeline[year]) return ` <b>${year}年</b>${timeline[year]}`;
+  return ` <b>${year}年</b>的具体红色历史事件我还在整理中。<br><br>目前已收录：${Object.keys(timeline).join('、')} 年的重要事件。<br><i> 输入具体事件名如「长征」「开国大典」了解更多</i>`;
 }
 
 function getSpiritList() {
-  return `🚩 <b>红色精神谱系</b><br><br>
+  return ` <b>红色精神谱系</b><br><br>
       • <b>红船精神</b> — 开天辟地、敢为人先<br>
       • <b>井冈山精神</b> — 坚定信念、艰苦奋斗<br>
       • <b>长征精神</b> — 不怕牺牲、不畏艰难<br>
@@ -486,7 +487,7 @@ function getSpiritList() {
       • <b>红旗渠精神</b> — 自力更生、艰苦创业<br>
       • <b>两弹一星精神</b> — 无私奉献、大力协同<br>
       • <b>苏区精神</b> — 求真务实、一心为民<br><br>
-      <i>💡 输入精神名称了解详情，如「红旗渠精神」</i>`;
+      <i> 输入精神名称了解详情，如「红旗渠精神」</i>`;
 }
 
 function findVenue(name) {
@@ -507,26 +508,26 @@ function recommendRoute(q) {
   const venues = getVenues();
   const isChangzheng = q.indexOf('长征') >= 0;
   const routes = [
-    { name: '🌟 建党足迹之旅（2天）', desc: '上海一大会址 → 嘉兴南湖红船，追寻党的诞生足迹。', venues: ['中共一大会址纪念馆', '嘉兴南湖红船'], theme: '建党' },
-    { name: '⭐ 长征精神之旅（5天）', desc: '井冈山 → 遵义 → 泸定桥 → 会宁，重走长征关键节点。', venues: ['井冈山革命博物馆', '遵义会议会址', '泸定桥', '会宁红军长征胜利纪念馆'], theme: '长征' },
-    { name: '🏔️ 延安精神之旅（3天）', desc: '延安 → 西柏坡 → 北京，从延安到开国大典。', venues: ['延安革命纪念馆', '西柏坡纪念馆', '中国共产党历史展览馆'], theme: '延安' },
-    { name: '🔥 抗战记忆之旅（4天）', desc: '沈阳 → 太行 → 重庆，重温全民族抗战史诗。', venues: ['九一八历史博物馆', '八路军太行纪念馆', '红岩革命纪念馆'], theme: '抗战' },
-    { name: '⛰️ 革命摇篮之旅（3天）', desc: '南昌 → 井冈山 → 古田，探索人民军队创建之路。', venues: ['南昌八一起义纪念馆', '井冈山革命博物馆', '古田会议会址'], theme: '建军' },
-    { name: '🌄 伟人故里之旅（2天）', desc: '韶山 → 天津，缅怀伟人风范。', venues: ['韶山毛泽东同志故居', '周恩来邓颖超纪念馆'], theme: '伟人' },
-    { name: '💪 奋斗精神之旅（3天）', desc: '红旗渠 → 三五九旅 → 原子城，感受奋斗力量。', venues: ['红旗渠纪念馆', '三五九旅屯垦纪念馆', '青海原子城纪念馆'], theme: '奋斗' },
+    { name: ' 建党足迹之旅（2天）', desc: '上海一大会址 → 嘉兴南湖红船，追寻党的诞生足迹。', venues: ['中共一大会址纪念馆', '嘉兴南湖红船'], theme: '建党' },
+    { name: ' 长征精神之旅（5天）', desc: '井冈山 → 遵义 → 泸定桥 → 会宁，重走长征关键节点。', venues: ['井冈山革命博物馆', '遵义会议会址', '泸定桥', '会宁红军长征胜利纪念馆'], theme: '长征' },
+    { name: ' 延安精神之旅（3天）', desc: '延安 → 西柏坡 → 北京，从延安到开国大典。', venues: ['延安革命纪念馆', '西柏坡纪念馆', '中国共产党历史展览馆'], theme: '延安' },
+    { name: ' 抗战记忆之旅（4天）', desc: '沈阳 → 太行 → 重庆，重温全民族抗战史诗。', venues: ['九一八历史博物馆', '八路军太行纪念馆', '红岩革命纪念馆'], theme: '抗战' },
+    { name: ' 革命摇篮之旅（3天）', desc: '南昌 → 井冈山 → 古田，探索人民军队创建之路。', venues: ['南昌八一起义纪念馆', '井冈山革命博物馆', '古田会议会址'], theme: '建军' },
+    { name: ' 伟人故里之旅（2天）', desc: '韶山 → 天津，缅怀伟人风范。', venues: ['韶山毛泽东同志故居', '周恩来邓颖超纪念馆'], theme: '伟人' },
+    { name: ' 奋斗精神之旅（3天）', desc: '红旗渠 → 三五九旅 → 原子城，感受奋斗力量。', venues: ['红旗渠纪念馆', '三五九旅屯垦纪念馆', '青海原子城纪念馆'], theme: '奋斗' },
   ];
   const displayRoutes = isChangzheng ? routes.filter(function (r) { return r.theme === "长征"; }).concat(routes.filter(function (r) { return r.theme !== "长征"; })) : routes;
-  let html = '<div class="ai-card-title">🗺️ 红色旅游主题路线推荐</div><br>';
+  let html = '<div class="ai-card-title"> 红色旅游主题路线推荐</div><br>';
   displayRoutes.forEach(function (r) {
     html += '<div class="ai-card">';
-    html += '<b>' + r.name + '</b><br>📌 ' + r.desc + '<br>';
-    html += '🏛️ ' + r.venues.map(function (vn) {
+    html += '<b>' + r.name + '</b><br> ' + r.desc + '<br>';
+    html += ' ' + r.venues.map(function (vn) {
       const v = venues.find(function (x) { return (x.name || '').indexOf(vn) >= 0; });
       return v ? '<a class="ai-card-link" href="' + escapeAttr(getBasePath()) + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">' + escapeHtml(vn) + '</a>' : escapeHtml(vn);
     }).join(' → ');
     html += '</div>';
   });
-  html += '<br><i>💡 点击场馆名查看详情 | 输入「长征路线」查看长征专题</i>';
+  html += '<br><i> 点击场馆名查看详情 | 输入「长征路线」查看长征专题</i>';
   return html;
 }
 

@@ -5,7 +5,8 @@
    约束：只依赖 utils.js，被 pages/music/modals/cardgen/longmarch/action-delegate 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080416';
+import { getBasePath } from './utils.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -35,7 +36,8 @@ function showToast(message, duration = 2500) {
     toast.className = 'toast';
     document.body.appendChild(toast);
   }
-  toast.textContent = message;
+  /* innerHTML：支持图标 SVG；调用方均为常量文案（无用户输入注入面） */
+  toast.innerHTML = message;
   toast.classList.add('show');
   clearTimeout(toast._timeout);
   toast._timeout = setTimeout(() => toast.classList.remove('show'), duration);
@@ -180,13 +182,13 @@ function copyShareLink(text) {
   const url = location.href;
   // 非安全上下文（file:// / http）下 navigator.clipboard 可能不存在，直接访问会同步抛错
   if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
-    showToast('❌ 当前环境不支持复制，请手动复制地址栏');
+    showToast(icon('cross') + ' 当前环境不支持复制，请手动复制地址栏');
     return;
   }
   navigator.clipboard.writeText(`${text}\n${url}`).then(() => {
-    showToast('✅ 链接已复制到剪贴板');
+    showToast(icon('check') + ' 链接已复制到剪贴板');
   }).catch(() => {
-    showToast('❌ 复制失败，请手动复制地址栏');
+    showToast(icon('cross') + ' 复制失败，请手动复制地址栏');
   });
 }
 

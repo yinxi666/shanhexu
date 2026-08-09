@@ -4,8 +4,9 @@
    约束：依赖 utils(getBasePath) / ui(showToast)；被 pages.initCommon 调用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080416';
-import { showToast } from './ui.js?v=2026080416';
+import { getBasePath } from './utils.js?v=2026080502';
+import { showToast } from './ui.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
 
 let bgMusic = null;
 
@@ -37,7 +38,7 @@ function initBgMusic() {
   const btn = document.createElement('button');
   btn.className = 'music-toggle';
   btn.title = '背景音乐 · 歌唱祖国';
-  btn.innerHTML = '🔇';
+  btn.innerHTML = icon('note-off');
   btn.setAttribute('aria-label', '播放背景音乐');
   wrap.appendChild(btn);
 
@@ -55,7 +56,7 @@ function initBgMusic() {
     savedTime = parseFloat(sessionStorage.getItem('bgmusic_time') || '0') || 0;
   } catch (e) { /* 存储不可用：忽略恢复 */ }
   if (wasPlaying) {
-    btn.innerHTML = '🎵';
+    btn.innerHTML = icon('note');
     btn.classList.add('playing');
     // 先设进度再播放（元数据未就绪时 currentTime 可能抛 InvalidStateError）
     if (savedTime > 0) { try { bgMusic.currentTime = savedTime; } catch (e) { } }
@@ -67,7 +68,7 @@ function initBgMusic() {
   btn.addEventListener('click', function () {
     if (bgMusic.paused) {
       bgMusic.play().then(function () {
-        btn.innerHTML = '🎵';
+        btn.innerHTML = icon('note');
         btn.classList.add('playing');
         sessionStorage.setItem('bgmusic_playing', '1');
       }).catch(function () {
@@ -75,7 +76,7 @@ function initBgMusic() {
       });
     } else {
       bgMusic.pause();
-      btn.innerHTML = '🔇';
+      btn.innerHTML = icon('note-off');
       btn.classList.remove('playing');
       sessionStorage.setItem('bgmusic_playing', '0');
     }

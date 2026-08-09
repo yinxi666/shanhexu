@@ -5,12 +5,13 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026080416';
-import * as RedRenderers from './renderers.js?v=2026080416';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080416';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080416';
-import { initBgMusic } from './music.js?v=2026080416';
-import { initHomeHeatmap } from './heatmap.js?v=2026080416';
+import * as RedData from './data.js?v=2026080502';
+import * as RedRenderers from './renderers.js?v=2026080502';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080502';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080502';
+import { initBgMusic } from './music.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
+import { initHomeHeatmap } from './heatmap.js?v=2026080502';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
@@ -216,7 +217,7 @@ async function refreshMessageList() {
   const pageItems = all.slice(start, start + pageSize);
 
   if (pageItems.length === 0) {
-    html = '<div class="empty-state"><div class="empty-icon">💬</div><h3>暂无留言</h3><p>快来写下你的学习感悟吧！</p></div>';
+    html = '<div class="empty-state"><div class="empty-icon">' + icon('chat') + '</div><h3>暂无留言</h3><p>快来写下你的学习感悟吧！</p></div>';
   } else {
     html = pageItems.map(m => renderMessageCard(m)).join('');
     html += renderPagination(all.length, pageSize, currentPage, '.message-list', (page) => {
@@ -455,7 +456,7 @@ async function initGuidePage() {
   if (toggleBtn) {
     toggleBtn.addEventListener('click', async function () {
       mapVisible = !mapVisible;
-      toggleBtn.innerHTML = mapVisible ? '📋 列表视图' : '🗺️ 地图视图';
+      toggleBtn.innerHTML = mapVisible ? icon('list') + ' 列表视图' : icon('map') + ' 地图视图';
       toggleBtn.classList.toggle('map-active', mapVisible);
       if (guideMap) guideMap.classList.toggle('is-hidden', !mapVisible);
       if (guideList) guideList.classList.toggle('is-hidden', mapVisible);
@@ -504,7 +505,7 @@ async function initGuidePage() {
     if (countEl) countEl.innerHTML = '共找到 <strong>' + filtered.length + '</strong> 个场馆，点击卡片可查看场馆详细介绍。';
 
     if (pageItems.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>未找到匹配的场馆</h3><p>请尝试调整搜索条件或筛选选项</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">' + icon('search') + '</div><h3>未找到匹配的场馆</h3><p>请尝试调整搜索条件或筛选选项</p></div>';
     } else {
       container.innerHTML = pageItems.map(function (v) { return renderVenueCard(v); }).join('');
       bindImageFallbacks(container);
@@ -551,7 +552,7 @@ async function initDetailPage() {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   if (!id) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">❓</div><h3>未指定场馆</h3><p>请从导览页面选择一个场馆查看详情</p></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">' + icon('help') + '</div><h3>未指定场馆</h3><p>请从导览页面选择一个场馆查看详情</p></div>';
     return;
   }
 
@@ -565,7 +566,7 @@ async function initDetailPage() {
   const venue = venues.find(v => String(v.id) === String(id));
 
   if (!venue) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>场馆未找到</h3><p>该场馆可能已被移除或链接无效</p></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">' + icon('search') + '</div><h3>场馆未找到</h3><p>该场馆可能已被移除或链接无效</p></div>';
     return;
   }
 
@@ -628,9 +629,9 @@ async function initDetailPage() {
       <div class="detail-action-bar">
         <a href="guide.html" class="action-back">← 返回导览列表</a>
         <div class="action-right">
-          <button class="action-btn" data-action="open-card-gen" data-name="${escapeHtml(venue.name)}" data-image="${escapeAttr(sanitizeUrl(venue.image))}" title="生成红色纪念卡">🎴 纪念卡</button>
-          <button class="action-btn" data-action="copy-share-link" title="复制分享链接">🔗 分享</button>
-          <button class="action-btn btn-print" data-action="print-page" title="打印场馆详情">🖨️ 打印</button>
+          <button class="action-btn" data-action="open-card-gen" data-name="${escapeHtml(venue.name)}" data-image="${escapeAttr(sanitizeUrl(venue.image))}" title="生成红色纪念卡">${icon('card')} 纪念卡</button>
+          <button class="action-btn" data-action="copy-share-link" title="复制分享链接">${icon('link')} 分享</button>
+          <button class="action-btn btn-print" data-action="print-page" title="打印场馆详情">${icon('print')} 打印</button>
         </div>
       </div>`;
 
@@ -642,24 +643,24 @@ async function initDetailPage() {
           <div class="detail-body">
             <div class="detail-tags">
               <span class="tag-category">${escapeHtml(venue.category || '红色场馆')}</span>
-              <span class="tag-province">📍 ${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}</span>
+              <span class="tag-province">${icon('pin')} ${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}</span>
             </div>
             <h2>${escapeHtml(venue.name)}</h2>
-            <div class="detail-location">📍 ${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}</div>
+            <div class="detail-location">${icon('pin')} ${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}</div>
             <div class="detail-desc">${escapeHtml(detailedDesc)}</div>
             <div class="detail-section">
-              <h3>📖 历史背景</h3>
+              <h3>${icon('scroll')} 历史背景</h3>
               <p>${escapeHtml(historyText)}</p>
             </div>
             <div class="detail-section">
-              <h3>🎯 教育意义</h3>
+              <h3>${icon('target')} 教育意义</h3>
               <p>${escapeHtml(educationText)}</p>
             </div>
           </div>
         </div>
         <div class="detail-sidebar">
           <div class="sidebar-card">
-            <h3>📋 场馆信息</h3>
+            <h3>${icon('clipboard')} 场馆信息</h3>
             <div class="info-row"><span class="info-label">名称</span><span class="info-value">${escapeHtml(venue.standardName || venue.name)}</span></div>
             <div class="info-row"><span class="info-label">地区</span><span class="info-value">${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')}</span></div>
             <div class="info-row"><span class="info-label">类别</span><span class="info-value">${escapeHtml(venue.category || '红色场馆')}</span></div>
@@ -667,21 +668,21 @@ async function initDetailPage() {
           </div>
           ${venue.officialUrl ? `
           <div class="sidebar-card">
-            <h3>🔗 官方链接</h3>
-            <a class="official-link" href="${escapeAttr(sanitizeUrl(venue.officialUrl))}" target="_blank" rel="noopener">🌐 ${escapeHtml(venue.officialLinkType || '官方网站')}</a>
-            ${venue.sourcePage ? `<a class="official-link official-link-spaced" href="${escapeAttr(sanitizeUrl(venue.sourcePage))}" target="_blank" rel="noopener">📷 图片来源</a>` : ''}
+            <h3>${icon('link')} 官方链接</h3>
+            <a class="official-link" href="${escapeAttr(sanitizeUrl(venue.officialUrl))}" target="_blank" rel="noopener">${icon('globe')} ${escapeHtml(venue.officialLinkType || '官方网站')}</a>
+            ${venue.sourcePage ? `<a class="official-link official-link-spaced" href="${escapeAttr(sanitizeUrl(venue.sourcePage))}" target="_blank" rel="noopener">${icon('globe')} 图片来源</a>` : ''}
           </div>` : ''}
           <div class="sidebar-card">
-            <h3>🗺️ 位置信息</h3>
+            <h3>${icon('map')} 位置信息</h3>
             ${venue.coordinates && venue.coordinates.lat
       ? `<a class="amap-static-card" href="https://uri.amap.com/marker?position=${venue.coordinates.lng},${venue.coordinates.lat}&name=${encodeURIComponent(venue.name)}" target="_blank">
             <div class="amap-static-map">
-              <span class="amap-static-pin">📍</span>
+              <span class="amap-static-pin">${icon('pin')}</span>
               <span class="amap-static-label">在高德地图中查看</span>
               <span class="amap-static-address">${escapeHtml(venue.province)} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}</span>
             </div>
           </a>`
-      : `<div class="map-placeholder">📍 ${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}<br><small>详细地址请以官方发布为准</small></div>`
+      : `<div class="map-placeholder">${icon('pin')} ${escapeHtml(venue.province || '')} ${escapeHtml(venue.city || '')} ${escapeHtml(venue.district || '')}<br><small>详细地址请以官方发布为准</small></div>`
     }
           </div>
         </div>

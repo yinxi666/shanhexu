@@ -4,15 +4,16 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail, copyShareLink } from './ui.js?v=2026080416';
-import { openVideo, openPracticeDetail, openLightbox } from './modals.js?v=2026080416';
-import { likePractice } from './pages.js?v=2026080416';
-import { toggleFavorite } from './favorites.js?v=2026080416';
-import { openChat } from './chat.js?v=2026080416';
-import { openQuiz } from './quiz.js?v=2026080416';
-import { toggleDarkMode } from './darkmode.js?v=2026080416';
-import * as RedCardGen from './cardgen.js?v=2026080416';
-import { releaseFocus } from './focus-trap.js?v=2026080416';
+import { goToDetail, copyShareLink } from './ui.js?v=2026080502';
+import { openVideo, openPracticeDetail, openLightbox } from './modals.js?v=2026080502';
+import { likePractice } from './pages.js?v=2026080502';
+import { toggleFavorite } from './favorites.js?v=2026080502';
+import { openChat } from './chat.js?v=2026080502';
+import { openQuiz } from './quiz.js?v=2026080502';
+import { toggleDarkMode } from './darkmode.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
+import * as RedCardGen from './cardgen.js?v=2026080502';
+import { releaseFocus } from './focus-trap.js?v=2026080502';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -104,7 +105,7 @@ function handleToggleFavorite(btn) {
   const id = btn.dataset.id;
   if (!id) return;
   const nx = toggleFavorite(id);
-  btn.innerHTML = nx ? '❤️' : '🤍';
+  btn.innerHTML = nx ? icon('heart') : icon('heart-outline');
   btn.classList.toggle('active', nx);
   btn.setAttribute('aria-pressed', String(nx));
 }

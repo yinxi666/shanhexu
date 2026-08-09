@@ -4,7 +4,8 @@
    约束：依赖 utils(getBasePath)；被 app.js 初始化（所有页面）
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080416';
+import { getBasePath } from './utils.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -26,12 +27,12 @@ function initMobileNav() {
   nav.className = 'mobile-nav';
   nav.setAttribute('aria-label', '移动端导航');
   nav.innerHTML = `
-      <a href="${bp}index.html" class="${isActive('index')}">🏠<span>首页</span></a>
-      <a href="${bp}pages/guide.html" class="${isActive('guide')}">📍<span>导览</span></a>
-      <a href="${bp}pages/changzheng.html" class="${isActive('changzheng')}">🚩<span>长征</span></a>
-      <a href="${bp}pages/practice.html" class="${isActive('practice')}">🏆<span>实践</span></a>
-      <a href="${bp}pages/message.html" class="${isActive('message')}">💬<span>留言</span></a>
-      <a href="${bp}pages/policy.html" class="${isActive('policy')}">📰<span>政策</span></a>
+      <a href="${bp}index.html" class="${isActive('index')}">${icon('home')}<span>首页</span></a>
+      <a href="${bp}pages/guide.html" class="${isActive('guide')}">${icon('pin')}<span>导览</span></a>
+      <a href="${bp}pages/changzheng.html" class="${isActive('changzheng')}">${icon('flag')}<span>长征</span></a>
+      <a href="${bp}pages/practice.html" class="${isActive('practice')}">${icon('trophy')}<span>实践</span></a>
+      <a href="${bp}pages/message.html" class="${isActive('message')}">${icon('chat')}<span>留言</span></a>
+      <a href="${bp}pages/policy.html" class="${isActive('policy')}">${icon('news')}<span>政策</span></a>
     `;
   document.body.appendChild(nav);
 }

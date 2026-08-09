@@ -23,6 +23,31 @@ html.dark {
   --shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --mobile-nav-bg: rgba(10, 10, 15, 0.95);
+
+  /* 语义色暗色变体：浅色底转深色表面，文字转亮色保证对比度 */
+  --gold-ink: #fbbf24;
+  --corkboard: #6b5130;
+  --corkboard-border: #4a3a22;
+  --img-placeholder: #1e293b;
+  --chat-header-grad: linear-gradient(135deg, #6b0f0f 0%, #8f1a1a 55%, #a06a20 140%);
+  --status-ok: #4ade80;
+  --status-ok-border: #22c55e;
+  --status-ok-bg: rgba(34, 197, 94, 0.12);
+  --status-ok-text: #4ade80;
+  --status-err: #ef4444;
+  --status-err-text: #f87171;
+
+  /* 长征手卷页：暖金黎明叙事在暗色下收敛，融入全站暗色视觉 */
+  --cz-gold: #eec55e;
+  --cz-paper: #2b2315;
+  --cz-sky-glow: rgba(217, 164, 65, 0.22);
+  --cz-sky-1: #33291c;
+  --cz-sky-2: #2a2015;
+  --cz-sky-3: #241a10;
+  --cz-sky-4: #1c130b;
+  --cz-sky-5: #120b06;
+  --cz-sky-6: #070403;
   /* 卡片边框/阴影未覆盖 → 深色下卡片边框近乎消失 */
   --card-border: rgba(248, 113, 113, 0.16);
   --card-border-hover: rgba(248, 113, 113, 0.38);

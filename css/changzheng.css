@@ -4,6 +4,20 @@
    分层：FIXED视差背景 / FIXED双卷轴+手卷舞台 / SCROLL驱动条 / HUD / 迷你地图
    ============================================================ */
 
+/* ---------- 长征主题令牌：浅色模式保持原暖金黎明叙事，
+   dark.css 的 html.dark 逐项覆盖以融入全站暗色视觉 ---------- */
+:root {
+  --cz-gold: #ffd76e;            /* 主金色：文字/描边/印章 */
+  --cz-paper: #fff1d0;           /* 纸色：浅米底文字 */
+  --cz-sky-glow: rgba(225, 155, 75, 0.30);  /* 黎明天际暖光带 */
+  --cz-sky-1: #24160c;           /* 天空渐变段 1（顶） */
+  --cz-sky-2: #4d2f16;
+  --cz-sky-3: #7a4c22;
+  --cz-sky-4: #5a3214;
+  --cz-sky-5: #221105;
+  --cz-sky-6: #080402;           /* 天空渐变段 6（底） */
+}
+
 /* ---------- main 容器：唯一正常流 ---------- */
 #cz-main {
   position: relative;
@@ -19,8 +33,8 @@
   pointer-events: none;
   /* 黎明天际：中上部有一道可见的暖光带，让黑色山影与行军队伍衬出剪影 */
   background:
-    radial-gradient(ellipse 90% 55% at 50% 42%, rgba(225, 155, 75, 0.30) 0%, transparent 68%),
-    linear-gradient(180deg, #24160c 0%, #4d2f16 34%, #7a4c22 47%, #5a3214 54%, #221105 74%, #080402 100%);
+    radial-gradient(ellipse 90% 55% at 50% 42%, var(--cz-sky-glow) 0%, transparent 68%),
+    linear-gradient(180deg, var(--cz-sky-1) 0%, var(--cz-sky-2) 34%, var(--cz-sky-3) 47%, var(--cz-sky-4) 54%, var(--cz-sky-5) 74%, var(--cz-sky-6) 100%);
 }
 
 /* 仿宣纸（素材暂不可用，用多层径向+SVG噪点） */
@@ -103,7 +117,7 @@
   left: 4px;
   right: 4px;
   z-index: 2;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: linear-gradient(90deg,
       rgba(0, 0, 0, 0.45) 0%,
       rgba(0, 0, 0, 0.06) 24%,
@@ -160,7 +174,7 @@
   left: 4px;
   right: 4px;
   z-index: 1;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='240' viewBox='0 0 48 240'><defs><filter id='w' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.13 0.018' numOctaves='3' stitchTiles='stitch' seed='5'/><feColorMatrix type='matrix' values='0.42 0 0 0 0.10  0.24 0 0 0 0.04  0.10 0 0 0 0.01  0 0 0 1 0'/></filter></defs><rect width='48' height='240' filter='url(%23w)'/></svg>");
   background-repeat: repeat-y;
   background-size: 100% 200px;
@@ -206,7 +220,7 @@
   will-change: transform;
   transform: translate3d(0, 0, 0);
   /* 手卷上下端做微微弧形下垂（空气里手卷的弧度） */
-  border-radius: 2px / 4px;
+  border-radius: var(--radius-xs) / 4px;
 }
 
 /* 手卷宣纸底：repeat-x 无限延伸的浅米黄宣纸
@@ -318,9 +332,9 @@
   height: 76px;
   transform: translate(-50%, -50%);
   z-index: 4;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.55s ease,
-    opacity 0.45s ease;
+  transition: transform var(--duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+    filter var(--duration-normal) ease,
+    opacity var(--duration-normal) ease;
   cursor: pointer;
   pointer-events: auto;
   opacity: 0.78;
@@ -363,7 +377,7 @@
   top: -26px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 2px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-pill);
   background: rgba(80, 35, 15, 0.92);
   color: #ffe7b0;
@@ -371,7 +385,7 @@
   white-space: nowrap;
   letter-spacing: 1px;
   opacity: 0;
-  transition: opacity 0.35s ease, top 0.35s ease;
+  transition: opacity var(--duration-fast) ease, top var(--duration-fast) ease;
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -389,8 +403,8 @@
   max-width: 42vw;
   background:
     radial-gradient(ellipse at 20% 10%, rgba(255, 248, 220, 0.92) 0%, #f7ecc9 55%, #efe0b2 100%);
-  padding: 16px 22px 18px;
-  border-radius: 2px;
+  padding: 16px 24px 16px;
+  border-radius: var(--radius-xs);
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.35),
     0 2px 6px rgba(0, 0, 0, 0.25),
@@ -399,8 +413,8 @@
   opacity: 0;
   transform: translate(0, -120vh) rotate(-12deg) scale(0.9);
   transition:
-    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.75s ease;
+    transform var(--duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+    opacity var(--duration-normal) ease;
   z-index: 5;
   pointer-events: none;
   /* 不挡下面印章点击 */
@@ -417,7 +431,7 @@
 
 /* 奇偶站笺纸左右错开，避免重叠 */
 .cz-note.place-left {
-  margin-left: -470px;
+  margin-left: -468px;
 }
 
 .cz-note.place-right {
@@ -458,7 +472,7 @@
   color: #fff6da;
   font-family: 'HongLeiZhuoShu', 'STKaiti', 'KaiTi', serif;
   font-size: 16px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   transform: rotate(-4deg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 240, 200, 0.25);
   opacity: 0.88;
@@ -470,7 +484,7 @@
   align-items: baseline;
   justify-content: space-between;
   padding-bottom: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   border-bottom: 1px dashed rgba(120, 80, 30, 0.35);
 }
 
@@ -494,8 +508,8 @@
   font-size: 15px;
   line-height: 1.6;
   color: #6a2b15;
-  padding: 8px 10px;
-  margin: 8px 0 10px;
+  padding: 8px 12px;
+  margin: 8px 0 12px;
   background: rgba(190, 140, 70, 0.12);
   border-left: 3px solid rgba(170, 90, 30, 0.55);
   font-style: italic;
@@ -511,15 +525,15 @@
 
 /* 笺纸场馆链接按钮 */
 .cz-note-venue {
-  margin-top: 14px;
+  margin-top: 16px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 8px;
+  padding: 8px 16px;
   border: 1px solid rgba(170, 90, 30, 0.5);
   color: #7a1a0f;
   font-size: 13px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   text-decoration: none;
   background: rgba(255, 246, 216, 0.7);
   transition: all 0.25s ease;
@@ -537,7 +551,7 @@
   width: 100%;
   height: 82px;
   margin: 0 0 8px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
   position: relative;
   border: 1px solid rgba(139, 90, 43, 0.3);
@@ -549,7 +563,7 @@
   height: 100%;
   object-fit: cover;
   filter: sepia(0.4) contrast(1.1) brightness(0.75) saturate(0.6);
-  transition: filter 0.4s ease;
+  transition: filter var(--duration-fast) ease;
 }
 
 .cz-note-photo:hover img {
@@ -594,7 +608,7 @@
   bottom: calc(100% + 6px);
   right: 0;
   width: 210px;
-  padding: 10px 12px;
+  padding: 12px 12px;
   background: rgba(42, 28, 16, 0.96);
   border: 1px solid rgba(178, 120, 50, 0.55);
   border-radius: var(--radius-xs);
@@ -618,7 +632,7 @@
 
 .cz-note-relic-tip strong {
   display: block;
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-family: 'Noto Serif SC', serif;
   font-weight: 700;
   font-size: 13.5px;
@@ -643,10 +657,10 @@
   position: absolute;
   top: -4px;
   right: -6px;
-  font-size: 10px;
+  font-size: 12px;
   color: rgba(255, 215, 150, 0.7);
   background: rgba(60, 30, 10, 0.85);
-  padding: 1px 6px;
+  padding: 4px 8px;
   border-radius: var(--radius-pill);
   letter-spacing: 0.04em;
   opacity: 0;
@@ -675,12 +689,12 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 215, 150, 0.4);
   background: rgba(60, 30, 10, 0.92);
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-size: 15px;
   cursor: pointer;
   z-index: 6;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
-  transition: transform .2s ease, background .2s ease;
+  transition: transform var(--transition) ease, background var(--transition) ease;
   pointer-events: auto;
 }
 .cz-sound-toggle:hover {
@@ -694,17 +708,17 @@
   top: -12px;
   left: -12px;
   z-index: 6;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 215, 150, 0.4);
   background: rgba(60, 30, 10, 0.92);
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
-  transition: transform .2s ease, background .2s ease;
+  transition: transform var(--transition) ease, background var(--transition) ease;
   pointer-events: auto;
   white-space: nowrap;
 }
@@ -726,17 +740,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 16px;
   padding: 0 24px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 1s ease;
+  transition: opacity var(--duration-normal) ease;
 }
 .cz-poem-overlay.show {
   opacity: 1;
 }
 .cz-poem-text {
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-family: "HongLeiZhuoShu", "STKaiti", "KaiTi", serif;
   font-size: clamp(26px, 5vw, 48px);
   font-weight: 700;
@@ -779,13 +793,13 @@
   width: min(360px, 88vw);
   max-height: 80vh;
   overflow-y: auto;
-  padding: 30px 26px 24px;
+  padding: 32px 28px 24px;
   background: linear-gradient(160deg, #2b1610, #1a0e08);
   border: 1px solid rgba(255, 215, 150, 0.3);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
   text-align: center;
-  color: #fff1d0;
+  color: var(--cz-paper);
 }
 .cz-relic-close {
   position: absolute;
@@ -797,10 +811,10 @@
   font-size: 18px;
   cursor: pointer;
   padding: 4px 8px;
-  transition: color .2s, transform .2s;
+  transition: color var(--transition), transform var(--transition);
 }
 .cz-relic-close:hover {
-  color: #ffd76e;
+  color: var(--cz-gold);
   transform: scale(1.15);
 }
 .cz-relic-svg svg {
@@ -809,8 +823,8 @@
   filter: drop-shadow(0 0 14px rgba(255, 200, 90, 0.3));
 }
 .cz-relic-modal-box h3 {
-  margin: 14px 0 8px;
-  color: #ffd76e;
+  margin: 16px 0 8px;
+  color: var(--cz-gold);
   font-size: 20px;
   font-family: "HongLeiZhuoShu", "STZhongsong", serif;
   letter-spacing: 0.08em;
@@ -864,7 +878,7 @@
   margin: 0 auto 28px;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid #ffd76e;
+  border: 4px solid var(--cz-gold);
   box-shadow: 0 0 36px rgba(255, 200, 90, 0.5), 0 0 70px rgba(255, 120, 60, 0.32);
   animation: cz-complete-ignite 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -874,7 +888,7 @@
   inset: -38px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 140, 70, 0.3) 0%, transparent 65%);
-  animation: cz-complete-glow 2.2s ease-in-out infinite;
+  animation: cz-complete-glow 2var(--transition) ease-in-out infinite;
   pointer-events: none;
 }
 .cz-complete-portrait img {
@@ -896,16 +910,16 @@
   font-family: "HongLeiZhuoShu", "STKaiti", "KaiTi", serif;
   font-size: clamp(38px, 7vw, 66px);
   font-weight: 700;
-  color: #ffd76e;
+  color: var(--cz-gold);
   letter-spacing: 0.16em;
   text-shadow: 0 0 30px rgba(255, 200, 90, 0.55), 0 4px 18px rgba(0, 0, 0, 0.7);
-  animation: cz-complete-rise .8s ease both .2s;
+  animation: cz-complete-rise .8s ease both var(--transition);
 }
 .cz-complete-sub {
   font-size: clamp(17px, 3vw, 26px);
   color: rgba(255, 215, 150, 0.92);
   letter-spacing: 0.24em;
-  margin-top: 14px;
+  margin-top: 16px;
   animation: cz-complete-rise .8s ease both .3s;
 }
 .cz-complete-desc {
@@ -913,18 +927,18 @@
   font-size: 15px;
   line-height: 1.9;
   max-width: 760px;
-  margin: 26px auto 0;
+  margin: 28px auto 0;
   font-family: "Noto Serif SC", "STZhongsong", serif;
   letter-spacing: 0.02em;
-  animation: cz-complete-rise .8s ease both .4s;
+  animation: cz-complete-rise .8s ease both var(--duration-fast);
 }
 @keyframes cz-complete-rise {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .cz-complete-btn {
-  margin-top: 34px;
-  padding: 14px 36px;
+  margin-top: 32px;
+  padding: 16px 36px;
   font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -934,7 +948,7 @@
   color: #fff;
   cursor: pointer;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 120, 60, 0.35);
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform var(--transition) ease, box-shadow var(--transition) ease;
   animation: cz-complete-rise .8s ease both .5s;
 }
 .cz-complete-btn:hover {
@@ -953,7 +967,7 @@
   animation: cz-complete-rise .8s ease both .6s;
 }
 .cz-complete-close:hover {
-  color: #ffd76e;
+  color: var(--cz-gold);
 }
 
 /* 长征纪念卡：专属弹窗（红金证书主题） */
@@ -976,13 +990,13 @@
   width: min(430px, 92vw);
   max-height: 88vh;
   overflow-y: auto;
-  padding: 30px 24px 24px;
+  padding: 32px 24px 24px;
   background: linear-gradient(165deg, #2d1410, #190b07);
   border: 1px solid rgba(255, 200, 100, 0.4);
   border-top: 4px solid var(--seal-red);
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
-  color: #fff1d0;
+  color: var(--cz-paper);
   text-align: center;
 }
 .cz-card-close {
@@ -995,24 +1009,24 @@
   font-size: 18px;
   cursor: pointer;
   padding: 4px 8px;
-  transition: color .2s, transform .2s;
+  transition: color var(--transition), transform var(--transition);
 }
 .cz-card-close:hover {
-  color: #ffd76e;
+  color: var(--cz-gold);
   transform: scale(1.15);
 }
 .cz-card-head {
   font-family: "HongLeiZhuoShu", "STZhongsong", serif;
   font-size: 26px;
   font-weight: 700;
-  color: #ffd76e;
+  color: var(--cz-gold);
   letter-spacing: 0.1em;
   margin-bottom: 4px;
 }
 .cz-card-sub {
   font-size: 13px;
   color: rgba(255, 215, 150, 0.7);
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   letter-spacing: 0.04em;
 }
 .cz-card-field {
@@ -1040,10 +1054,10 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: border-color .2s, transform .2s;
+  transition: border-color var(--transition), transform var(--transition);
 }
 .cz-card-bg.selected {
-  border-color: #ffd76e;
+  border-color: var(--cz-gold);
   box-shadow: 0 0 10px rgba(255, 215, 110, 0.5);
 }
 .cz-card-bg:hover {
@@ -1054,25 +1068,25 @@
   left: 0;
   right: 0;
   bottom: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: #fff;
   background: rgba(0, 0, 0, 0.55);
-  padding: 2px 0;
+  padding: 4px 0;
   letter-spacing: 0.05em;
 }
 .cz-card-field input[type="text"] {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 12px;
+  padding: 12px 12px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 200, 100, 0.35);
   background: rgba(0, 0, 0, 0.35);
-  color: #fff1d0;
+  color: var(--cz-paper);
   font-size: 14px;
 }
 .cz-card-field input[type="text"]:focus {
   outline: none;
-  border-color: #ffd76e;
+  border-color: var(--cz-gold);
 }
 .cz-card-spirits {
   display: flex;
@@ -1080,23 +1094,23 @@
   gap: 8px;
 }
 .cz-card-chip {
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 200, 100, 0.35);
   background: rgba(185, 28, 28, 0.3);
   color: #ffe9b0;
   font-size: 13px;
   cursor: pointer;
-  transition: all .2s;
+  transition: all var(--transition);
 }
 .cz-card-chip.selected {
   background: var(--seal-red);
   color: #fff;
-  border-color: #ffd76e;
+  border-color: var(--cz-gold);
 }
 .cz-card-gen {
   width: 100%;
-  margin-top: 6px;
+  margin-top: 8px;
   padding: 12px;
   font-size: 16px;
   font-weight: 700;
@@ -1106,7 +1120,7 @@
   background: var(--grad-primary);
   color: #fff;
   cursor: pointer;
-  transition: transform .2s, box-shadow .2s;
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 .cz-card-gen:hover {
   transform: scale(1.02);
@@ -1117,7 +1131,7 @@
   cursor: not-allowed;
 }
 .cz-card-preview {
-  margin-top: 18px;
+  margin-top: 16px;
 }
 .cz-card-preview img {
   width: 100%;
@@ -1135,13 +1149,13 @@
 .cz-card-actions button {
   flex: 1;
   max-width: 160px;
-  padding: 10px;
+  padding: 12px;
   font-size: 14px;
   font-weight: 600;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 215, 150, 0.4);
   cursor: pointer;
-  transition: transform .2s;
+  transition: transform var(--transition);
 }
 .cz-card-dl {
   background: var(--seal-red);
@@ -1155,7 +1169,7 @@
   transform: scale(1.04);
 }
 .cz-card-savehint {
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 12px;
   color: rgba(255, 215, 150, 0.6);
 }
@@ -1167,7 +1181,7 @@
   z-index: 80;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .8s ease;
+  transition: opacity var(--duration-normal) ease;
   overflow: hidden;
 }
 .cz-theater.show {
@@ -1191,7 +1205,7 @@
   inset: 0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1.2s ease;
+  transition: opacity var(--duration-normal) ease;
 }
 .cz-theater.fog-on .cz-theater-fog {
   opacity: 1;
@@ -1229,7 +1243,7 @@
   bottom: 12%;
   transform: translateX(-50%);
   text-align: center;
-  color: #fff1d0;
+  color: var(--cz-paper);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
   white-space: nowrap;
 }
@@ -1238,7 +1252,7 @@
   font-size: clamp(30px, 5vw, 48px);
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: #ffd76e;
+  color: var(--cz-gold);
 }
 .cz-theater-date {
   font-size: 14px;
@@ -1393,7 +1407,7 @@
 
 .cz-route-dot.active .cz-route-dot-core {
   fill: #ff3b30;
-  stroke: #ffd76e;
+  stroke: var(--cz-gold);
   stroke-width: 2.2;
   r: 6.5;
   filter: drop-shadow(0 0 6px rgba(255, 100, 60, 0.9));
@@ -1453,7 +1467,7 @@
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 1.8s ease;
+  transition: opacity var(--duration-normal) ease;
   mix-blend-mode: overlay;
   filter: contrast(1.1) saturate(0.6) brightness(0.55);
 }
@@ -1502,7 +1516,7 @@
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 1.8s ease;
+  transition: opacity var(--duration-normal) ease;
   filter: sepia(0.35) contrast(1.15) brightness(0.45) saturate(0.55);
   mix-blend-mode: multiply;
   z-index: 2;
@@ -1581,7 +1595,7 @@
   right: clamp(14px, 3vw, 36px);
   z-index: 40;
   width: clamp(200px, 22vw, 300px);
-  padding: 12px 14px;
+  padding: 12px 16px;
   background: rgba(10, 6, 3, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -1605,12 +1619,12 @@
   stroke-dashoffset: 2000;
   filter: drop-shadow(0 0 6px rgba(255, 200, 100, 0.9));
   /* 红色进度条缓速追赶滚动，不跟手太快 */
-  transition: stroke-dashoffset 0.7s ease-out;
+  transition: stroke-dashoffset var(--duration-normal) ease-out;
 }
 
 /* 手卷红色路线进度线：滚动时缓速跟上 */
 #czHandrollRouteProgress {
-  transition: stroke-dashoffset 0.7s ease-out;
+  transition: stroke-dashoffset var(--duration-normal) ease-out;
 }
 
 #cz-route-dots .cz-route-dot {
@@ -1618,12 +1632,12 @@
 }
 
 #cz-route-dots .cz-route-dot-core {
-  transition: fill 0.5s ease, r 0.3s ease, filter 0.3s ease, stroke-width 0.3s ease;
+  transition: fill var(--duration-normal) ease, r 0.3s ease, filter 0.3s ease, stroke-width 0.3s ease;
 }
 
 /* 已走过的站：金色实心 */
 #cz-route-dots .cz-route-dot.passed .cz-route-dot-core {
-  fill: #ffd76e;
+  fill: var(--cz-gold);
   stroke: #f3c64c;
 }
 
@@ -1631,9 +1645,9 @@
 #cz-route-dots .cz-route-dot.active .cz-route-dot-core {
   fill: #fff;
   r: 5;
-  stroke: #ffd76e;
+  stroke: var(--cz-gold);
   stroke-width: 1.8;
-  filter: drop-shadow(0 0 6px #ffd76e);
+  filter: drop-shadow(0 0 6px var(--cz-gold));
 }
 
 #cz-route-dots .cz-route-dot.active .cz-route-dot-halo {
@@ -1654,7 +1668,7 @@
 }
 
 #cz-route-marker {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-fast) cubic-bezier(0.22, 1, 0.36, 1);
   filter: drop-shadow(0 0 8px rgba(255, 80, 50, 0.9));
 }
 
@@ -1666,7 +1680,7 @@
 }
 
 .cz-route-title {
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -1676,7 +1690,7 @@
 
 .cz-route-tag {
   color: rgba(255, 215, 150, 0.55);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
@@ -1686,15 +1700,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding-top: 6px;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 215, 150, 0.18);
   color: rgba(255, 255, 255, 0.6);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.04em;
 }
 
 .cz-route-foot b {
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-weight: 700;
 }
 
@@ -1706,7 +1720,7 @@
   transform: translateX(-50%);
   z-index: 30;
   width: min(400px, 40vw);
-  padding: 14px 18px;
+  padding: 16px 16px;
   background: rgba(10, 6, 3, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -1714,7 +1728,7 @@
   border-radius: var(--radius-lg);
   box-sizing: border-box;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
-  color: #fff1d0;
+  color: var(--cz-paper);
   pointer-events: none;
 }
 
@@ -1722,17 +1736,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
 .cz-hud-row:last-of-type {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .cz-hud-index {
   display: inline-block;
-  padding: 3px 10px;
+  padding: 4px 12px;
   background: rgba(185, 28, 28, 0.85);
   color: #fff;
   font-size: 13px;
@@ -1743,7 +1757,7 @@
 
 .cz-hud-station {
   flex: 1;
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-size: 17px;
   font-weight: 700;
   font-family: "HongLeiZhuoShu", "STZhongsong", serif;
@@ -1760,7 +1774,7 @@
 }
 
 .cz-hud-miles b {
-  color: #ffd76e;
+  color: var(--cz-gold);
   font-weight: 700;
   font-family: "HongLeiZhuoShu", serif;
   font-size: 18px;
@@ -1777,16 +1791,16 @@
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .cz-hud-bar-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #ffd76e 0%, #ff8a3d 100%);
+  background: linear-gradient(90deg, var(--cz-gold) 0%, #ff8a3d 100%);
   border-radius: var(--radius-pill);
   box-shadow: 0 0 8px rgba(255, 190, 90, 0.9);
-  transition: width 0.15s linear;
+  transition: width var(--transition) linear;
 }
 
 .cz-hud-hint {
@@ -1851,7 +1865,7 @@
   .cz-note {
     width: calc(100vw - 120px);
     max-width: none;
-    padding: 16px 18px 18px;
+    padding: 16px 16px 16px;
   }
 
   .cz-note.place-left,
@@ -1887,9 +1901,9 @@
     top: 210px;
     right: 10px;
     width: clamp(150px, 34vw, 190px);
-    padding: 8px 10px;
+    padding: 8px 12px;
     border-radius: var(--radius);
-    gap: 6px;
+    gap: 8px;
   }
 
   .cz-route-tag {
@@ -1897,11 +1911,11 @@
   }
 
   .cz-route-title {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .cz-route-foot {
-    font-size: 10px;
+    font-size: 12px;
     padding-top: 4px;
   }
 
@@ -1911,7 +1925,7 @@
     transform: translateX(-50%);
     bottom: auto;
     width: calc(100vw - 20px);
-    padding: 10px 14px;
+    padding: 12px 16px;
     border-radius: var(--radius);
   }
 
@@ -1926,18 +1940,18 @@
   .cz-autoplay-btn {
     top: -10px;
     left: -10px;
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 4px 12px;
+    font-size: 12px;
   }
 
   .cz-hud-row {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .cz-hud-index {
     font-size: 12px;
     letter-spacing: 0.1em;
-    padding: 2px 8px;
+    padding: 4px 8px;
   }
 
   .cz-hud-station {

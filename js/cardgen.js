@@ -2,9 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { getBasePath, resolveAssetPath, escapeAttr, isTouchDevice } from './utils.js?v=2026080416';
-import { showToast } from './ui.js?v=2026080416';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026080416';
+import { getBasePath, resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026080502';
+import { showToast } from './ui.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026080502';
 
 const $ = (s, c) => (c || document).querySelector(s);
 function toast(msg) {
@@ -156,6 +157,7 @@ function drawRoute(ctx, W, baseY) {
 function renderCard(bgImg, spirit, name, venueName) {
   const W = 640, H = 900;
   const cv = document.createElement('canvas');
+  cv.setAttribute('aria-hidden', 'true');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
   ctx.textAlign = 'center';
@@ -298,7 +300,7 @@ function generateCard() {
   const bg = bgList[selectedBg] || bgList[0];
 
   const resetBtn = function () {
-    if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = '✨ 生成纪念卡'; }
+    if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = icon('sparkle') + ' 生成纪念卡'; }
   };
 
   const img = new Image();
@@ -339,7 +341,7 @@ function generateCard() {
       }
     }
     resetBtn();
-    toast('✅ 纪念卡已生成');
+    toast(icon('check') + ' 纪念卡已生成');
   };
   img.onerror = function () { resetBtn(); toast('背景图加载失败，请重试'); };
   img.src = resolveAssetPath(bg.src);
@@ -396,7 +398,7 @@ function buildModal() {
   overlay.innerHTML = `
       <div class="quiz-modal cardgen-modal" role="dialog" aria-modal="true" aria-label="红色纪念卡生成">
         <button class="cardgen-close" aria-label="关闭">✕</button>
-        <h3>🎴 红色纪念卡</h3>
+        <h3>${icon('card')} 红色纪念卡</h3>
         <p>输入姓名、选择精神，生成一张可带走、可分享的红色文创纪念卡</p>
         <div class="cardgen-venue is-hidden" id="cardgen-venue"></div>
 
@@ -414,21 +416,21 @@ function buildModal() {
           <label>③ 精神关键词（或自定义寄语）</label>
           <div class="cardgen-spirits">
             ${SPIRITS.map((s, i) => `<button type="button" class="cardgen-chip${i === 0 ? ' selected' : ''}" data-i="${i}">${s}</button>`).join('')}
-            <button type="button" class="cardgen-chip" data-custom="1">✍️ 自定义</button>
+            <button type="button" class="cardgen-chip" data-custom="1">${icon('pen')} 自定义</button>
           </div>
           <input type="text" id="cardgen-slogan" class="is-hidden" placeholder="自定义寄语（最多10字）" maxlength="10">
         </div>
 
         <div class="cardgen-actions">
-          <button type="button" class="btn primary" id="cardgen-generate">✨ 生成纪念卡</button>
-          <button type="button" class="btn secondary is-hidden" id="cardgen-download">⬇️ 下载 PNG</button>
-          <button type="button" class="btn secondary is-hidden" id="cardgen-share">📤 分享</button>
+          <button type="button" class="btn primary" id="cardgen-generate">${icon('sparkle')} 生成纪念卡</button>
+          <button type="button" class="btn secondary is-hidden" id="cardgen-download">${icon('download')} 下载 PNG</button>
+          <button type="button" class="btn secondary is-hidden" id="cardgen-share">${icon('share')} 分享</button>
         </div>
 
         <div class="cardgen-preview is-hidden" id="cardgen-preview">
           <img id="cardgen-preview-img" alt="纪念卡预览">
         </div>
-        <div class="cardgen-savehint is-hidden" id="cardgen-savehint">💡 长按图片可保存到相册</div>
+        <div class="cardgen-savehint is-hidden" id="cardgen-savehint">${icon('bulb')} 长按图片可保存到相册</div>
       </div>
     `;
   document.body.appendChild(overlay);
@@ -489,7 +491,7 @@ function open(venueName, venueImage) {
   if (venueEl) {
     if (currentVenueName) {
       venueEl.classList.remove('is-hidden');
-      venueEl.textContent = '📍 纪念主题：' + currentVenueName;
+      venueEl.innerHTML = icon('pin') + ' 纪念主题：' + escapeHtml(currentVenueName);
     } else {
       venueEl.classList.add('is-hidden');
       venueEl.textContent = '';

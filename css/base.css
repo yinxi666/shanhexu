@@ -67,6 +67,23 @@
   --card-shadow: 0 4px 20px rgba(185, 28, 28, 0.08);
   --card-shadow-hover: 0 8px 30px rgba(185, 28, 28, 0.15);
 
+  /* 移动端底栏背景：浅色浅米、深色近黑（dark.css 覆盖） */
+  --mobile-nav-bg: rgba(253, 251, 247, 0.95);
+
+  /* 语义色令牌：浅金底文字 / 软木板 / 图片占位 / 聊天头部渐变 /
+     答题与分享的状态色（dark.css 逐项覆盖） */
+  --gold-ink: #8b6914;
+  --corkboard: #c9a87c;
+  --corkboard-border: #8b6914;
+  --img-placeholder: #e5e7eb;
+  --chat-header-grad: linear-gradient(135deg, #8f1616 0%, #c02525 55%, #e0912f 140%);
+  --status-ok: #16a34a;
+  --status-ok-border: #22c55e;
+  --status-ok-bg: #f0fdf4;
+  --status-ok-text: #4ade80;
+  --status-err: #ef4444;
+  --status-err-text: #f87171;
+
   --stat-label: #64748b;
 
   --hero-title-size: clamp(3rem, 10vw, 7rem);
@@ -262,11 +279,11 @@ p {
 }
 
 .scroll-animate-delay-1 {
-  transition-delay: 0.1s;
+  transition-delay: 0.var(--duration-normal);
 }
 
 .scroll-animate-delay-2 {
-  transition-delay: 0.2s;
+  transition-delay: var(--transition);
 }
 
 .scroll-animate-delay-3 {
@@ -274,10 +291,37 @@ p {
 }
 
 .scroll-animate-delay-4 {
-  transition-delay: 0.4s;
+  transition-delay: var(--duration-fast);
 }
 
 .scroll-animate-delay-5 {
-  transition-delay: 0.5s;
+  transition-delay: var(--duration-normal);
 }
 
+
+/* ============================================================
+   行内 SVG 图标（icons.js）：1em 跟随字号，currentColor 跟随主题
+   ============================================================ */
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   系统"减少动效"偏好：禁用全部动画/过渡/平滑滚动
+   （base.css 被所有页面加载，含长征页）
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

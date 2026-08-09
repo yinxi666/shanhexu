@@ -87,6 +87,7 @@ export function initEntranceAnimation() {
   // ===== 粒子贴图预渲染（性能优化） =====
   function makeSprite(inner, mid) {
     let c = document.createElement('canvas');
+    c.setAttribute('aria-hidden', 'true');
     c.width = 64; c.height = 64;
     let cx = c.getContext('2d');
     let g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -130,6 +131,7 @@ export function initEntranceAnimation() {
   tiananmenImg.onload = function () {
     try {
       let oc = document.createElement('canvas');
+      oc.setAttribute('aria-hidden', 'true');
       let iw = tiananmenImg.naturalWidth || tiananmenImg.width;
       let ih = tiananmenImg.naturalHeight || tiananmenImg.height;
       oc.width = iw; oc.height = ih;
@@ -176,6 +178,7 @@ export function initEntranceAnimation() {
   tiananmenImg.src = '天安门.webp';
 
   let taFireCanvas = document.createElement('canvas');
+  taFireCanvas.setAttribute('aria-hidden', 'true');
   let taFireCtx = taFireCanvas.getContext('2d', { willReadFrequently: true });
   let taEmbers = [];
 
@@ -363,6 +366,7 @@ export function initEntranceAnimation() {
   function initGrain() {
     try {
       grainCanvas = document.createElement('canvas');
+      grainCanvas.setAttribute('aria-hidden', 'true');
       grainCanvas.width = W; grainCanvas.height = H;
       let gc = grainCanvas.getContext('2d');
       let imgData = gc.createImageData(W, H);

@@ -16,17 +16,17 @@
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/changzheng.html">
   <title>长征·二万五千里 - 赓续血脉・数绘红旅</title>
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026080416">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026080502">
   <link rel="manifest" href="../manifest.json">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="../css/base.css?v=2026080416">
-  <link rel="stylesheet" href="../css/home.css?v=2026080416">
-  <link rel="stylesheet" href="../css/components.css?v=2026080416">
-  <link rel="stylesheet" href="../css/pages.css?v=2026080416">
-  <link rel="stylesheet" href="../css/widgets.css?v=2026080416">
-  <link rel="stylesheet" href="../css/effects.css?v=2026080416">
-  <link rel="stylesheet" href="../css/dark.css?v=2026080416">
-  <link rel="stylesheet" href="../css/changzheng.css?v=2026080416">
+  <link rel="stylesheet" href="../css/base.css?v=2026080502">
+  <link rel="stylesheet" href="../css/home.css?v=2026080502">
+  <link rel="stylesheet" href="../css/components.css?v=2026080502">
+  <link rel="stylesheet" href="../css/pages.css?v=2026080502">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026080502">
+  <link rel="stylesheet" href="../css/effects.css?v=2026080502">
+  <link rel="stylesheet" href="../css/dark.css?v=2026080502">
+  <link rel="stylesheet" href="../css/changzheng.css?v=2026080502">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     /* ===== 长征页面禁用body默认padding ===== */
@@ -74,7 +74,7 @@
       <div class="cz-bg-ink"></div>
       <div class="cz-bg-vignette"></div>
       <!-- Canvas粒子（从底部升起的火焰余烬） -->
-      <canvas id="cz-atmos" class="cz-atmos"></canvas>
+      <canvas id="cz-atmos" class="cz-atmos" aria-hidden="true"></canvas>
     </div>
 
     <!-- ============================================================
@@ -158,7 +158,7 @@
          固定层 3/4：HUD（左下）
          ============================================================ -->
   <div class="cz-hud" id="cz-hud">
-    <button class="cz-sound-toggle" id="cz-sound-toggle" type="button" title="环境音开关" aria-label="环境音开关">🔇</button>
+    <button class="cz-sound-toggle" id="cz-sound-toggle" type="button" title="环境音开关" aria-label="环境音开关"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h3l5 4V6l-5 4z"/><path d="M17 9.5l4 5M21 9.5l-4 5"/></svg></button>
     <button class="cz-autoplay-btn" id="cz-autoplay-btn" type="button" title="自动行军" aria-label="自动行军"
       aria-pressed="false">▶ 自动行军</button>
     <div class="cz-hud-row">
@@ -180,7 +180,7 @@
          ============================================================ -->
   <div class="cz-route-wrap">
     <div class="cz-route-head">
-      <span class="cz-route-title">📍 中央红军长征路线</span>
+      <span class="cz-route-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 16 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg> 中央红军长征路线</span>
       <span class="cz-route-tag">二万五千里 · 17站</span>
     </div>
     <svg id="cz-route-svg" viewBox="0 0 600 360" preserveAspectRatio="xMidYMid meet">
@@ -201,7 +201,7 @@
       </g>
     </svg>
     <div class="cz-route-foot">
-      <span class="cz-route-cur">📍 当前 <b id="cz-route-cur">瑞金</b></span>
+      <span class="cz-route-cur"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 16 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg> 当前 <b id="cz-route-cur">瑞金</b></span>
       <span class="cz-route-pct">已走 <b id="cz-route-pct">0</b>%</span>
     </div>
   </div>
@@ -232,7 +232,7 @@
       <p class="cz-complete-desc">
         指尖轻划，屏幕上两万五千里转瞬便走到终点，滑动不过片刻光景。<br><br>可百年前真实的征途，却用双脚丈量了整整春秋寒暑。<br><br>屏幕里的两万五千里到此止步，可真实历史里的风雪、草地、险峰从未褪色。<br><br>一代人走完救国之路，一代人守护盛世山河，长征从未结束，它藏在每一个向前奔赴的我们身上。
       </p>
-      <button class="cz-complete-btn" id="cz-complete-btn" type="button">🎖️ 领取长征纪念卡</button>
+      <button class="cz-complete-btn" id="cz-complete-btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M9.2 13.2L7.5 21l4.5-2.5L16.5 21l-1.7-7.8"/></svg> 领取长征纪念卡</button>
       <button class="cz-complete-close" id="cz-complete-close" type="button">✕ 关闭</button>
     </div>
   </div>
@@ -241,7 +241,7 @@
   <div class="cz-card-modal" id="cz-card-modal" role="dialog" aria-modal="true" aria-label="长征纪念卡">
     <div class="cz-card-box">
       <button class="cz-card-close" id="cz-card-close" type="button" aria-label="关闭">✕</button>
-      <div class="cz-card-head">🎖️ 长征纪念卡</div>
+      <div class="cz-card-head"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M9.2 13.2L7.5 21l4.5-2.5L16.5 21l-1.7-7.8"/></svg> 长征纪念卡</div>
       <p class="cz-card-sub">走完全程 · 二万五千里，留下一张专属纪念</p>
       <div class="cz-card-field">
         <label>① 选择背景</label>
@@ -255,15 +255,15 @@
         <label>③ 精神关键词</label>
         <div class="cz-card-spirits" id="cz-card-spirits"></div>
       </div>
-      <button class="cz-card-gen" id="cz-card-gen" type="button">✨ 生成纪念卡</button>
+      <button class="cz-card-gen" id="cz-card-gen" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/><path d="M12 4l1.8 6.2L20 12l-6.2 1.8L12 20l-1.8-6.2L4 12l6.2-1.8z"/></svg> 生成纪念卡</button>
       <div class="cz-card-preview is-hidden" id="cz-card-preview">
         <img id="cz-card-preview-img" alt="长征纪念卡预览">
         <div class="cz-card-actions">
-          <button class="cz-card-dl" id="cz-card-download" type="button">⬇️ 下载</button>
-          <button class="cz-card-share" id="cz-card-share" type="button">📤 分享</button>
+          <button class="cz-card-dl" id="cz-card-download" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7.5 11L12 15.5 16.5 11"/><path d="M4 19h16"/></svg> 下载</button>
+          <button class="cz-card-share" id="cz-card-share" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v11"/><path d="M8 6.5L12 3l4 3.5"/><path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg> 分享</button>
         </div>
       </div>
-      <div class="cz-card-savehint is-hidden" id="cz-card-savehint">💡 长按图片可保存到相册</div>
+      <div class="cz-card-savehint is-hidden" id="cz-card-savehint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 17.5h5"/><path d="M9 20h6"/><path d="M12 3a6 6 0 0 1 3.5 10.8c-.8.6-1.5 1.2-1.5 2.2h-4c0-1-.7-1.6-1.5-2.2A6 6 0 0 1 12 3z"/></svg> 长按图片可保存到相册</div>
     </div>
   </div>
 
@@ -294,7 +294,7 @@
   <div id="site-footer"></div>
 
   <!-- ===== 脚本 ===== -->
-  <script type="module" src="../js/app.js?v=2026080416"></script>
+  <script type="module" src="../js/app.js?v=2026080502"></script>
 </body>
 
 </html>

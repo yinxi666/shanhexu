@@ -4,7 +4,8 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080416';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -28,14 +29,14 @@ function initQuiz() {
 
   const html = `
       <button class="quiz-fab" aria-label="红色知识问答" title="红色知识挑战赛">
-        <span>🧠</span>
+        <span>${icon('star')}</span>
       </button>
       <div class="quiz-modal-overlay" id="quiz-overlay">
         <div class="quiz-modal" role="dialog" aria-modal="true" aria-label="红色知识挑战赛">
           <button class="quiz-close" aria-label="关闭">✕</button>
           <div class="quiz-body" id="quiz-body">
             <div class="quiz-start">
-              <div class="quiz-logo">🧠</div>
+              <div class="quiz-logo">${icon('star')}</div>
               <h3>红色知识挑战赛</h3>
               <p>测测你对红色场馆和革命历史的了解程度！</p>
               <p class="quiz-meta">共 ${quizData.length} 题 · 即时反馈 · 不限时间</p>
@@ -126,8 +127,8 @@ function initQuiz() {
         if (correct) score++;
         const fb = $('#quiz-feedback');
         fb.innerHTML = correct
-          ? '✅ <b>回答正确！</b> ' + item.tip
-          : '❌ <b>回答错误</b> ' + item.tip;
+          ? icon('check') + ' <b>回答正确！</b> ' + item.tip
+          : icon('cross') + ' <b>回答错误</b> ' + item.tip;
         fb.classList.add('show');
 
         clearTimeout(advanceTimer);
@@ -140,9 +141,9 @@ function initQuiz() {
     clearTimeout(advanceTimer);
     const pct = Math.round((score / quizData.length) * 100);
     let emoji, msg;
-    if (pct >= 90) { emoji = '🏆'; msg = '太棒了！你是红色知识达人！'; }
-    else if (pct >= 60) { emoji = '👍'; msg = '不错！继续学习红色文化！'; }
-    else { emoji = '📚'; msg = '继续加油！多逛逛场馆页面学习吧~'; }
+    if (pct >= 90) { emoji = icon('trophy'); msg = '太棒了！你是红色知识达人！'; }
+    else if (pct >= 60) { emoji = icon('star'); msg = '不错！继续学习红色文化！'; }
+    else { emoji = icon('book'); msg = '继续加油！多逛逛场馆页面学习吧~'; }
 
     body.innerHTML = '';
     result.classList.remove('is-hidden');
@@ -153,7 +154,7 @@ function initQuiz() {
           <div class="quiz-result-score">${score}/${quizData.length}</div>
           <p class="quiz-result-rate">正确率 ${pct}%</p>
           <p class="quiz-result-msg">${msg}</p>
-          <button class="btn primary quiz-btn-margin" id="quiz-retry-btn">🔄 再来一次</button>
+          <button class="btn primary quiz-btn-margin" id="quiz-retry-btn">${icon('refresh')} 再来一次</button>
           <button class="btn secondary quiz-btn-margin" id="quiz-close-btn">关闭</button>
         </div>
       `;
@@ -168,7 +169,7 @@ function initQuiz() {
     currentQ = 0; score = 0; answered = [];
     body.innerHTML = `
         <div class="quiz-start">
-          <div class="quiz-logo">🧠</div>
+          <div class="quiz-logo">${icon('star')}</div>
           <h3>红色知识挑战赛</h3>
           <p>测测你对红色场馆和革命历史的了解程度！</p>
           <p class="quiz-meta">共 ${quizData.length} 题 · 即时反馈 · 不限时间</p>

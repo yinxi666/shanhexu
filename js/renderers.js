@@ -4,8 +4,9 @@
    依赖：RedData 数据层
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026080416';
-import { isFavorite as checkFavorite } from './favorites.js?v=2026080416';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
+import { isFavorite as checkFavorite } from './favorites.js?v=2026080502';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -26,7 +27,7 @@ function renderVenueCard(venue, basePath) {
   const fb = fallbackSrc();
   const favActive = isFavorite(venue.id);
   const favClass = favActive ? 'active' : '';
-  const favIcon = favActive ? '❤️' : '🤍';
+  const favIcon = favActive ? icon('heart') : icon('heart-outline');
   const esc = escapeHtml;
   const attr = escapeAttr;
   return `
@@ -39,7 +40,7 @@ function renderVenueCard(venue, basePath) {
         <div class="card-body">
           <h3>${esc(venue.name)}</h3>
           <div class="card-meta">
-            <span>📍 ${esc(venue.city || venue.province || '')}</span>
+            <span>${icon('pin')} ${esc(venue.city || venue.province || '')}</span>
           </div>
           <p class="card-desc">${esc(venue.summary || '暂无简介')}</p>
         </div>
@@ -78,12 +79,12 @@ function renderPracticeCard(practice, basePath) {
         </div>
         <div class="practice-body">
           <h3>${esc(practice.title)}</h3>
-          <p class="team-name">👥 ${esc(practice.team || '实践团队')}</p>
+          <p class="team-name">${icon('users')} ${esc(practice.team || '实践团队')}</p>
           <p>${esc(practice.summary || '')}</p>
         </div>
         <div class="practice-footer">
           <span class="practice-date"><span class="pd-year">${(practice.createdAt || '----').slice(0, 4)}</span><span class="pd-month">${parseInt((practice.createdAt || '--').slice(5, 7), 10) || '--'}</span><span class="pd-day">${parseInt((practice.createdAt || '--').slice(8, 10), 10) || '--'}</span></span>
-          <span class="practice-likes" data-action="like-practice" data-id="${esc(practice.id)}">❤️ <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
+          <span class="practice-likes" data-action="like-practice" data-id="${esc(practice.id)}">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
         </div>
       </div>
     `;

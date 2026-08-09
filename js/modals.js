@@ -5,7 +5,8 @@
          被 pages.js / action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026080416';
+import { showToast, bindImageFallbacks } from './ui.js?v=2026080502';
+import { icon } from './icons.js?v=2026080502';
 import {
   getBasePath,
   resolveAssetPath,
@@ -14,9 +15,9 @@ import {
   escapeHtml,
   escapeAttr,
   getLikeCount
-} from './utils.js?v=2026080416';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080416';
-import { loadJSON } from './data.js?v=2026080416';
+} from './utils.js?v=2026080502';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080502';
+import { loadJSON } from './data.js?v=2026080502';
 
 // 视频弹窗
 function openVideo(src) {
@@ -97,7 +98,7 @@ async function openPracticeDetail(id) {
         <img src="${escapeAttr(imgSrc)}" alt="${escapeHtml(p.title)}" class="practice-detail-hero" loading="lazy" decoding="async" data-fallback="${escapeAttr(fb)}">
         <div class="practice-detail-body">
           <h2 class="practice-detail-title">${escapeHtml(p.title)}</h2>
-          <p class="practice-detail-team">👥 ${escapeHtml(p.team || '实践团队')}</p>
+          <p class="practice-detail-team">${icon('users')} ${escapeHtml(p.team || '实践团队')}</p>
           <p class="practice-detail-summary">${escapeHtml(p.summary || '')}</p>
           ${galleryHtml}
           ${videoSrc ? `
@@ -105,8 +106,8 @@ async function openPracticeDetail(id) {
             <button class="btn primary small" data-action="play-video" data-src="${escapeAttr(videoSrc)}">▶ 播放视频</button>
           </div>` : ''}
           <div class="practice-detail-actions">
-            <span>📅 ${escapeHtml(p.createdAt || '')}</span>
-            <span class="practice-detail-likes" data-action="like-practice" data-id="${p.id}">❤️ <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
+            <span>${icon('calendar')} ${escapeHtml(p.createdAt || '')}</span>
+            <span class="practice-detail-likes" data-action="like-practice" data-id="${p.id}">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
           </div>
         </div>
       </div>

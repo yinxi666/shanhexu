@@ -50,16 +50,16 @@
 
 .hero-bg-next {
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity var(--duration-normal) ease-in-out;
 }
 
 .hero-bg-active {
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity var(--duration-normal) ease-in-out;
 }
 
 /* Hero 入场动画延迟（替代内联 style） */
-.animate-fade-in-up[data-delay="0.2s"] { animation-delay: 0.2s; }
-.animate-fade-in-up[data-delay="0.4s"] { animation-delay: 0.4s; }
+.animate-fade-in-up[data-delay="var(--transition)"] { animation-delay: var(--transition); }
+.animate-fade-in-up[data-delay="var(--duration-fast)"] { animation-delay: var(--duration-fast); }
 .animate-fade-in-up[data-delay="0.6s"] { animation-delay: 0.6s; }
 .animate-fade-in-up[data-delay="0.8s"] { animation-delay: 0.8s; }
 
@@ -144,8 +144,8 @@
   padding: 1.1rem 2.8rem;
   font-size: 1rem;
   font-weight: 700;
-  border-radius: 60px;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--radius-pill);
+  transition: all var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 0.06em;
   cursor: pointer;
   position: relative;
@@ -159,9 +159,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 60px;
+  border-radius: var(--radius-pill);
   opacity: 0;
-  transition: opacity 0.35s;
+  transition: opacity var(--duration-fast);
 }
 
 .hero-btn-primary {
@@ -301,7 +301,7 @@
 
 .brand small {
   display: block;
-  margin-top: 2px;
+  margin-top: 4px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -315,7 +315,7 @@
 
 .nav-links li a {
   display: inline-block;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: var(--radius-md);
   color: var(--ink);
   font-size: 16px;
@@ -333,7 +333,7 @@
   width: 0;
   height: 2.5px;
   background: var(--red);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -435,7 +435,7 @@
 }
 
 .section-heading p {
-  margin-top: 10px;
+  margin-top: 12px;
   color: var(--muted);
   max-width: 600px;
   margin-left: auto;
@@ -445,7 +445,7 @@
 /* ---------- Buttons ---------- */
 .btn {
   min-height: 44px;
-  padding: 11px 22px;
+  padding: 12px 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -481,7 +481,7 @@
 
 .btn.small {
   min-height: 34px;
-  padding: 6px 14px;
+  padding: 8px 16px;
   font-size: 13px;
 }
 
@@ -493,7 +493,7 @@
 }
 
 .feature-card {
-  padding: 28px 22px;
+  padding: 28px 24px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
@@ -521,7 +521,7 @@
 }
 
 .feature-card h3 {
-  margin: 8px 0 6px;
+  margin: 8px 0 8px;
   color: var(--ink);
   font-size: 18px;
 }
@@ -534,7 +534,7 @@
 
 .feature-card .card-icon {
   font-size: 32px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 /* ---------- Stats Row ---------- */
@@ -551,7 +551,7 @@
   border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 12px 40px rgba(0, 0, 0, 0.04);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -565,7 +565,7 @@
   height: 3px;
   background: linear-gradient(90deg, #b45309, #b8860b);
   transform: scaleX(0);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-item:hover {
@@ -607,7 +607,7 @@
 }
 
 .stat-item .stat-label {
-  margin-top: 6px;
+  margin-top: 8px;
   color: var(--stat-label);
   font-size: 14px;
   font-weight: 500;
