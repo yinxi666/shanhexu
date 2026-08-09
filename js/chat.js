@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, safeStorage } from './utils.js?v=2026080502';
-import * as RedData from './data.js?v=2026080502';
-import { getVenues } from './venue-store.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, safeStorage } from './utils.js?v=2026080515';
+import * as RedData from './data.js?v=2026080515';
+import { getVenues } from './venue-store.js?v=2026080515';
+import { icon } from './icons.js?v=2026080515';
 
 const $ = (s, c) => (c || document).querySelector(s);
 const $$ = (s, c) => [...(c || document).querySelectorAll(s)];
@@ -19,13 +19,13 @@ function initChatWidget() {
   const html = `
       <div class="chat-widget">
         <button class="chat-fab" aria-label="AI导览助手" title="AI智能导览助手">
-          <span class="chat-fab-icon">${icon('book')}</span>
+          <img class="chat-fab-icon" src="${getBasePath()}ai图标.webp" alt="AI导览助手">
           <span class="chat-fab-badge">AI</span>
         </button>
         <div class="chat-panel">
           <div class="chat-header">
             <div class="chat-header-left">
-              <span class="chat-avatar">${icon('book')}</span>
+              <img class="chat-avatar" src="${getBasePath()}ai图标.webp" alt="">
               <div>
                 <strong>红旅AI助手</strong>
                 <small>智能导览 · 知识库 Agent</small>

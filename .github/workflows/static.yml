@@ -40,7 +40,7 @@ jobs:
           # 注意：upload-pages-artifact 的 path 只接受单个路径，不支持多行列表。
           mkdir -p _site
           cp index.html favicon.png manifest.json .nojekyll _site/
-          cp *.webp _site/
+          cp *.webp *.jpg _site/
           cp -r pages css js data assets images templates _site/
           # 页脚链接指向 docs/素材说明/（素材来源与授权说明）。仅拷该子目录，
           # 不部署 docs/ 下的内部部署说明（学校服务器部署说明.md）与失效参考页

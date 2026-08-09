@@ -4,8 +4,9 @@
    约束：依赖 timeline(initTimeline)；被 app.js 初始化（首页）
    ============================================================ */
 
-import { initTimeline } from './timeline.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
+import { initTimeline } from './timeline.js?v=2026080515';
+import { icon } from './icons.js?v=2026080515';
+import { getBasePath } from './utils.js?v=2026080515';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -27,7 +28,7 @@ function initHomepageInnovation() {
           </div>
           <div class="feature-grid feature-grid-2col">
             <div class="feature-card feature-card-clickable" data-action="open-chat">
-              <div class="card-icon">${icon('chat')}</div>
+              <div class="card-icon"><img src="${getBasePath()}ai图标.webp" alt=""></div>
               <span class="card-num">AI</span>
               <h3>AI智能导览助手</h3>
               <p>基于场馆知识库的对话式问答系统，支持场馆搜索、路线推荐、知识问答。</p>

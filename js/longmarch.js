@@ -3,15 +3,15 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026080502';
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026080502';
-import { showToast } from './ui.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026080502';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080502';
+import * as RedData from './data.js?v=2026080515';
+import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026080515';
+import { showToast } from './ui.js?v=2026080515';
+import { icon } from './icons.js?v=2026080515';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026080515';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080515';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026080502';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026080515';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化） */
 const _reduceMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');
@@ -149,8 +149,6 @@ const routeDots = $('#cz-route-dots');
 const routeTrack = $('#cz-route-track');
 const routeFill = $('#cz-route-fill');
 const routeMarker = $('#cz-route-marker');
-const routeCur = $('#cz-route-cur');
-const routePct = $('#cz-route-pct');
 
 /* 全局状态 */
 const state = {
@@ -521,11 +519,9 @@ function updateMiniRoute(progress) {
   // marker 移到当前站位置上方
   if (routeMarker && state._miniPts && state._miniPts[id - 1]) {
     const p = state._miniPts[id - 1];
-    routeMarker.setAttribute('transform', `translate(${p.x.toFixed(1)}, ${(p.y - 10).toFixed(1)})`);
+    // 放大 marker（星形定位点），小地图上更醒目
+    routeMarker.setAttribute('transform', `translate(${p.x.toFixed(1)}, ${(p.y - 10).toFixed(1)}) scale(1.4)`);
   }
-  // 卡片底部：当前站 + 已走百分比
-  if (routeCur && STATIONS[id - 1]) routeCur.textContent = STATIONS[id - 1].name;
-  if (routePct) routePct.textContent = Math.round(progress * 100);
 }
 
 let _scrollDustT = 0;
@@ -1346,31 +1342,34 @@ function buildMiniRoute() {
 
     const halo = document.createElementNS(svgNS, 'circle');
     halo.setAttribute('class', 'cz-route-dot-halo');
-    halo.setAttribute('r', 9);
+    halo.setAttribute('r', 11);
     halo.setAttribute('fill', 'rgba(255, 215, 110, 0.0)');
     halo.setAttribute('stroke', 'rgba(255, 215, 110, 0.35)');
     halo.setAttribute('stroke-width', 1.5);
     g.appendChild(halo);
 
     const c = document.createElementNS(svgNS, 'circle');
-    c.setAttribute('r', 4.5);
+    c.setAttribute('r', 6);
     c.setAttribute('class', 'cz-route-dot-core');
     c.setAttribute('fill', '#3a1007');
     c.setAttribute('stroke', '#ffd76e');
-    c.setAttribute('stroke-width', 1.6);
+    c.setAttribute('stroke-width', 1.8);
     g.appendChild(c);
 
-    // 标签（偶数站上，奇数站下）
-    const label = document.createElementNS(svgNS, 'text');
-    label.setAttribute('x', 0);
-    label.setAttribute('y', (i % 2 === 0 ? -13 : 20));
-    label.setAttribute('text-anchor', 'middle');
-    label.setAttribute('font-family', "'STKaiti','KaiTi','FangSong',serif");
-    label.setAttribute('font-size', 10);
-    label.setAttribute('fill', '#f8df9c');
-    label.setAttribute('opacity', 0.85);
-    label.textContent = s.name;
-    g.appendChild(label);
+    // 标签（偶数站上，奇数站下）——只给关键站标名，避免 17 个名字在 200-300px 小卡片上糊成一团
+    const KEY_STATIONS = [1, 7, 11, 16, 17];
+    if (KEY_STATIONS.includes(s.id)) {
+      const label = document.createElementNS(svgNS, 'text');
+      label.setAttribute('x', 0);
+      label.setAttribute('y', (i % 2 === 0 ? -13 : 20));
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('font-family', "'STKaiti','KaiTi','FangSong',serif");
+      label.setAttribute('font-size', 20);
+      label.setAttribute('fill', '#f8df9c');
+      label.setAttribute('opacity', 0.9);
+      label.textContent = s.name;
+      g.appendChild(label);
+    }
 
     g.addEventListener('click', () => scrollToStation(s.id));
     routeDots.appendChild(g);
