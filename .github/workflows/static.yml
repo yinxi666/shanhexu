@@ -40,6 +40,8 @@ jobs:
           # 注意：upload-pages-artifact 的 path 只接受单个路径，不支持多行列表。
           mkdir -p _site
           cp index.html favicon.png manifest.json .nojekyll _site/
+          # nullglob：无匹配文件时 glob 展开为空数组，避免 cp *.jpg（当前根目录无 .jpg）因无匹配而失败
+          shopt -s nullglob
           cp *.webp *.jpg _site/
           cp -r pages css js data assets images templates _site/
           # 页脚链接指向 docs/素材说明/（素材来源与授权说明）。仅拷该子目录，
