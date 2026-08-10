@@ -680,12 +680,13 @@
    沉浸增强：环境音景按钮 / 人物小卡 / 诗词浮现 / 文物详情弹窗
    ============================================================ */
 
-/* 音景开关（HUD 右上角小圆钮；HUD 本身 pointer-events:none，此钮需恢复） */
+/* 音景开关（HUD 右上角小圆钮；HUD 本身 pointer-events:none，此钮需恢复为 auto 才能点击） */
 .cz-sound-toggle {
   position: absolute;
   bottom: -12px;
   right: -12px;
   z-index: 6;
+  pointer-events: auto;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -702,12 +703,13 @@
   background: rgba(130, 45, 22, 0.95);
 }
 
-/* 自动行军（HUD 左上角胶囊按钮） */
+/* 自动行军（HUD 左上角胶囊按钮；同样需恢复 pointer-events 才能点击） */
 .cz-autoplay-btn {
   position: absolute;
   bottom: -12px;
   left: -12px;
   z-index: 6;
+  pointer-events: auto;
   padding: 8px 12px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 215, 150, 0.4);

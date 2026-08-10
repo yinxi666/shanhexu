@@ -5,13 +5,13 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026081001';
-import * as RedRenderers from './renderers.js?v=2026081001';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081001';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081001';
-import { initBgMusic } from './music.js?v=2026081001';
-import { icon } from './icons.js?v=2026081001';
-import { initHomeHeatmap } from './heatmap.js?v=2026081001';
+import * as RedData from './data.js?v=2026081005';
+import * as RedRenderers from './renderers.js?v=2026081005';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081005';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081005';
+import { initBgMusic } from './music.js?v=2026081005';
+import { icon } from './icons.js?v=2026081005';
+import { initHomeHeatmap } from './heatmap.js?v=2026081005';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
@@ -281,8 +281,8 @@ async function initHomePage() {
   if (statPractices) statPractices.textContent = practiceCount > 0 ? practiceCount + '+' : '0';
   if (statReflections) statReflections.textContent = reflectionCount > 0 ? reflectionCount + '+' : '0';
 
-  // 初始化热力图
-  initHomeHeatmap(venues);
+  // 初始化热力图（数据为官方名录分省统计，不再依赖本站场馆）
+  initHomeHeatmap();
 }
 
 // 导览页

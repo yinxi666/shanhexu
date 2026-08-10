@@ -4,8 +4,8 @@
    约束：依赖 utils(getBasePath)；被 app.js 初始化（所有页面）
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081001';
-import { icon } from './icons.js?v=2026081001';
+import { getBasePath } from './utils.js?v=2026081005';
+import { icon } from './icons.js?v=2026081005';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 

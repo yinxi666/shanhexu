@@ -180,6 +180,19 @@ html.dark .msg-status.rejected {
 .dark-toggle:hover {
   transform: scale(1.1);
 }
+/* 深色下 .dark-toggle 用 --card-bg(#1e293b) 会融入页面背景(#0f172a)看不清：
+   提亮表面 + 实心金描边 + 金色光晕，与深色主题强调色一致 */
+html.dark .dark-toggle {
+  background: #334155;
+  border-color: var(--gold);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 12px rgba(251, 191, 36, 0.35);
+}
+/* 深色下音乐按钮同样用 --white(#1e293b) 融入背景：提亮表面 + 金描边 + 光晕（用 box-shadow 环避免改动边框布局） */
+html.dark .music-toggle {
+  background: #334155;
+  box-shadow: 0 0 0 1px var(--gold), 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(251, 191, 36, 0.3);
+}
+/* 播放/暂停仅用图标(note/note-off)区分，深色下不再套深酒红底 */
 html.dark .share-btn.copied {
   background: #052e16;
   color: #86efac;

@@ -1,39 +1,46 @@
 /* ============================================================
    赓续血脉・数绘红旅 — 首页热力图 (Home Heatmap)
    职责：ECharts 中国地图热力图，加载失败自动降级 SVG
+   数据：全国红色旅游经典景区名录(发改社会〔2016〕2662号，共300处)分省统计
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081001';
-import { ASSET_VERSION } from './version.js?v=2026081001';
+import { getBasePath } from './utils.js?v=2026081005';
+import { ASSET_VERSION } from './version.js?v=2026081005';
+
+// 官方分省数据：据《全国红色旅游经典景区名录》(发改社会〔2016〕2662号，国家发改委等14部门，2016年，共300处)，按名录正文逐省统计。
+// 官方原文见国家发改委官网，本机留存 PDF 未纳入仓库(GitHub 内容扫描对该 PDF 误报)。
+// 新疆含新疆生产建设兵团(8+4=12)；港澳台不在名录内，按 0 计。
+const OFFICIAL_ATTRACTIONS = {
+  '北京市': 15, '天津市': 6, '河北省': 14, '山西省': 9, '内蒙古自治区': 8,
+  '辽宁省': 12, '吉林省': 8, '黑龙江省': 12, '上海市': 7, '江苏省': 11,
+  '浙江省': 10, '安徽省': 8, '福建省': 9, '江西省': 11, '山东省': 13,
+  '河南省': 14, '湖北省': 14, '湖南省': 14, '广东省': 13, '广西壮族自治区': 5,
+  '海南省': 8, '重庆市': 4, '四川省': 9, '贵州省': 8, '云南省': 9,
+  '西藏自治区': 5, '陕西省': 13, '甘肃省': 10, '青海省': 5, '宁夏回族自治区': 4,
+  '新疆维吾尔自治区': 12
+};
+
+// 全部省级行政区(含港澳台，绘制完整中国轮廓；港澳台数值为 0)
+const PROVINCE_NAMES = ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省',
+  '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省', '湖南省',
+  '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省', '西藏自治区', '陕西省', '甘肃省',
+  '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '香港特别行政区', '澳门特别行政区', '台湾省'];
 
 // 首页热力图 - ECharts中国地图，加载失败自动降级SVG
-async function initHomeHeatmap(venues) {
+async function initHomeHeatmap() {
   const container = document.getElementById('home-heatmap');
   if (!container) return;
 
-  const provinceData = {};
-  const provinceNames = ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省',
-    '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省', '湖南省',
-    '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省', '西藏自治区', '陕西省', '甘肃省',
-    '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '香港特别行政区', '澳门特别行政区', '台湾省'];
-  provinceNames.forEach(n => provinceData[n] = 0);
-
-  venues.forEach(v => {
-    if (!v.province) return;
-    for (const name of provinceNames) {
-      if (v.province.includes(name) || name.includes(v.province)) {
-        provinceData[name]++; break;
-      }
-    }
-  });
+  // 用官方名录分省数据构建(港澳台补 0)，三条渲染路径共用同一份数据
+  const provinceData = { ...OFFICIAL_ATTRACTIONS, '香港特别行政区': 0, '澳门特别行政区': 0, '台湾省': 0 };
 
   // 等待ECharts加载后初始化（最多约15秒，超时降级SVG，避免无限轮询）
   let echartsRetries = 0;
   const ECHARTS_MAX_RETRIES = 50; // 50 × 300ms ≈ 15s
   function tryInit() {
     if (window.echarts) {
-      initECharts(container, provinceData, provinceNames, venues);
+      initECharts(container, provinceData);
     } else if (echartsRetries < ECHARTS_MAX_RETRIES) {
       echartsRetries++;
       setTimeout(tryInit, 300);
@@ -44,25 +51,10 @@ async function initHomeHeatmap(venues) {
   setTimeout(tryInit, 200);
 }
 
-async function initECharts(container, provinceData, provinceNames, venues) {
-
-  const additionalVenues = {
-    '北京市': 5, '天津市': 2, '河北省': 8, '山西省': 4, '内蒙古自治区': 3,
-    '辽宁省': 4, '吉林省': 3, '黑龙江省': 4, '上海市': 4, '江苏省': 6,
-    '浙江省': 5, '安徽省': 4, '福建省': 5, '江西省': 10, '山东省': 5,
-    '河南省': 4, '湖北省': 5, '湖南省': 7, '广东省': 6, '广西壮族自治区': 4,
-    '海南省': 2, '重庆市': 4, '四川省': 6, '贵州省': 4, '云南省': 3,
-    '西藏自治区': 2, '陕西省': 8, '甘肃省': 4, '青海省': 2, '宁夏回族自治区': 2,
-    '新疆维吾尔自治区': 3, '香港特别行政区': 1, '澳门特别行政区': 1, '台湾省': 2
-  };
-
-  for (const [name, count] of Object.entries(additionalVenues)) {
-    provinceData[name] += count;
-  }
-
-  const chartData = provinceNames.map(name => ({
+async function initECharts(container, provinceData) {
+  const chartData = PROVINCE_NAMES.map(name => ({
     name: name,
-    value: provinceData[name]
+    value: provinceData[name] || 0
   }));
 
   try {
@@ -79,7 +71,7 @@ async function initECharts(container, provinceData, provinceNames, venues) {
         trigger: 'item',
         formatter: function (params) {
           return `<div class="map-tooltip-name">${params.name}</div>
-                    <div class="map-tooltip-count">场馆数量：<span class="map-tooltip-value">${params.value}</span></div>`;
+                    <div class="map-tooltip-count">景区数量：<span class="map-tooltip-value">${params.value}</span></div>`;
         },
         backgroundColor: 'rgba(255,255,255,0.95)',
         borderColor: '#e5e7eb',
@@ -98,7 +90,7 @@ async function initECharts(container, provinceData, provinceNames, venues) {
         textStyle: { color: '#64748b' }
       },
       series: [{
-        name: '红色场馆数量',
+        name: '红色旅游景区数量',
         type: 'map',
         map: 'china',
         roam: 'move',
@@ -229,7 +221,7 @@ function createSimpleHeatmap(container, provinceData) {
         <path d="M115,125 L140,120 L150,130 L140,145 L115,140" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" opacity="0.5" />
         ${svgContent}
         <rect x="10" y="155" width="180" height="18" rx="4" fill="#f1f5f9" stroke="#e2e8f0" />
-        <text x="18" y="167" font-size="9" fill="#64748b">场馆数量：</text>
+        <text x="18" y="167" font-size="9" fill="#64748b">景区数量：</text>
         <rect x="65" y="159" width="100" height="10" rx="2" fill="url(#legendGradient)" />
         <text x="65" y="176" font-size="7" fill="#64748b">少</text>
         <text x="158" y="176" font-size="7" fill="#64748b">多</text>
