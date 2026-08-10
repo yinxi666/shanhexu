@@ -1,17 +1,17 @@
 /* ============================================================
    赓续血脉・数绘红旅 — 页面控制器层 (Pages)
    职责：6 个页面（首页/导览/详情/政策/实践/留言）的初始化编排 + 点赞
-   约束：只做"页面装配"，共享 UI 原子来自 ui/music/modals/heatmap；
+   约束：只做"页面装配"，共享 UI 原子来自 ui/music/icons/heatmap；
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026080520';
-import * as RedRenderers from './renderers.js?v=2026080520';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080520';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080520';
-import { initBgMusic } from './music.js?v=2026080520';
-import { icon } from './icons.js?v=2026080520';
-import { initHomeHeatmap } from './heatmap.js?v=2026080520';
+import * as RedData from './data.js?v=2026081001';
+import * as RedRenderers from './renderers.js?v=2026081001';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081001';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081001';
+import { initBgMusic } from './music.js?v=2026081001';
+import { icon } from './icons.js?v=2026081001';
+import { initHomeHeatmap } from './heatmap.js?v=2026081001';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];

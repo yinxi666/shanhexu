@@ -278,12 +278,13 @@ p {
   transform: translateY(0);
 }
 
+/* 按 0.1s 逐级延迟，让多个元素依次浮现 */
 .scroll-animate-delay-1 {
-  transition-delay: 0.var(--duration-normal);
+  transition-delay: 0.1s;
 }
 
 .scroll-animate-delay-2 {
-  transition-delay: var(--transition);
+  transition-delay: 0.2s;
 }
 
 .scroll-animate-delay-3 {
@@ -291,11 +292,11 @@ p {
 }
 
 .scroll-animate-delay-4 {
-  transition-delay: var(--duration-fast);
+  transition-delay: 0.4s;
 }
 
 .scroll-animate-delay-5 {
-  transition-delay: var(--duration-normal);
+  transition-delay: 0.5s;
 }
 
 

@@ -4,7 +4,7 @@
    约束：只依赖 data.js，被 chat.js / timeline.js 引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026080520';
+import * as RedData from './data.js?v=2026081001';
 
 let venuesCache = [];
 

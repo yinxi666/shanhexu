@@ -3,15 +3,15 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026080520';
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026080520';
-import { showToast } from './ui.js?v=2026080520';
-import { icon } from './icons.js?v=2026080520';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026080520';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080520';
+import * as RedData from './data.js?v=2026081001';
+import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081001';
+import { showToast } from './ui.js?v=2026081001';
+import { icon } from './icons.js?v=2026081001';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026081001';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081001';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026080520';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081001';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化） */
 const _reduceMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');

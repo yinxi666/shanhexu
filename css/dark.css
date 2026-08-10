@@ -48,7 +48,7 @@ html.dark {
   --cz-sky-4: #1c130b;
   --cz-sky-5: #120b06;
   --cz-sky-6: #070403;
-  /* 卡片边框/阴影未覆盖 → 深色下卡片边框近乎消失 */
+  /* 卡片边框/阴影令牌：覆盖 base.css 的浅色值，随 html.dark 自动作用于全部消费组件 */
   --card-border: rgba(248, 113, 113, 0.16);
   --card-border-hover: rgba(248, 113, 113, 0.38);
   --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);

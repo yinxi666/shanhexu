@@ -935,7 +935,13 @@
 }
 
 .fav-btn.active {
+  color: var(--red);
   animation: heartBeat 0.3s ease;
+}
+
+/* 收藏态：SVG 默认 fill="none"，靠 CSS 覆盖为实心红心（presentation attribute 优先级低于 CSS） */
+.fav-btn.active .icon {
+  fill: currentColor;
 }
 
 @keyframes heartBeat {

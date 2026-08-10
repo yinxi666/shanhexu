@@ -86,13 +86,17 @@
 │   ├── entrance-animation.js # 首页入场动画
 │   ├── hero-carousel.js    # 首页 Hero 背景轮播
 │   ├── focus-trap.js       # 弹窗焦点圈定 + 全站滚动锁
+│   ├── icons.js            # SVG 单色图标库（44 个命名图标，替代 emoji，被 14+ 模块引用）
 │   └── version.js          # ASSET_VERSION 缓存破击单源
 ├── templates/
 │   ├── site-header.html    # 共享导航模板
 │   └── site-footer.html    # 共享页脚模板
 ├── scripts/
 │   ├── bump-version.js     # 版本号同步脚本（HTML 的 ?v= + JS import 的 ?v= 模块级缓存破击）
-│   └── audit.js            # 零依赖静态审计（版本一致性/import 完整/无死引用/数据健康报告）
+│   ├── audit.js            # 零依赖静态审计（版本一致性/import 完整/无死引用/数据健康报告）
+│   └── converge-design-tokens.js # 圆角/时长/间距魔法值收敛为 CSS 令牌（幂等）
+├── tests/
+│   └── *.test.js           # 零依赖契约测试（node --test tests/）：深色模式/设计令牌/色彩收敛/减少动效/排版/emoji 清理/长征深色/无障碍
 ├── data/
 │   ├── venues.json         # 15 个核心场馆
 │   ├── province-candidates.json  # 扩展候选场馆
@@ -114,6 +118,8 @@
 ├── images/
 │   └── longmarch/          # 长征 17 站实景照片
 ├── 天安门.webp              # 入场动画天安门剪影素材
+├── 毛主席雕像.webp / 长征.webp # 首页 Hero 背景素材
+├── ai图标.webp / 挑战赛.webp # AI 助手图标 / 知识问答挑战赛素材
 ├── docs/
 │   └── 素材说明/            # 素材来源、授权与核验说明
 ├── manifest.json           # PWA 配置

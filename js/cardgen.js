@@ -2,10 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { getBasePath, resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026080520';
-import { showToast } from './ui.js?v=2026080520';
-import { icon } from './icons.js?v=2026080520';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026080520';
+import { getBasePath, resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081001';
+import { showToast } from './ui.js?v=2026081001';
+import { icon } from './icons.js?v=2026081001';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081001';
 
 const $ = (s, c) => (c || document).querySelector(s);
 function toast(msg) {
@@ -519,4 +519,4 @@ function init() {
 }
 
 // 暴露 renderCard/dataUrlToBlob/SPIRITS：供长征纪念卡专用弹窗等复用
-export { init, open, close, renderCard, dataUrlToBlob, SPIRITS };
+export { init, open, renderCard, dataUrlToBlob, SPIRITS };

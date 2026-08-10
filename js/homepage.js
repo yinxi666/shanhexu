@@ -4,8 +4,8 @@
    约束：依赖 timeline(initTimeline)；被 app.js 初始化（首页）
    ============================================================ */
 
-import { initTimeline } from './timeline.js?v=2026080520';
-import { icon } from './icons.js?v=2026080520';
+import { initTimeline } from './timeline.js?v=2026081001';
+import { icon } from './icons.js?v=2026081001';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 

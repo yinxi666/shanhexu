@@ -2,11 +2,11 @@
    赓续血脉・数绘红旅 — 共享弹窗 (Modals)
    职责：视频播放 / 实践成果详情 / 图片灯箱
    约束：依赖 ui(showToast,bindImageFallbacks) / utils / focus-trap / data(loadJSON)；
-         被 pages.js / action-delegate.js 引用
+         被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026080520';
-import { icon } from './icons.js?v=2026080520';
+import { showToast, bindImageFallbacks } from './ui.js?v=2026081001';
+import { icon } from './icons.js?v=2026081001';
 import {
   getBasePath,
   resolveAssetPath,
@@ -15,9 +15,9 @@ import {
   escapeHtml,
   escapeAttr,
   getLikeCount
-} from './utils.js?v=2026080520';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080520';
-import { loadJSON } from './data.js?v=2026080520';
+} from './utils.js?v=2026081001';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081001';
+import { loadJSON } from './data.js?v=2026081001';
 
 // 视频弹窗
 function openVideo(src) {

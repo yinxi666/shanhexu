@@ -4,8 +4,8 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080520';
-import { ASSET_VERSION } from './version.js?v=2026080520';
+import { getBasePath } from './utils.js?v=2026081001';
+import { ASSET_VERSION } from './version.js?v=2026081001';
 
 // 首页热力图 - ECharts中国地图，加载失败自动降级SVG
 async function initHomeHeatmap(venues) {
