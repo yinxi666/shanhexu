@@ -4,7 +4,7 @@
    注意：导航高亮由 setActiveNav() 在注入后统一处理（含 aria-current）
    ============================================================ */
 
-import { ASSET_VERSION } from './version.js?v=2026080515';
+import { ASSET_VERSION } from './version.js?v=2026080520';
 
 function getBasePath() {
   return location.pathname.includes('/pages/') ? '../' : './';

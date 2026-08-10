@@ -5,13 +5,13 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026080515';
-import * as RedRenderers from './renderers.js?v=2026080515';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080515';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080515';
-import { initBgMusic } from './music.js?v=2026080515';
-import { icon } from './icons.js?v=2026080515';
-import { initHomeHeatmap } from './heatmap.js?v=2026080515';
+import * as RedData from './data.js?v=2026080520';
+import * as RedRenderers from './renderers.js?v=2026080520';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080520';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080520';
+import { initBgMusic } from './music.js?v=2026080520';
+import { icon } from './icons.js?v=2026080520';
+import { initHomeHeatmap } from './heatmap.js?v=2026080520';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];

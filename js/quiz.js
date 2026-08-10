@@ -4,8 +4,9 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080515';
-import { icon } from './icons.js?v=2026080515';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080520';
+import { icon } from './icons.js?v=2026080520';
+import { getBasePath } from './utils.js?v=2026080520';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -29,7 +30,7 @@ function initQuiz() {
 
   const html = `
       <button class="quiz-fab" aria-label="红色知识问答" title="红色知识挑战赛">
-        <span>${icon('star')}</span>
+        <span><img class="quiz-fab-icon" src="${getBasePath()}挑战赛.webp" alt="红色知识挑战赛"></span>
       </button>
       <div class="quiz-modal-overlay" id="quiz-overlay">
         <div class="quiz-modal" role="dialog" aria-modal="true" aria-label="红色知识挑战赛">

@@ -5,8 +5,8 @@
          被 pages.js / action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026080515';
-import { icon } from './icons.js?v=2026080515';
+import { showToast, bindImageFallbacks } from './ui.js?v=2026080520';
+import { icon } from './icons.js?v=2026080520';
 import {
   getBasePath,
   resolveAssetPath,
@@ -15,9 +15,9 @@ import {
   escapeHtml,
   escapeAttr,
   getLikeCount
-} from './utils.js?v=2026080515';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080515';
-import { loadJSON } from './data.js?v=2026080515';
+} from './utils.js?v=2026080520';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080520';
+import { loadJSON } from './data.js?v=2026080520';
 
 // 视频弹窗
 function openVideo(src) {
