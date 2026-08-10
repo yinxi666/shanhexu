@@ -2,15 +2,12 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { getBasePath, resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081005';
-import { showToast } from './ui.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081005';
+import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081006';
+import { showToast } from './ui.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081006';
 
 const $ = (s, c) => (c || document).querySelector(s);
-function toast(msg) {
-  showToast(msg);
-}
 
 /* ---- 可选数据 ---- */
 const SPIRITS = ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];
@@ -309,7 +306,7 @@ function generateCard() {
       lastCardDataUrl = renderCard(img, spirit, name, currentVenueName);
     } catch (e) {
       resetBtn();
-      toast('生成失败，请重试');
+      showToast('生成失败，请重试');
       return;
     }
     const pv = $('#cardgen-preview');
@@ -341,9 +338,9 @@ function generateCard() {
       }
     }
     resetBtn();
-    toast(icon('check') + ' 纪念卡已生成');
+    showToast(icon('check') + ' 纪念卡已生成');
   };
-  img.onerror = function () { resetBtn(); toast('背景图加载失败，请重试'); };
+  img.onerror = function () { resetBtn(); showToast('背景图加载失败，请重试'); };
   img.src = resolveAssetPath(bg.src);
 }
 

@@ -1,37 +1,26 @@
 /* ============================================================
    赓续血脉・数绘红旅 — 渲染器模块 (Renderers)
    职责：所有页面组件的HTML渲染函数
-   依赖：RedData 数据层
+   依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
-import { isFavorite as checkFavorite } from './favorites.js?v=2026081005';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
+import { isFavorite as checkFavorite } from './favorites.js?v=2026081006';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
-
-/**
- * 渲染场馆卡片
- * @param {Object} venue - 场馆数据对象
- * @param {string} [basePath] - 基础路径
- * @returns {string} HTML字符串
- */
-function isFavorite(id) {
-  // 收藏逻辑统一走 favorites.js（实现单一来源），不再本地复刻
-  return checkFavorite(id);
-}
 
 function renderVenueCard(venue, basePath) {
   const bp = basePath || getBasePath();
   const imgSrc = sanitizeUrl(resolveAssetPath(venue.image, bp));
   const fb = fallbackSrc();
-  const favActive = isFavorite(venue.id);
+  const favActive = checkFavorite(venue.id);
   const favClass = favActive ? 'active' : '';
-  const favIcon = favActive ? icon('heart') : icon('heart-outline');
+  const favIcon = icon('heart'); // 收藏态由 .fav-btn.active 的 CSS fill 区分，无需两个图标
   const esc = escapeHtml;
   const attr = escapeAttr;
   return `
-      <div class="venue-card" data-id="${esc(venue.id)}" data-action="go-detail">
+      <div class="venue-card" data-id="${esc(venue.id)}" data-action="go-detail" tabindex="0" role="button" aria-label="${esc(venue.name)}">
         <div class="card-img">
           <img src="${attr(imgSrc)}" alt="${esc(venue.name)}" title="${esc(venue.name)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
           <span class="card-category">${esc(venue.category || '红色场馆')}</span>
@@ -70,12 +59,12 @@ function renderPracticeCard(practice, basePath) {
   const esc = escapeHtml;
   const attr = escapeAttr;
   return `
-      <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}">
+      <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="${esc(practice.title || practice.name || '')}">
         <div class="practice-img">
           <img src="${attr(imgSrc)}" alt="${esc(practice.title)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
           ${videoSrc ? `
           <div class="has-video-badge">▶ 视频</div>
-          <div class="play-btn" data-action="play-video" data-src="${attr(videoSrc)}">▶</div>` : ''}
+          <button class="play-btn" type="button" data-action="play-video" data-src="${attr(videoSrc)}" aria-label="播放视频" title="播放视频">▶</button>` : ''}
         </div>
         <div class="practice-body">
           <h3>${esc(practice.title)}</h3>

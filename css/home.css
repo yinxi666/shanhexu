@@ -152,18 +152,6 @@
   overflow: hidden;
 }
 
-.hero-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: var(--radius-pill);
-  opacity: 0;
-  transition: opacity var(--duration-fast);
-}
-
 .hero-btn-primary {
   background: var(--grad-primary);
   color: var(--hero-text);
@@ -407,10 +395,6 @@
     linear-gradient(to top, rgba(200, 180, 150, 0.08) 0%, transparent 35%),
     /* 天空层：暖黄雾霭 */
     radial-gradient(ellipse 60% 40% at 50% 60%, rgba(220, 200, 160, 0.03) 0%, transparent 70%);
-}
-
-.section-sm {
-  padding: 40px 24px;
 }
 
 .section-heading {

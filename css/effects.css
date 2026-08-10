@@ -53,13 +53,15 @@
   .quiz-fab,
   .quiz-modal-overlay,
   .dark-toggle,
+  .music-player,
+  .music-toggle,
   .back-to-top,
   .mobile-nav,
   .site-footer,
   .hero-actions,
   .video-modal-overlay,
   .practice-modal-overlay,
-  .lightbox,
+  .lightbox-overlay,
   .message-form-card,
   .pagination {
     display: none !important;
@@ -165,94 +167,6 @@ main {
 
 .venue-card:nth-child(5) {
   animation-delay: 0.30s;
-}
-
-/* ---------- 分享按钮 ---------- */
-.share-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--card-bg);
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-
-.share-btn:hover {
-  border-color: var(--red);
-  color: var(--red);
-  background: var(--light-red);
-}
-
-.share-btn.copied {
-  border-color: var(--status-ok-border);
-  color: var(--status-ok);
-  background: var(--status-ok-bg);
-}
-
-
-/* ---------- 时间线 ---------- */
-.timeline {
-  position: relative;
-  padding-left: 32px;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--red);
-  border-radius: var(--radius-xs);
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 24px;
-  padding: 16px 16px;
-  background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-}
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: -25px;
-  top: 18px;
-  width: 12px;
-  height: 12px;
-  background: var(--red);
-  border: 3px solid var(--bg);
-  border-radius: 50%;
-  z-index: 1;
-}
-
-.timeline-item .tl-year {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--red);
-  margin-bottom: 4px;
-}
-
-.timeline-item .tl-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.timeline-item .tl-desc {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 4px;
-  line-height: 1.6;
 }
 
 /* ============================================================
@@ -427,23 +341,6 @@ main {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-/* ---------- 响应式补充 ---------- */
-@media (max-width: 860px) {
-  .timeline {
-    padding-left: 24px;
-  }
-
-  .timeline::before {
-    left: 10px;
-  }
-
-  .timeline-item::before {
-    left: -19px;
-    width: 10px;
-    height: 10px;
   }
 }
 
@@ -665,46 +562,6 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 /* ============================================================
    图片画廊和 Lightbox
    ============================================================ */
-.detail-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.gallery-item {
-  aspect-ratio: 4/3;
-  overflow: hidden;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-
-.gallery-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.lightbox {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 1700;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
 .lightbox-content {
   max-width: 90vw;
   max-height: 90vh;
@@ -778,7 +635,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 }
 
 .red-star-marker.marker-highlight .rsm-inner {
-  animation: marker-pulse 1var(--transition) ease-in-out infinite;
+  animation: marker-pulse 1s ease-in-out infinite;
 }
 
 @keyframes marker-pulse {
@@ -793,24 +650,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   }
 }
 
-.lightbox-caption {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: white;
-  font-size: 14px;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 8px 16px;
-  border-radius: var(--radius-xl);
-}
-
 @media (max-width: 640px) {
-  .detail-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 8px;
-  }
-
   .lightbox-close {
     width: 32px;
     height: 32px;
@@ -1008,7 +848,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 
 .ai-thinking-dots span {
   display: inline-block;
-  animation: ai-dots 1var(--transition) infinite;
+  animation: ai-dots 1s infinite;
 }
 
 .ai-thinking-dots span:nth-child(2) {

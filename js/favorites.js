@@ -4,7 +4,7 @@
    约束：只依赖 utils.js，被 renderers.js / action-delegate.js 引用
    ============================================================ */
 
-import { safeStorage } from './utils.js?v=2026081005';
+import { safeStorage } from './utils.js?v=2026081006';
 
 function loadFavorites() {
   const raw = safeStorage.get('redguide_favs', [], localStorage);

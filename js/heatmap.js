@@ -5,8 +5,8 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081005';
-import { ASSET_VERSION } from './version.js?v=2026081005';
+import { getBasePath } from './utils.js?v=2026081006';
+import { ASSET_VERSION } from './version.js?v=2026081006';
 
 // 官方分省数据：据《全国红色旅游经典景区名录》(发改社会〔2016〕2662号，国家发改委等14部门，2016年，共300处)，按名录正文逐省统计。
 // 官方原文见国家发改委官网，本机留存 PDF 未纳入仓库(GitHub 内容扫描对该 PDF 误报)。

@@ -96,9 +96,6 @@
   --duration-normal: 0.6s;
 }
 
-/* ---------- Google Fonts（国内用户已注释，使用系统字体提升加载速度） ---------- */
-/* @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap'); */
-
 /* ---------- Reset & Base ---------- */
 *,
 *::before,
@@ -226,20 +223,6 @@ p {
   }
 }
 
-@keyframes scroll-indicator {
-
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-
-  50% {
-    transform: translateY(10px);
-    opacity: 1;
-  }
-}
-
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -260,10 +243,6 @@ p {
 
 .animate-fade-in {
   animation: fade-in var(--duration-normal) var(--ease-smooth) forwards;
-}
-
-.animate-scroll-indicator {
-  animation: scroll-indicator 2s ease-in-out infinite;
 }
 
 /* 滚动触发动画 */

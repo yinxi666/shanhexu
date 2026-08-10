@@ -4,9 +4,9 @@
    约束：依赖 utils(getBasePath) / ui(showToast)；被 pages.initCommon 调用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081005';
-import { showToast } from './ui.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
+import { getBasePath } from './utils.js?v=2026081006';
+import { showToast } from './ui.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
 
 let bgMusic = null;
 
@@ -16,7 +16,7 @@ function initBgMusic() {
   bgMusic.src = getBasePath() + 'assets/音频/NurxatAnwar - 歌唱祖国 (伴奏)_H.ogg';
   bgMusic.loop = true;
   bgMusic.volume = 0.5;
-  bgMusic.preload = 'auto';
+  bgMusic.preload = 'none'; // 4.1MB 音频不预下载，首次点击播放时再加载
 
   // 容器
   const wrap = document.createElement('div');

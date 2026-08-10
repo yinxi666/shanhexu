@@ -4,7 +4,7 @@
    约束：依赖 icons（图标）；被 app.js（初始化）与 action-delegate.js（toggleDarkMode）引用
    ============================================================ */
 
-import { icon } from './icons.js?v=2026081005';
+import { icon } from './icons.js?v=2026081006';
 
 /* 浏览器地址栏/任务栏颜色跟随主题 */
 function applyThemeColor(isDark) {

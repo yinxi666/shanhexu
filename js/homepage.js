@@ -4,8 +4,8 @@
    约束：依赖 timeline(initTimeline)；被 app.js 初始化（首页）
    ============================================================ */
 
-import { initTimeline } from './timeline.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
+import { initTimeline } from './timeline.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -37,7 +37,7 @@ function initHomepageInnovation() {
               <div class="card-icon">${icon('star')}</div>
               <span class="card-num">Quiz</span>
               <h3>红色知识挑战赛</h3>
-              <p>12道红色历史与场馆知识题，测测你对革命文化的了解程度。</p>
+              <p>每局随机10道红色历史与场馆知识题，测测你对革命文化的了解程度。</p>
               <span class="feature-card-action">开始挑战 →</span>
             </div>
             <div class="feature-card feature-card-clickable" data-action="toggle-dark">

@@ -57,6 +57,11 @@ html.dark {
   --deep-red: #991b1b;
 }
 
+/* 深色下长征纪念卡姓名输入框：--cz-paper 变深棕(#2b2315)，深底深字不可读 → 文字固定为浅纸色 */
+html.dark .cz-card-field input[type="text"] {
+  color: #f7ecc9;
+}
+
 html.dark .site-header {
   background: rgba(15, 23, 42, 0.95);
 }
@@ -192,12 +197,6 @@ html.dark .music-toggle {
   background: #334155;
   box-shadow: 0 0 0 1px var(--gold), 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(251, 191, 36, 0.3);
 }
-/* 播放/暂停仅用图标(note/note-off)区分，深色下不再套深酒红底 */
-html.dark .share-btn.copied {
-  background: #052e16;
-  color: #86efac;
-}
-
 @media (max-width: 860px) {
   .dark-toggle {
     left: 8px !important;

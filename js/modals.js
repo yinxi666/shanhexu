@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
+import { showToast, bindImageFallbacks } from './ui.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
 import {
   getBasePath,
   resolveAssetPath,
@@ -15,9 +15,9 @@ import {
   escapeHtml,
   escapeAttr,
   getLikeCount
-} from './utils.js?v=2026081005';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081005';
-import { loadJSON } from './data.js?v=2026081005';
+} from './utils.js?v=2026081006';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081006';
+import { loadJSON } from './data.js?v=2026081006';
 
 // 视频弹窗
 function openVideo(src) {
@@ -38,6 +38,8 @@ function openVideo(src) {
       }
     });
   }
+  // 已打开则直接返回，避免重复 lockBodyScroll 使计数失衡
+  if (overlay.classList.contains('open')) return;
   const video = overlay.querySelector('video');
   const closeBtn = overlay.querySelector('.video-close');
   video.src = src;
@@ -46,7 +48,7 @@ function openVideo(src) {
     showToast('视频加载失败');
   };
   overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   trapFocus(overlay.querySelector('.video-modal'), {
     initialFocus: closeBtn,
     onClose: closeVideo
@@ -59,7 +61,7 @@ function openVideo(src) {
     video.pause();
     video.src = '';
     video.onerror = null;
-    document.body.style.overflow = '';
+    unlockBodyScroll();
     releaseFocus();
   }
 }
@@ -114,7 +116,7 @@ async function openPracticeDetail(id) {
     `;
   document.body.appendChild(overlay);
   bindImageFallbacks(overlay);
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   overlay.classList.add('open');
   const modal = overlay.querySelector('.quiz-modal');
   const closeBtn = overlay.querySelector('.quiz-close');
@@ -128,7 +130,7 @@ async function openPracticeDetail(id) {
   function closePracticeDetail() {
     if (!overlay.parentNode) return;
     overlay.remove();
-    document.body.style.overflow = '';
+    unlockBodyScroll();
     releaseFocus();
   }
 }

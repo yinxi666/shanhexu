@@ -3,15 +3,15 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081005';
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081005';
-import { showToast } from './ui.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026081005';
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081005';
+import * as RedData from './data.js?v=2026081006';
+import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081006';
+import { showToast } from './ui.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026081006';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081006';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081005';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081006';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化） */
 const _reduceMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');
@@ -831,7 +831,8 @@ function openRelicDetail(stationId) {
   if (relicStoryEl) relicStoryEl.textContent = relic.story;
   if (relicStationEl) relicStationEl.textContent = `${s.name} · ${s.date} · 已走 ${s.miles} 里`;
   relicModal.classList.add('show');
-  lockBody();
+  relicModal.setAttribute('aria-hidden', 'false');
+  lockBodyScroll();
   const closeBtn = $('#cz-relic-close');
   trapFocus(relicModal, {
     initialFocus: closeBtn,
@@ -843,7 +844,8 @@ function closeRelic() {
   if (!relicModal || !relicModal.classList.contains('show')) return;
   releaseFocus();
   relicModal.classList.remove('show');
-  unlockBody();
+  relicModal.setAttribute('aria-hidden', 'true');
+  unlockBodyScroll();
 }
 
 /* ---------- 终点成就：走完全程 → 长征纪念卡 ---------- */
@@ -853,7 +855,7 @@ function showComplete() {
   if (!completeOverlay) return;
   completeOverlay.classList.add('show');
   completeOverlay.setAttribute('aria-hidden', 'false');
-  lockBody();
+  lockBodyScroll();
   const completeBtn = $('#cz-complete-btn');
   trapFocus(completeOverlay, {
     initialFocus: completeBtn,
@@ -865,7 +867,7 @@ function closeComplete() {
   releaseFocus();
   completeOverlay.classList.remove('show');
   completeOverlay.setAttribute('aria-hidden', 'true');
-  unlockBody();
+  unlockBodyScroll();
 }
 
 /* ---------- 长征纪念卡：专属弹窗 ---------- */
@@ -926,7 +928,7 @@ function openCardModal() {
   if (!czCardModal) return;
   buildCardModal();
   czCardModal.classList.add('open');
-  lockBody();
+  lockBodyScroll();
   trapFocus(czCardModal, {
     initialFocus: czCardName,
     onClose: closeCardModal
@@ -936,7 +938,7 @@ function closeCardModal() {
   if (!czCardModal || !czCardModal.classList.contains('open')) return;
   releaseFocus();
   czCardModal.classList.remove('open');
-  unlockBody();
+  unlockBodyScroll();
   _czCardDataUrl = null; // 复位，避免重开后直接导出上一张旧卡面
 }
 function generateLongMarchCard() {
@@ -1013,7 +1015,12 @@ function initImmersiveUI() {
   if (soundToggle) soundToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleSound(); });
   if (autoplayBtn) autoplayBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleAutoScroll(); });
   // 用户手动滚动 / 触摸 / 方向键 → 立即接管自动行军
-  ['wheel', 'touchstart'].forEach(ev => window.addEventListener(ev, () => { if (_autoRaf) stopAutoScroll(); }, { passive: true }));
+  ['wheel', 'touchstart'].forEach(ev => window.addEventListener(ev, (e) => {
+    if (!_autoRaf) return;
+    // 触屏点按自动行军按钮时不在此停：让 click 的 toggle 全权控制，避免"touchstart先停→click再启"竞态导致无法停止
+    if (ev === 'touchstart' && e.target && e.target.closest && e.target.closest('#cz-autoplay-btn')) return;
+    stopAutoScroll();
+  }, { passive: true }));
   window.addEventListener('keydown', (e) => {
     if (_autoRaf && ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'PageDown', 'PageUp', ' ', 'Home', 'End'].includes(e.key)) stopAutoScroll();
   });
@@ -1136,10 +1143,7 @@ function _instantScroll(y) {
   try { window.scrollTo({ top: y, behavior: 'instant' }); }
   catch (e) { window.scrollTo(0, y); }
 }
-/* 弹窗 body 滚动锁计数（多弹窗叠加时避免互相解锁） */
-let _bodyScrollLock = 0;
-function lockBody() { _bodyScrollLock++; document.body.style.overflow = 'hidden'; }
-function unlockBody() { _bodyScrollLock = Math.max(0, _bodyScrollLock - 1); if (_bodyScrollLock === 0) document.body.style.overflow = ''; }
+/* 弹窗 body 滚动锁：统一复用 focus-trap 的计数式 lockBodyScroll/unlockBodyScroll，避免两套锁并存 */
 /* 笺纸 dropped 世代标记（快速回滚时取消过期定时器） */
 let _dropGen = 0;
 /* 诗词每站只浮现一次 */

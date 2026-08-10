@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081005';
-import { ASSET_VERSION } from './version.js?v=2026081005';
+import { getBasePath } from './utils.js?v=2026081006';
+import { ASSET_VERSION } from './version.js?v=2026081006';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
@@ -123,7 +123,8 @@ async function loadExtMeta() {
   if (_extMetaPromise) return _extMetaPromise;
   _extMetaPromise = loadJSON('data/extended-venues-meta.json');
   const data = await _extMetaPromise;
-  if (data && typeof data === 'object') {
+  // 注意：loadJSON 失败返回 []（typeof [] === 'object'），必须再校验非空，否则失败结果会被永久缓存
+  if (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length > 0) {
     _extMetaCache = data;
   } else {
     _extMetaPromise = null; // 允许下次重试
@@ -137,7 +138,7 @@ async function loadVenueDetails() {
   if (_venueDetailsPromise) return _venueDetailsPromise;
   _venueDetailsPromise = loadJSON('data/venue-details.json');
   const data = await _venueDetailsPromise;
-  if (data && typeof data === 'object') {
+  if (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length > 0) {
     _venueDetailsCache = data;
   } else {
     _venueDetailsPromise = null; // 允许下次重试

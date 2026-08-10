@@ -4,9 +4,9 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
-import { getVenues } from './venue-store.js?v=2026081005';
+import { getBasePath } from './utils.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
+import { getVenues } from './venue-store.js?v=2026081006';
 
 function initTimeline() {
   if (!(location.pathname.endsWith('/') || location.pathname.endsWith('index.html'))) return;
@@ -51,6 +51,10 @@ function initTimeline() {
 
   nodes.forEach(function (node) {
     node.addEventListener('click', function () { showEvent(node.dataset.year); });
+    // 键盘可达：Enter/Space 与点击一致
+    node.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showEvent(node.dataset.year); }
+    });
   });
 
   // 自动激活第一个

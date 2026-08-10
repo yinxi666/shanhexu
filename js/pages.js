@@ -5,13 +5,13 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026081005';
-import * as RedRenderers from './renderers.js?v=2026081005';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081005';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081005';
-import { initBgMusic } from './music.js?v=2026081005';
-import { icon } from './icons.js?v=2026081005';
-import { initHomeHeatmap } from './heatmap.js?v=2026081005';
+import * as RedData from './data.js?v=2026081006';
+import * as RedRenderers from './renderers.js?v=2026081006';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081006';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081006';
+import { initBgMusic } from './music.js?v=2026081006';
+import { icon } from './icons.js?v=2026081006';
+import { initHomeHeatmap } from './heatmap.js?v=2026081006';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
@@ -316,11 +316,11 @@ async function initGuidePage() {
   const categorySelect = $('#filter-category');
   if (provinceSelect) {
     provinceSelect.innerHTML = '<option value="all">全部地区</option>' +
-      provinces.map(p => `<option value="${p}" ${p === initProvince ? 'selected' : ''}>${p}</option>`).join('');
+      provinces.map(p => `<option value="${escapeHtml(p)}" ${p === initProvince ? 'selected' : ''}>${escapeHtml(p)}</option>`).join('');
   }
   if (categorySelect) {
     categorySelect.innerHTML = '<option value="all">全部类别</option>' +
-      categories.map(c => `<option value="${c}" ${c === initCategory ? 'selected' : ''}>${c}</option>`).join('');
+      categories.map(c => `<option value="${escapeHtml(c)}" ${c === initCategory ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
   }
 
   const searchInput = $('#search-input');
@@ -341,22 +341,9 @@ async function initGuidePage() {
     if (toggleBtn) toggleBtn.classList.remove('is-hidden');
   }
 
-  let _leafletInjected = false;
   async function initMap() {
     if (leafletMap) return;
-    if (!window.L && !_leafletInjected) {
-      _leafletInjected = true;
-      try {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-          script.setAttribute('data-injected', '1');
-          script.onload = resolve;
-          script.onerror = reject;
-          document.head.appendChild(script);
-        });
-      } catch (e) { /* CDN 注入失败：仅地图不可用，不影响其他功能 */ }
-    }
+    // guide.html 已通过 <script defer> 静态加载 Leaflet（同一 CDN），此处无需再动态注入兜底
     if (!window.L || !mapContainer) return;
     leafletMap = L.map(mapContainer, {
       center: [35, 110],
@@ -403,7 +390,7 @@ async function initGuidePage() {
     });
     staleMarkers.forEach(layer => leafletMap.removeLayer(layer));
     venueMarkerMap = {};
-    const withCoords = filteredVenues.filter(function (v) { return v.coordinates && v.coordinates.lat; });
+    const withCoords = filteredVenues.filter(function (v) { return v.coordinates && v.coordinates.lat && v.coordinates.lng; });
     if (withCoords.length === 0) return;
 
     const defIcon = makeDefaultIcon();

@@ -14,8 +14,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .detail-layout,
-  .message-layout {
+  .detail-layout {
     grid-template-columns: 1fr;
   }
 
@@ -130,16 +129,6 @@
     display: none;
   }
 
-  /* 移动端简化政策卡片 */
-  .policy-card {
-    flex-direction: column;
-  }
-
-  .policy-card .policy-img {
-    width: 100%;
-    height: 140px;
-  }
-
   .stats-row {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
@@ -194,10 +183,6 @@
   .policy-card .policy-img {
     width: 100%;
     height: 160px;
-  }
-
-  .message-layout {
-    grid-template-columns: 1fr;
   }
 
   .message-list {
@@ -682,13 +667,13 @@
 .quiz-opt.correct {
   border-color: var(--status-ok-border);
   background: rgba(34, 197, 94, 0.1);
-  color: var(--status-ok-text);
+  color: var(--status-ok); /* 浅色下用深绿令牌提升对比度，深色下用亮绿 */
 }
 
 .quiz-opt.wrong {
   border-color: var(--status-err);
   background: rgba(239, 68, 68, 0.1);
-  color: var(--status-err-text);
+  color: var(--status-err);
 }
 
 .opt-letter {
@@ -724,13 +709,13 @@
 .quiz-feedback.correct {
   border-color: var(--status-ok-border);
   background: rgba(34, 197, 94, 0.08);
-  color: var(--status-ok-text);
+  color: var(--status-ok);
 }
 
 .quiz-feedback.wrong {
   border-color: var(--status-err);
   background: rgba(239, 68, 68, 0.08);
-  color: var(--status-err-text);
+  color: var(--status-err);
 }
 
 /* 上一题 / 下一题导航 */
@@ -1003,43 +988,6 @@
   100% {
     transform: scale(1);
   }
-}
-
-/* ============================================================
-   PWA 安装提示
-   ============================================================ */
-.pwa-install-banner {
-  display: none;
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  box-shadow: var(--shadow-md);
-  z-index: 960;
-  white-space: nowrap;
-  font-size: 14px;
-  align-items: center;
-  gap: 12px;
-}
-
-.pwa-install-banner.show {
-  display: flex;
-}
-
-.pwa-install-banner button {
-  min-height: 34px;
-  padding: 8px 16px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: var(--red);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
 }
 
 /* ============================================================

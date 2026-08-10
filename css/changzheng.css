@@ -783,11 +783,13 @@
   -webkit-backdrop-filter: blur(6px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .3s ease;
+  visibility: hidden; /* 关闭态移出 Tab 序与无障碍树，避免 aria-hidden 元素内仍有可聚焦后代 */
+  transition: opacity .3s ease, visibility .3s ease;
 }
 .cz-relic-modal.show {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
 }
 .cz-relic-modal-box {
   position: relative;
@@ -889,7 +891,7 @@
   inset: -38px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 140, 70, 0.3) 0%, transparent 65%);
-  animation: cz-complete-glow 2var(--transition) ease-in-out infinite;
+  animation: cz-complete-glow 2s ease-in-out infinite;
   pointer-events: none;
 }
 .cz-complete-portrait img {
@@ -1584,12 +1586,12 @@
   background: radial-gradient(ellipse at 50% 55%, transparent 25%, rgba(0, 0, 0, 0.3) 65%, rgba(0, 0, 0, 0.65) 100%);
 }
 
-/* 注：.cz-atmos 定义在 5122 行（fixed + 100vw/h，避免此处重复覆盖导致 position 失效）*/
+/* 注：.cz-atmos 定义于上方"层 1/5"视差背景节（fixed + 100vw/h，避免此处重复覆盖导致 position 失效）*/
 
 /* ---- mood 切换（给 .cz-bg 加类即可换色） ---- */
 /* mood 背景色（通过 .cz-bg-mood 真实照片层 + .active 类控制，不再需要 .cz-bg.mood-* 类） */
 
-/* ---------- 层 2/3：SVG 长征路线图（左上/右上 HUD 小地图） ---------- */
+/* ---------- 层 4/5：SVG 长征路线图（左上/右上 HUD 小地图） ---------- */
 .cz-route-wrap {
   position: fixed;
   top: clamp(70px, 9vh, 96px);
@@ -1704,7 +1706,7 @@
   }
 }
 
-/* ---------- 层 3/3：顶部中央进度 HUD ---------- */
+/* ---------- 层 5/5：顶部中央进度 HUD ---------- */
 .cz-hud {
   position: fixed;
   top: clamp(72px, 9vh, 96px);

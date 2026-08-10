@@ -17,7 +17,6 @@ const SKIP_DIRS = new Set(['node_modules', '.git', '_site', 'docs', '.claude', '
 const DEAD_FILES = ['common.js', 'features.js', 'styles.css'];
 
 const errors = [];
-const warnings = [];
 
 /* ---- 遍历（跳过产物/库/内部文档目录） ---- */
 function walk(dir, cb) {
@@ -110,10 +109,6 @@ for (const f of ['venues.json', 'extended-venues-meta.json']) {
 console.log('\n数据健康（仅报告，不阻断）:');
 console.log(`  - "需进一步核验" 残留: ${pendingResidue} 处`);
 console.log(`  - 场馆类别取值: ${categories.size} 种 → ${[...categories].join('、')}`);
-if (warnings.length) {
-  console.log('\n警告:');
-  warnings.forEach((w) => console.log('  - ' + w));
-}
 
 /* ---- 汇总 ---- */
 console.log('');

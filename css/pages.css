@@ -18,12 +18,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.detail-main .detail-img {
-  width: 100%;
-  aspect-ratio: 2 / 1;
-  object-fit: cover;
-}
-
 .detail-main .detail-body {
   padding: 28px;
 }
@@ -409,7 +403,7 @@
   gap: 16px;
   align-items: center;
   font-size: 12px;
-  color: var(--light-muted);
+  color: var(--muted); /* --light-muted 在小字号下对比度不足(浅色#9ca3af≈2.9:1)，改用 --muted */
 }
 
 .policy-card .policy-info .policy-meta .policy-source {
@@ -589,9 +583,19 @@
   font-size: 52px;
   opacity: 0.9;
   cursor: pointer;
+  /* button 原生样式重置 */
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  line-height: 1;
   z-index: 2;
   transition: all 0.3s ease;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+/* 键盘聚焦可见 */
+.practice-card .practice-img .play-btn:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .practice-card:hover .practice-img .play-btn {
@@ -837,13 +841,6 @@
 
 
 /* ---------- Message Wall ---------- */
-.message-layout {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 28px;
-  align-items: start;
-}
-
 .message-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1441,13 +1438,6 @@
   border-color: var(--line);
 }
 
-
-/* ---------- Skeleton Loading ---------- */
-.skeleton {
-  animation: shimmer 1.5s infinite;
-  background: linear-gradient(90deg, var(--card-bg) 25%, var(--line) 50%, var(--card-bg) 75%);
-  background-size: 200% 100%;
-}
 
 /* ---------- Toast ---------- */
 .toast {
