@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081006';
-import { ASSET_VERSION } from './version.js?v=2026081006';
+import { getBasePath } from './utils.js?v=2026081007';
+import { ASSET_VERSION } from './version.js?v=2026081007';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>

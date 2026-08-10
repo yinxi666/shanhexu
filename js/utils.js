@@ -90,6 +90,14 @@ function isTouchDevice() {
   return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 }
 
+/* 是否已点赞：与 getLikeCount 同一套 sessionStorage 键，供渲染时保持已赞高亮 */
+function isPracticeLiked(id) {
+  try {
+    return sessionStorage.getItem('redguide_likes_' + id) != null
+      || sessionStorage.getItem('redguide_likecount_' + id) != null;
+  } catch (e) { return false; }
+}
+
 export {
   getBasePath,
   resolveAssetPath,
@@ -99,5 +107,6 @@ export {
   sanitizeUrl,
   safeStorage,
   getLikeCount,
+  isPracticeLiked,
   isTouchDevice
 };

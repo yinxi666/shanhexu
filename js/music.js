@@ -4,9 +4,9 @@
    约束：依赖 utils(getBasePath) / ui(showToast)；被 pages.initCommon 调用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081006';
-import { showToast } from './ui.js?v=2026081006';
-import { icon } from './icons.js?v=2026081006';
+import { getBasePath } from './utils.js?v=2026081007';
+import { showToast } from './ui.js?v=2026081007';
+import { icon } from './icons.js?v=2026081007';
 
 let bgMusic = null;
 

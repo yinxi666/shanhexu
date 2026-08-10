@@ -734,6 +734,22 @@
   transform: scale(0.9);
 }
 
+/* 已赞保持高亮：红心填充 + 红色药丸（持久态，刷新/重开仍保留） */
+.practice-card .practice-footer .practice-likes.active {
+  background: var(--red);
+  color: var(--on-primary);
+  box-shadow: 0 2px 8px rgba(185, 28, 28, 0.25);
+}
+.practice-card .practice-footer .practice-likes.active .icon,
+.practice-detail-likes.active .icon {
+  fill: currentColor;
+}
+/* 详情弹窗点赞：保持纯文本布局，仅红心填充 + 红字加粗 */
+.practice-detail-likes.active {
+  color: var(--red);
+  font-weight: 700;
+}
+
 /* ---- 背景音乐播放器 ---- */
 .music-player {
   position: fixed;

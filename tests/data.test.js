@@ -24,9 +24,9 @@ function extractObject(src, name) {
 }
 
 test('问答题库：30 题，每题 4 选项 + 有效答案 + 解析', () => {
-  const src = readFile('js/quiz.js');
+  const src = readFile('js/quiz-data.js');
   const m = src.match(/const quizData = (\[[\s\S]*?\n  \]);/);
-  assert.ok(m, 'quiz.js 应包含 quizData 数组');
+  assert.ok(m, 'quiz-data.js 应包含 quizData 数组');
   const quizData = eval(m[1]);
   assert.strictEqual(quizData.length, 30, '题库应为 30 题');
   quizData.forEach((item, i) => {
@@ -38,9 +38,9 @@ test('问答题库：30 题，每题 4 选项 + 有效答案 + 解析', () => {
 });
 
 test('热力图官方数据：31 省求和 = 300（新疆含兵团），港澳台补 0', () => {
-  const src = readFile('js/heatmap.js');
+  const src = readFile('js/heatmap-data.js');
   const m = src.match(/const OFFICIAL_ATTRACTIONS = (\{[\s\S]*?\n\});/);
-  assert.ok(m, 'heatmap.js 应包含 OFFICIAL_ATTRACTIONS');
+  assert.ok(m, 'heatmap-data.js 应包含 OFFICIAL_ATTRACTIONS');
   const data = eval('(' + m[1] + ')');
   const sum = Object.values(data).reduce((a, b) => a + b, 0);
   assert.strictEqual(sum, 300, '官方名录分省求和应为 300');

@@ -5,13 +5,13 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026081006';
-import * as RedRenderers from './renderers.js?v=2026081006';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081006';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081006';
-import { initBgMusic } from './music.js?v=2026081006';
-import { icon } from './icons.js?v=2026081006';
-import { initHomeHeatmap } from './heatmap.js?v=2026081006';
+import * as RedData from './data.js?v=2026081007';
+import * as RedRenderers from './renderers.js?v=2026081007';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081007';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081007';
+import { initBgMusic } from './music.js?v=2026081007';
+import { icon } from './icons.js?v=2026081007';
+import { initHomeHeatmap } from './heatmap.js?v=2026081007';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
@@ -39,6 +39,8 @@ function likePractice(el, id) {
   try {
     const liked = sessionStorage.getItem(key) != null || sessionStorage.getItem(legacyKey) != null;
     if (liked) {
+      // 已赞过：确保高亮态存在（防弹窗新渲染的副本未带 active）
+      el.classList.add('active');
       el.style.transform = 'scale(0.9)';
       setTimeout(() => el.style.transform = '', 150);
       return;
@@ -46,11 +48,14 @@ function likePractice(el, id) {
   } catch (e) { }
   const newCount = parseInt(countEl.textContent) + 1;
   countEl.textContent = newCount;
+  // 已赞保持高亮：红心填充 + 红色药丸
+  el.classList.add('active');
   // 同步更新页面上相同实践的所有点赞数（卡片+弹窗；统一用 data-action 选择器覆盖两种类名）
   const allLikes = document.querySelectorAll('[data-action="like-practice"]');
   allLikes.forEach(function (like) {
     // 通过 data-id 精确匹配，避免 practice-1 与 practice-10 子串误匹配
     if (like.dataset.id === id) {
+      like.classList.add('active');
       const c = like.querySelector('.like-count');
       if (c && c !== countEl) c.textContent = newCount;
     }
@@ -814,4 +819,4 @@ async function autoInit() {
   }
 }
 
-export { autoInit, initCommon, likePractice };
+export { autoInit, likePractice };

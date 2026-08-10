@@ -4,11 +4,9 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026081006';
-import { icon } from './icons.js?v=2026081006';
-import { isFavorite as checkFavorite } from './favorites.js?v=2026081006';
-
-const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081007';
+import { icon } from './icons.js?v=2026081007';
+import { isFavorite as checkFavorite } from './favorites.js?v=2026081007';
 
 function renderVenueCard(venue, basePath) {
   const bp = basePath || getBasePath();
@@ -56,6 +54,7 @@ function renderPracticeCard(practice, basePath) {
   const fb = fallbackSrc();
   const hasVideo = practice.video && practice.video.trim();
   const videoSrc = hasVideo ? sanitizeUrl(resolveAssetPath(practice.video, bp)) : '';
+  const practiceLiked = isPracticeLiked(practice.id); // 已赞保持高亮
   const esc = escapeHtml;
   const attr = escapeAttr;
   return `
@@ -73,7 +72,7 @@ function renderPracticeCard(practice, basePath) {
         </div>
         <div class="practice-footer">
           <span class="practice-date"><span class="pd-year">${(practice.createdAt || '----').slice(0, 4)}</span><span class="pd-month">${parseInt((practice.createdAt || '--').slice(5, 7), 10) || '--'}</span><span class="pd-day">${parseInt((practice.createdAt || '--').slice(8, 10), 10) || '--'}</span></span>
-          <span class="practice-likes" data-action="like-practice" data-id="${esc(practice.id)}">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
+          <span class="practice-likes${practiceLiked ? ' active' : ''}" data-action="like-practice" data-id="${esc(practice.id)}">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
         </div>
       </div>
     `;

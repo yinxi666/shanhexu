@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026081006';
-import { icon } from './icons.js?v=2026081006';
+import { showToast, bindImageFallbacks } from './ui.js?v=2026081007';
+import { icon } from './icons.js?v=2026081007';
 import {
   getBasePath,
   resolveAssetPath,
@@ -14,10 +14,11 @@ import {
   sanitizeUrl,
   escapeHtml,
   escapeAttr,
-  getLikeCount
-} from './utils.js?v=2026081006';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081006';
-import { loadJSON } from './data.js?v=2026081006';
+  getLikeCount,
+  isPracticeLiked
+} from './utils.js?v=2026081007';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081007';
+import { loadJSON } from './data.js?v=2026081007';
 
 // 视频弹窗
 function openVideo(src) {
@@ -68,6 +69,8 @@ function openVideo(src) {
 
 // 实践成果详情弹窗
 async function openPracticeDetail(id) {
+  // 已打开则直接返回，避免异步窗口内重复触发生成双弹窗、锁计数失衡
+  if (document.getElementById('practice-detail-overlay')) return;
   let practices;
   try { practices = await loadJSON('data/practices.json'); } catch (e) { practices = []; }
   const p = practices.find(x => String(x.id) === String(id));
@@ -109,7 +112,7 @@ async function openPracticeDetail(id) {
           </div>` : ''}
           <div class="practice-detail-actions">
             <span>${icon('calendar')} ${escapeHtml(p.createdAt || '')}</span>
-            <span class="practice-detail-likes" data-action="like-practice" data-id="${p.id}">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
+            <span class="practice-detail-likes${isPracticeLiked(p.id) ? ' active' : ''}" data-action="like-practice" data-id="${p.id}">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
           </div>
         </div>
       </div>
@@ -126,13 +129,15 @@ async function openPracticeDetail(id) {
       closePracticeDetail();
     }
   });
+}
 
-  function closePracticeDetail() {
-    if (!overlay.parentNode) return;
-    overlay.remove();
-    unlockBodyScroll();
-    releaseFocus();
-  }
+// 实践详情关闭（模块级独立函数：供弹窗内部与 action-delegate 的 close-practice-detail 共用，消除重复逻辑）
+function closePracticeDetail() {
+  const overlay = document.getElementById('practice-detail-overlay');
+  if (!overlay || !overlay.parentNode) return;
+  overlay.remove();
+  unlockBodyScroll();
+  releaseFocus();
 }
 
 // 图片灯箱
@@ -158,4 +163,4 @@ function openLightbox(src) {
   }
 }
 
-export { openVideo, openPracticeDetail, openLightbox };
+export { openVideo, openPracticeDetail, openLightbox, closePracticeDetail };
