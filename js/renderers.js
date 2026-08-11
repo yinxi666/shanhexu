@@ -4,9 +4,9 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081007';
-import { icon } from './icons.js?v=2026081007';
-import { isFavorite as checkFavorite } from './favorites.js?v=2026081007';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081008';
+import { icon } from './icons.js?v=2026081008';
+import { isFavorite as checkFavorite } from './favorites.js?v=2026081008';
 
 function renderVenueCard(venue, basePath) {
   const bp = basePath || getBasePath();

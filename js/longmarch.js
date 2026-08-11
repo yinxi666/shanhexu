@@ -3,17 +3,17 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081007';
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081007';
-import { showToast } from './ui.js?v=2026081007';
-import { icon } from './icons.js?v=2026081007';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026081007';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081007';
+import * as RedData from './data.js?v=2026081008';
+import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081008';
+import { showToast } from './ui.js?v=2026081008';
+import { icon } from './icons.js?v=2026081008';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026081008';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081008';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081007';
-import { RELIC_MAP, POEM_MOMENTS, CZ_CARD_BGS } from './cz-content.js?v=2026081007';
-import * as czSound from './cz-sound.js?v=2026081007';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081008';
+import { RELIC_MAP, POEM_MOMENTS, CZ_CARD_BGS } from './cz-content.js?v=2026081008';
+import * as czSound from './cz-sound.js?v=2026081008';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化） */
 const _reduceMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');

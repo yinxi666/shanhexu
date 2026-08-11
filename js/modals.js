@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026081007';
-import { icon } from './icons.js?v=2026081007';
+import { showToast, bindImageFallbacks } from './ui.js?v=2026081008';
+import { icon } from './icons.js?v=2026081008';
 import {
   getBasePath,
   resolveAssetPath,
@@ -16,9 +16,9 @@ import {
   escapeAttr,
   getLikeCount,
   isPracticeLiked
-} from './utils.js?v=2026081007';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081007';
-import { loadJSON } from './data.js?v=2026081007';
+} from './utils.js?v=2026081008';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081008';
+import { loadJSON } from './data.js?v=2026081008';
 
 // 视频弹窗
 function openVideo(src) {

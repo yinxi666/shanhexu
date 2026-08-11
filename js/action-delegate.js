@@ -4,16 +4,16 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail, copyShareLink } from './ui.js?v=2026081007';
-import { openVideo, openPracticeDetail, openLightbox, closePracticeDetail } from './modals.js?v=2026081007';
-import { likePractice } from './pages.js?v=2026081007';
-import { toggleFavorite } from './favorites.js?v=2026081007';
-import { openChat } from './chat.js?v=2026081007';
-import { openQuiz } from './quiz.js?v=2026081007';
-import { toggleDarkMode } from './darkmode.js?v=2026081007';
-import { icon } from './icons.js?v=2026081007';
-import * as RedCardGen from './cardgen.js?v=2026081007';
-import { releaseFocus } from './focus-trap.js?v=2026081007';
+import { goToDetail, copyShareLink } from './ui.js?v=2026081008';
+import { openVideo, openPracticeDetail, openLightbox, closePracticeDetail } from './modals.js?v=2026081008';
+import { likePractice } from './pages.js?v=2026081008';
+import { toggleFavorite } from './favorites.js?v=2026081008';
+import { openChat } from './chat.js?v=2026081008';
+import { openQuiz } from './quiz.js?v=2026081008';
+import { toggleDarkMode } from './darkmode.js?v=2026081008';
+import { icon } from './icons.js?v=2026081008';
+import * as RedCardGen from './cardgen.js?v=2026081008';
+import { releaseFocus } from './focus-trap.js?v=2026081008';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
