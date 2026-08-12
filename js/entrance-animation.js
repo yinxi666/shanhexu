@@ -3,7 +3,7 @@
    原 index.html 内联脚本提取，职责：首页 entrance-canvas 全屏叙事动画
    ============================================================ */
 
-import { resolveAssetPath } from './utils.js?v=2026081308';
+import { resolveAssetPath } from './utils.js?v=2026081309';
 
 export function initEntranceAnimation() {
   // sessionStorage 访问防护（Safari 隐私模式等会抛异常，避免开场黑屏卡死）
@@ -18,20 +18,21 @@ export function initEntranceAnimation() {
   }
   // 只在首页存在 entrance-overlay 时初始化，避免非首页直接调用报错
   if (!document.getElementById('entrance-overlay')) return;
-  // 背景页面对键盘焦点不设防：开场期间把主体内容标为惰性，焦点只落在遮罩内（skip 已 autofocus）
+  // 背景页面对键盘焦点不设防：开场期间把主体内容标为 inert（真正挡 Tab 焦点）+
+  // aria-hidden 作旧引擎回退，焦点只落在遮罩内（skip 已 autofocus）
   const _entranceMain = document.querySelector('main');
   const _entranceHeader = document.getElementById('site-header');
   const _entranceFooter = document.getElementById('site-footer');
-  if (_entranceMain) _entranceMain.setAttribute('aria-hidden', 'true');
-  if (_entranceHeader) _entranceHeader.setAttribute('aria-hidden', 'true');
-  if (_entranceFooter) _entranceFooter.setAttribute('aria-hidden', 'true');
+  if (_entranceMain) { _entranceMain.setAttribute('inert', ''); _entranceMain.setAttribute('aria-hidden', 'true'); }
+  if (_entranceHeader) { _entranceHeader.setAttribute('inert', ''); _entranceHeader.setAttribute('aria-hidden', 'true'); }
+  if (_entranceFooter) { _entranceFooter.setAttribute('inert', ''); _entranceFooter.setAttribute('aria-hidden', 'true'); }
   const _restoreEntranceInert = function () {
-    if (_entranceMain) _entranceMain.removeAttribute('aria-hidden');
-    if (_entranceHeader) _entranceHeader.removeAttribute('aria-hidden');
-    if (_entranceFooter) _entranceFooter.removeAttribute('aria-hidden');
+    if (_entranceMain) { _entranceMain.removeAttribute('inert'); _entranceMain.removeAttribute('aria-hidden'); }
+    if (_entranceHeader) { _entranceHeader.removeAttribute('inert'); _entranceHeader.removeAttribute('aria-hidden'); }
+    if (_entranceFooter) { _entranceFooter.removeAttribute('inert'); _entranceFooter.removeAttribute('aria-hidden'); }
   };
   window.addEventListener('entranceFinished', _restoreEntranceInert);
-  // 已播放过则跳过（也要复位 aria-hidden）
+  // 已播放过则跳过（也要复位 inert/aria-hidden）
   if (isEntranceDone()) {
     _restoreEntranceInert();
     let el = document.getElementById('entrance-overlay');

@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-08-13 · v2026081309 — 第二轮审查修复（回归 + 残留）
+
+针对第二轮全仓审查（37 条/确认 16）的修复：
+
+- **回归修复**：移动→桌面 resize 后导览地图补 plotVenuesOnMap（不再空白）；聊天历史恢复把相对路径 rebase 到当前页 base（跨页不再 404）；长征 JS 站距断点(vw<1024)与 CSS 便签断点对齐（≤1023 块，横屏手机便签不再滑出屏）；findVenueByName 补别名映射（金寨县革命博物馆等别名可命中）；入场遮罩改 `inert`（真正挡 Tab 焦点）；迷你地图 svg 改 `role="group"`（不吞跳站圆点）
+- **焦点栈加固**：closeModal 只弹"传入元素"对应的 trap（不误弹栈顶）；openQuiz 加已开守卫；聊天面板移除失配的 aria-modal（未接 trap 不声明 modal 语义）；Esc 连关两层已在工作区修复一并提交
+- **低危**：留言提交写失败不显示成功 + 提交后回第 1 页；sanitize 白名单补 TABLE/TR/TD（对比表恢复不拍平）；跳过持久化 ai-thinking 临时气泡（不再恢复出卡死转圈）；热力图深色重渲染保留用户缩放/中心；背景网格重建后还焦点 + aria-pressed；卡片容器补 aria-label；.section 加 scroll-margin-top（分页锚点不再被 header 盖）；雨花台详情键改名与馆名一致（删魔法别名）
+- **死代码/文档**：删 cardgen GOLD、practice-detail-section、longmarch stamp 的 --note-tilt、dark.css 冗余 gold 令牌；cz-card-modal closeCardModal 复用 closeModal；修长 march 陈旧注释；README 场馆图 34→32（图标 43 经核实正确不改）；smoke boot 超时不再静默（记入 errors）；政策 ≤480 隐藏残留时间线
+
 ## 2026-08-13 · v2026081308 — 时事政策页移动端密度
 
 - ≤480px 收走政策时间线左侧 90px 时间列（日期徽章移到卡上方、圆点隐藏），卡恢复全宽

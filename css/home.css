@@ -354,6 +354,8 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 64px 24px;
+  /* 分页锚点滚动（anchorToListIfPaged）避开 sticky header，否则列表顶部被盖 ~69px */
+  scroll-margin-top: 76px;
 }
 
 /* hero 下方第一个 section（导览/留言/政策/实践共用）— 淡墨山水底纹 */

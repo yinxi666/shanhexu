@@ -96,11 +96,11 @@ test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 4
       const resp = await page.goto(url + p, { waitUntil: 'domcontentloaded' });
       assert.ok(resp && resp.ok(), name + ' 应返回 200，实际 ' + (resp && resp.status()));
       // 等待 app.js boot 完成标志（替代固定 sleep：慢机器不再按固定时长赌时序）。
-      // 超时不直接判负——真实的 JS 异常已由 pageerror/console 收集，此处只做等待兜底
+      // 超时是真实缺陷（boot 挂起/永远不设置标志）：显式记入 errors，让测试红掉而非静默通过
       try {
         await page.waitForFunction('window.__shanhexuBooted === true', null, { timeout: 15000 });
       } catch (e) {
-        // boot 标志缺失：交由 errors 数组里捕获的异常判定，不在此处误报
+        errors.push('[初始化超时] ' + name + ' 的 app.js boot 未在 15s 内完成');
       }
     }
 

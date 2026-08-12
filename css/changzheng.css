@@ -1800,6 +1800,36 @@
 }
 
 
+/* ---------- 响应式：移动端便签定位（≤1023，与 JS 站间距收紧断点 vw<1024 对齐；
+   否则 769-1023 视口站距已收紧、便签却走桌面定位，会滑出屏/不居中） ---------- */
+@media (max-width: 1023px) {
+  .cz-note {
+    width: calc(100vw - 120px);
+    max-width: none;
+    padding: 16px 16px 16px;
+    /* 便签水平居中于站点坐标（transform 相对自身宽），随手卷滚动时始终贴近站点、
+       不被纸带出屏；此前"停靠左缘 left:-14px"会让便签整体滑出视口，滚动后看不到内容 */
+    transform: translateX(-50%) translateY(-120vh) rotate(-12deg) scale(0.9);
+  }
+
+  .cz-note.dropped {
+    transform: translateX(-50%) rotate(var(--note-tilt, 0deg));
+  }
+
+  .cz-note.place-left,
+  .cz-note.place-right {
+    width: min(400px, 70vw);
+  }
+
+  .cz-note.place-left {
+    margin-left: -24px;
+  }
+
+  .cz-note.place-right {
+    margin-left: 24px;
+  }
+}
+
 /* ---------- 响应式：手机端 ---------- */
 @media (max-width: 768px) {
   .cz-roller {
@@ -1832,32 +1862,7 @@
     opacity: 0.6;
   }
 
-  .cz-note {
-    width: calc(100vw - 120px);
-    max-width: none;
-    padding: 16px 16px 16px;
-    /* 便签水平居中于站点坐标（transform 相对自身宽），随手卷滚动时始终贴近站点、
-       不被纸带出屏；此前"停靠左缘 left:-14px"会让便签整体滑出视口，滚动后看不到内容 */
-    transform: translateX(-50%) translateY(-120vh) rotate(-12deg) scale(0.9);
-  }
-
-  .cz-note.dropped {
-    transform: translateX(-50%) rotate(var(--note-tilt, 0deg));
-  }
-
-  .cz-note.place-left,
-  .cz-note.place-right {
-    width: min(400px, 70vw);
-  }
-
-  .cz-note.place-left {
-    margin-left: -24px;
-  }
-
-  .cz-note.place-right {
-    margin-left: 24px;
-  }
-
+  /* 便签定位规则已上移至 ≤1023 块（与 JS 站间距断点对齐），此处只保留手机专属缩放 */
   .cz-note-photo {
     height: 56px;
   }

@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath, stripProvinceSuffix, FALLBACK_IMAGE } from './utils.js?v=2026081308';
-import { ASSET_VERSION } from './version.js?v=2026081308';
+import { getBasePath, stripProvinceSuffix, FALLBACK_IMAGE } from './utils.js?v=2026081309';
+import { ASSET_VERSION } from './version.js?v=2026081309';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
@@ -157,15 +157,11 @@ const loadVenueDetails = makeObjectLoader('data/venue-details.json', '[RedData] 
 
 /* ---- 场馆特定详情查询 ---- */
 function getVenueDetail(name) {
-  // 旧名称/别名到新名称的映射（仅保留仍可能命中的条目）
-  const nameAlias = {
-    '雨花台烈士纪念馆（纪念建筑）': '雨花台烈士纪念馆',
-  };
-  const lookupName = nameAlias[name] || name;
+  // venue-details.json 的键已与合并场馆名精确一致（含雨花台括号名），无需别名桥
   const details = loadVenueDetails.getCache();
   if (!details) return null;
   // 仅精确键查找：剥"纪念馆"后缀的回退分支在当前数据下不可达，且未来某馆名缺键时会误配到同名前缀馆的详情
-  return details[lookupName] || null;
+  return details[name] || null;
 }
 
 /* ---- 纯数据查询（无 DOM 依赖） ---- */
@@ -193,10 +189,26 @@ function getCategories(venues) {
   return [...new Set(venues.map(v => v.category))].filter(Boolean).sort();
 }
 
+/* 场馆别名 → 目标场馆名（venue-aliases.json 中与核心撞名被去重的候选；
+   收紧前缀回退后这些 5+ 字别名会解析失败，这里用全名精确命中） */
+const VENUE_ALIAS_TO_NAME = {
+  '南湖革命纪念馆': '嘉兴南湖红船',
+  '金寨县革命博物馆': '金寨县革命烈士纪念塔',
+  '古田会议纪念馆': '古田会议会址',
+  '韶山毛泽东同志纪念馆': '韶山毛泽东同志故居',
+  '遵义会议纪念馆': '遵义会议会址',
+};
+
 function findVenueByName(venues, name) {
   name = name.replace(/[的了吗呢]$/, '').trim();
   // 剥后缀后为空（聊天输入"的"等）→ 直接返回，杜绝"includes('') 恒真"误配到 venues[0]
   if (!name) return null;
+  // 别名查询：按目标馆全名精确匹配
+  const aliasTarget = VENUE_ALIAS_TO_NAME[name];
+  if (aliasTarget) {
+    const hit = venues.find(v => (v.name === aliasTarget) || (v.standardName === aliasTarget));
+    if (hit) return hit;
+  }
   // 打分匹配：精确 > 前缀 > 包含；仅短查询（≤4 字）才允许"前 3 字"模糊回退，
   // 避免长查询（如"上海红色记忆展"）截断成"上海红"误配到无关场馆
   let best = null, bestScore = 0;

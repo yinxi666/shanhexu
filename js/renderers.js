@@ -4,8 +4,8 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
 
 // 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
 function renderVenueCard(venue, basePath, isFav = false) {
@@ -18,9 +18,9 @@ function renderVenueCard(venue, basePath, isFav = false) {
   const esc = escapeHtml;
   const attr = escapeAttr;
   // 容器不设 role="button"：内部含真实 <button>（收藏），role=button 容器会让读屏压平嵌套交互。
-  // 键盘激活仍可用：data-action 委托的 keydown 处理 Enter/Space
+  // 键盘激活仍可用：data-action 委托的 keydown 处理 Enter/Space；保留 aria-label 作为可访问名
   return `
-      <div class="venue-card" data-id="${esc(venue.id)}" data-action="go-detail" tabindex="0">
+      <div class="venue-card" data-id="${esc(venue.id)}" data-action="go-detail" tabindex="0" aria-label="${esc(venue.name)}，查看详情">
         <div class="card-img">
           <img src="${attr(imgSrc)}" alt="${esc(venue.name)}" title="${esc(venue.name)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
           <span class="card-category">${esc(venue.category || '红色场馆')}</span>
@@ -61,9 +61,9 @@ function renderPracticeCard(practice, basePath) {
   const esc = escapeHtml;
   const attr = escapeAttr;
   // 容器不设 role="button"：内部含播放/点赞交互元素，role=button 容器会压平嵌套交互。
-  // 键盘激活仍可用：data-action 委托的 keydown 处理 Enter/Space
+  // 键盘激活仍可用：data-action 委托的 keydown 处理 Enter/Space；保留 aria-label 作为可访问名
   return `
-      <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0">
+      <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0" aria-label="${esc(practice.title)}，查看详情">
         <div class="practice-img">
           <img src="${attr(imgSrc)}" alt="${esc(practice.title)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
           ${hasVideo ? `

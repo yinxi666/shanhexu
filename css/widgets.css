@@ -244,6 +244,11 @@
     display: none;
   }
 
+  /* 时间列收走后，竖向时间线（.policy-list::before）也要隐藏，否则出现游离红段 */
+  .policy-list::before {
+    display: none;
+  }
+
   .policy-card {
     flex-direction: row;
     align-items: flex-start;

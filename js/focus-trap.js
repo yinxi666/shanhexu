@@ -43,15 +43,32 @@ function unlockBodyScroll() {
 
 /* 弹窗关闭公共序列：释放焦点陷阱 + 移除展示类 + 复位 aria-hidden + 释放滚动锁。
    activeClass 做幂等守卫（仅当确实打开才执行），供多个弹窗 close 复用 */
+/* 弹出指定下标/指定元素的焦点陷阱（共享收尾：剥 aria-modal、恢复新顶层 aria-modal、栈空拆监听、还焦点） */
+function _popTrapAt(idx) {
+  if (idx < 0 || idx >= _traps.length) return;
+  const trap = _traps.splice(idx, 1)[0];
+  const { modal, returnFocus } = trap;
+  if (modal) modal.removeAttribute('aria-modal');
+  const next = _topTrap();
+  if (next) next.modal.setAttribute('aria-modal', 'true');
+  else document.removeEventListener('keydown', _handleKeyDown);
+  if (returnFocus && document.contains(returnFocus) && typeof returnFocus.focus === 'function') {
+    returnFocus.focus({ preventScroll: true });
+  }
+}
+
 function closeModal(el, activeClass) {
   if (!el || !el.classList.contains(activeClass)) return;
-  releaseFocus();
+  // 只弹出"传入元素"对应的 trap：嵌套弹窗中若关下层，不误弹栈顶（避免栈错位/焦点失控）
+  _popTrapAt(_traps.findIndex(t => t.modal === el));
   el.classList.remove(activeClass);
   el.setAttribute('aria-hidden', 'true');
   unlockBodyScroll();
 }
 
 function _handleKeyDown(e) {
+  // 其他监听器（如 longmarch 的 Esc 分派）已处理并 preventDefault 时，跳过避免嵌套弹窗"一次 Esc 连关两层"
+  if (e.defaultPrevented) return;
   const trap = _topTrap();
   if (!trap) return;
   const { modal, onClose } = trap;
@@ -123,22 +140,7 @@ function trapFocus(modal, options = {}) {
 
 /** 弹出顶层焦点陷阱，并把焦点还给其触发元素；若下层还有弹窗，恢复其 Tab 圈禁与 aria-modal */
 function releaseFocus() {
-  const trap = _traps.pop();
-  if (!trap) return;
-
-  const { modal, returnFocus } = trap;
-  if (modal) modal.removeAttribute('aria-modal');
-
-  const next = _topTrap();
-  if (next) {
-    next.modal.setAttribute('aria-modal', 'true');
-  } else {
-    document.removeEventListener('keydown', _handleKeyDown);
-  }
-
-  if (returnFocus && document.contains(returnFocus) && typeof returnFocus.focus === 'function') {
-    returnFocus.focus({ preventScroll: true });
-  }
+  _popTrapAt(_traps.length - 1);
 }
 
 export { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll, closeModal };

@@ -4,11 +4,11 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081308';
-import { $, onOverlayClick } from './ui.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
-import { getBasePath } from './utils.js?v=2026081308';
-import { quizData } from './quiz-data.js?v=2026081308';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081309';
+import { $, onOverlayClick } from './ui.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
+import { getBasePath } from './utils.js?v=2026081309';
+import { quizData } from './quiz-data.js?v=2026081309';
 
 function initQuiz() {
   if ($('.quiz-fab')) return;
@@ -62,6 +62,8 @@ function initQuiz() {
   const result = $('#quiz-result');
 
   function openQuiz() {
+    // 已打开则忽略：焦点陷阱改栈式后，重复 openQuiz 会压入两个指向同一弹窗的 trap，导致一次关闭后残留
+    if (overlay.classList.contains('open')) return;
     // 断点续答：有未完成回合则直接恢复（不用从开始屏重新开始）
     const saved = loadState();
     if (saved && saved.currentQ < saved.gameQuestions.length) {

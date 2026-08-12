@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
+import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
 import {
   getBasePath,
   safeAssetSrc,
@@ -16,9 +16,9 @@ import {
   escapeAttr,
   getLikeCount,
   isPracticeLiked
-} from './utils.js?v=2026081308';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081308';
-import { getPractice } from './data.js?v=2026081308';
+} from './utils.js?v=2026081309';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081309';
+import { getPractice } from './data.js?v=2026081309';
 
 // 实践中途请求进行中的标记：仅在 await 窗口内占用，防止双开守卫（DOM 守卫在 await 前无效）
 let _openingPracticeId = null;
@@ -70,7 +70,7 @@ async function openPracticeDetail(id) {
           </div>` : ''}
           <div class="practice-detail-actions">
             <span>${icon('calendar')} ${escapeHtml(p.createdAt || '')}</span>
-            <span class="practice-detail-likes${isPracticeLiked(p.id) ? ' active' : ''}" data-action="like-practice" data-id="${p.id}">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
+            <span class="practice-detail-likes${isPracticeLiked(p.id) ? ' active' : ''}" data-action="like-practice" data-id="${p.id}" tabindex="0" role="button" aria-label="点赞">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
           </div>
         </div>
       </div>

@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081308';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081308';
-import { ASSET_VERSION } from './version.js?v=2026081308';
+import { getBasePath } from './utils.js?v=2026081309';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081309';
+import { ASSET_VERSION } from './version.js?v=2026081309';
 
 /* 读取 CSS 令牌（含深色覆盖后的计算值），供 ECharts/SVG 主题适配 */
 function cssVar(name, fallback) {
@@ -92,10 +92,16 @@ async function initECharts(container, provinceData) {
       if (c) c.resize();
     });
 
-    // 深色/浅色切换时重渲染（ECharts 不会自动响应 html.dark 类）
+    // 深色/浅色切换时重渲染（ECharts 不会自动响应 html.dark 类）；
+    // 保留用户当前的缩放/中心，避免每次切换深色把视图重置回默认
     const mo = new MutationObserver(function () {
       const c = echarts.getInstanceByDom(container);
-      if (c) applyHeatmapOption(c, chartData, provinceData);
+      if (!c) return;
+      const s0 = c.getOption().series && c.getOption().series[0];
+      applyHeatmapOption(c, chartData, provinceData, {
+        zoom: s0 && s0.zoom,
+        center: s0 && s0.center
+      });
     });
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   } catch (error) {
@@ -103,7 +109,7 @@ async function initECharts(container, provinceData) {
   }
 }
 
-function applyHeatmapOption(chart, chartData, provinceData) {
+function applyHeatmapOption(chart, chartData, provinceData, view) {
   const t = heatmapTheme();
   const option = {
     backgroundColor: 'transparent',  // 交给页面背景（--bg），深色下不再硬编码白底
@@ -136,8 +142,8 @@ function applyHeatmapOption(chart, chartData, provinceData) {
       // 触屏设备允许双指缩放（roam:'move' 只允许拖拽，手机上无法手势缩放）；
       // 桌面保持 move-only，避免滚轮误缩放
       roam: ('ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0) ? true : 'move',
-      zoom: 1.7,
-      center: [105, 36],
+      zoom: view && view.zoom ? view.zoom : 1.7,
+      center: view && view.center ? view.center : [105, 36],
       scaleLimit: { min: 1, max: 5 },
       label: {
         show: true,

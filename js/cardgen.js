@@ -2,10 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081308';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081308';
+import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081309';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081309';
 
 /* ---- 可选数据 ---- */
 const SPIRITS = ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];
@@ -344,7 +344,7 @@ function renderHomeCard(bgImg, spirit, name) {
   name = inputs.name;
   spirit = inputs.spirit;
 
-  const GOLD = '#e8b33a', CREAM = '#f2e3c2';
+  const CREAM = '#f2e3c2';
 
   // 0) 照片全幅做底（明亮的"山河"，不被圆窗框住）
   drawCover(ctx, bgImg, W, H);
@@ -659,7 +659,7 @@ function getBgList() {
 function buildBgGrid(grid, items, selected, onPick, cls = 'cardgen-bg') {
   if (!grid) return;
   grid.innerHTML = items.map((b, i) =>
-    `<div class="${cls}${i === selected ? ' selected' : ''}" role="button" tabindex="0" data-i="${i}" data-src="${escapeAttr(resolveAssetPath(b.src))}"><span>${b.label}</span></div>`
+    `<div class="${cls}${i === selected ? ' selected' : ''}" role="button" tabindex="0" aria-pressed="${i === selected}" data-i="${i}" data-src="${escapeAttr(resolveAssetPath(b.src))}"><span>${b.label}</span></div>`
   ).join('');
   grid.querySelectorAll('.' + cls).forEach(function (el) {
     const src = el.dataset.src;
@@ -679,7 +679,13 @@ function renderBgSelector() {
   // 保留用户已选背景；仅当选择越界（如换场馆后列表变化）才落回默认（0 = 有场馆图时「本场馆」，否则第一张）
   if (!Number.isInteger(selectedBg) || selectedBg < 0 || selectedBg >= list.length) selectedBg = 0;
   // 每次重建背景网格并恢复选中高亮（修复"重开后高亮恒在第 0 格、生成却用 selectedBg"的脱节）
-  buildBgGrid(grid, list, selectedBg, function (i) { selectedBg = i; renderBgSelector(); }, 'cardgen-bg');
+  buildBgGrid(grid, list, selectedBg, function (i) {
+    selectedBg = i;
+    renderBgSelector();
+    // rebuild 后把焦点还给刚选的背景块（否则键盘用户每次选择焦点掉回 body）
+    const sel = grid.querySelector('.cardgen-bg[data-i="' + i + '"]');
+    if (sel) sel.focus({ preventScroll: true });
+  }, 'cardgen-bg');
 }
 
 function open(venueName, venueImage) {

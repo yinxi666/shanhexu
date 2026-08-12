@@ -5,15 +5,24 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081308';
-import { $, $$ } from './ui.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
-import { generateReply } from './chat-engine.js?v=2026081308';
+import { getBasePath, safeStorage } from './utils.js?v=2026081309';
+import { $, $$ } from './ui.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
+import { generateReply } from './chat-engine.js?v=2026081309';
+
+/* 相对路径重定向到当前页 base：聊天历史跨页恢复时，首页生成的 'pages/…' 在 /pages/ 子页会解析成
+   /pages/pages/… 404；把开头 '../' 剥成根相对再拼当前 base（http/锚点/根绝对 原样保留） */
+function rebaseUrl(raw) {
+  const u = String(raw || '').trim();
+  if (!u || /^(https?:|mailto:|tel:|#|data:|\/)/i.test(u)) return raw;
+  return getBasePath() + u.replace(/^(\.\.\/)+/, '');
+}
 
 /* 恢复时对机器人消息 HTML 做白名单净化（用惰性的 <template> 解析，脚本不执行），
    既保留富文本（场馆按钮/小卡片），又堵住 sessionStorage 被篡改时的注入 */
 function sanitizeBotHtml(html) {
-  const ALLOWED = new Set(['A', 'B', 'BR', 'DIV', 'SPAN', 'I', 'SMALL', 'IMG', 'STRONG', 'P']);
+  // TABLE/TBODY/TR/TD：compareVenues 的对比表是结构标签（无事件属性），放行以保恢复后表格完整
+  const ALLOWED = new Set(['A', 'B', 'BR', 'DIV', 'SPAN', 'I', 'SMALL', 'IMG', 'STRONG', 'P', 'TABLE', 'TBODY', 'TR', 'TD']);
   const tpl = document.createElement('template');
   tpl.innerHTML = String(html || '');
   const clean = function (el) {
@@ -27,13 +36,15 @@ function sanitizeBotHtml(html) {
         const name = attr.name.toLowerCase();
         const val = attr.value.trim().toLowerCase();
         if (name === 'style' || name === 'srcdoc' || name.indexOf('on') === 0) { node.removeAttribute(attr.name); return; }
-        // href/src 协议白名单（与 utils.sanitizeUrl 同口径）：http(s)/mailto/tel、站内相对路径、assets/images/uploads/pages/data 前缀；
-        // 其余一律剔除——堵住 javascript:/vbscript:/data: 各种子 scheme（含 data:image/svg+xml 这类黑名单漏网）
-        if ((name === 'href' || name === 'src')
-          && !/^(https?:|mailto:|tel:)/i.test(val)
-          && !(/^[/.]/.test(val) && !/^\/\//.test(val))
-          && !/^(assets|images|uploads|pages|data)\//i.test(val)) {
-          node.removeAttribute(attr.name);
+        if (name === 'href' || name === 'src') {
+          // href/src 协议白名单（与 utils.sanitizeUrl 同口径）：http(s)/mailto/tel、站内相对路径、assets/images/uploads/pages/data 前缀；
+          // 其余一律剔除——堵住 javascript:/vbscript:/data: 各种子 scheme（含 data:image/svg+xml 这类黑名单漏网）
+          const safe = /^(https?:|mailto:|tel:)/i.test(val)
+            || (/^[/.]/.test(val) && !/^\/\//.test(val))
+            || /^(assets|images|uploads|pages|data)\//i.test(val);
+          if (!safe) { node.removeAttribute(attr.name); return; }
+          // 白名单通过后，把相对路径 rebase 到当前页 base（防跨页恢复 404）
+          node.setAttribute(attr.name, rebaseUrl(attr.value));
         }
       });
       clean(node);
@@ -52,7 +63,8 @@ function initChatWidget() {
           <img class="chat-fab-icon" src="${getBasePath()}assets/通用/ai图标.webp" alt="AI导览助手">
           <span class="chat-fab-badge">AI</span>
         </button>
-        <div class="chat-panel" id="chat-panel" role="dialog" aria-modal="true" aria-label="AI导览助手">
+        <!-- 非模态浮层：不声明 aria-modal（面板未接 focus-trap，声明 modal 语义却不圈定焦点是契约失配） -->
+        <div class="chat-panel" id="chat-panel" role="dialog" aria-label="AI导览助手">
           <div class="chat-header">
             <div class="chat-header-left">
               <img class="chat-avatar" src="${getBasePath()}assets/通用/ai图标.webp" alt="">
@@ -125,7 +137,8 @@ function initChatWidget() {
   panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closePanel(); } });
 
   function saveChatHistory() {
-    const bubbles = $$('.chat-bubble', messages);
+    // 跳过"正在检索"的临时 thinking 气泡：它若被持久化，刷新后恢复会变成卡死转圈（无定时器能移除它）
+    const bubbles = $$('.chat-bubble', messages).filter(b => !b.querySelector('.ai-thinking'));
     // 机器人消息存 innerHTML（富文本：场馆按钮/小卡片），用户消息只存纯文本；
     // 恢复时对机器人 HTML 做白名单净化，防 sessionStorage 被篡改注入
     const history = bubbles.map(b => {

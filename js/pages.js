@@ -5,15 +5,15 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081308';
-import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081308';
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081308';
-import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081308';
-import { initBgMusic } from './music.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
-import { initHomeHeatmap } from './heatmap.js?v=2026081308';
-import { createGuideMap } from './guide-map.js?v=2026081308';
-import { isFavorite } from './favorites.js?v=2026081308';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081309';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081309';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081309';
+import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081309';
+import { initBgMusic } from './music.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
+import { initHomeHeatmap } from './heatmap.js?v=2026081309';
+import { createGuideMap } from './guide-map.js?v=2026081309';
+import { isFavorite } from './favorites.js?v=2026081309';
 
 /* ---------- 分页公共助手（四个页面控制器复用，消除页码解析与跳转回调的四处拷贝） ---------- */
 function normalizePage(raw, totalPages) {
@@ -157,7 +157,12 @@ function initMessageForm() {
     const stored = safeStorage.get('redguide_messages', [], sessionStorage);
     if (Array.isArray(stored)) {
       stored.unshift(newMsg);
-      safeStorage.set('redguide_messages', stored.slice(0, 50), sessionStorage);
+      const wrote = safeStorage.set('redguide_messages', stored.slice(0, 50), sessionStorage);
+      if (!wrote) {
+        // 写失败：不渲染成功 UI（与 likePractice/favorites 的写失败契约一致）
+        showToast('留言保存失败，请检查浏览器存储');
+        return;
+      }
     }
 
     // 印章动画
@@ -183,6 +188,10 @@ function initMessageForm() {
       }
     }, 350);
 
+    // 提交后回到第 1 页展示新留言（否则在 msg_page>1 上提交，新留言落在第 1 页但当前页看不见）
+    const msgUrl = new URL(location.href);
+    msgUrl.searchParams.delete('msg_page');
+    try { window.history.replaceState({}, '', msgUrl.toString()); } catch (e) { }
     // 刷新留言列表
     refreshMessageList();
   });
@@ -332,7 +341,7 @@ async function initGuidePage() {
   let _respTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(_respTimer);
-    _respTimer = setTimeout(() => {
+    _respTimer = setTimeout(async () => {
       const nowMobile = window.matchMedia('(max-width: 860px)').matches;
       if (nowMobile === isMobile) return;
       isMobile = nowMobile;
@@ -352,8 +361,10 @@ async function initGuidePage() {
         if (guideMapEl) guideMapEl.classList.remove('is-hidden');
         if (guideList) guideList.classList.remove('is-hidden');
         if (toggleBtn) toggleBtn.classList.add('is-hidden');
-        guideMapCtrl.initMap();
+        await guideMapCtrl.initMap();
         guideMapCtrl.invalidateSize();
+        // 地图新初始化后立即绘制场馆标记（此前只 initMap 不 plot，resize 后地图空白无星星）
+        doRender(false, true);
       }
     }, 150);
   });

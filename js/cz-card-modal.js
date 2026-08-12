@@ -4,12 +4,12 @@
    依赖：utils/ui/icons/cardgen/focus-trap/cz-content
    ============================================================ */
 
-import { getBasePath, isTouchDevice } from './utils.js?v=2026081308';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081308';
-import { icon } from './icons.js?v=2026081308';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081308';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081308';
-import { CZ_CARD_BGS } from './cz-content.js?v=2026081308';
+import { getBasePath, isTouchDevice } from './utils.js?v=2026081309';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081309';
+import { icon } from './icons.js?v=2026081309';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081309';
+import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081309';
+import { CZ_CARD_BGS } from './cz-content.js?v=2026081309';
 
 // 精神词列表复用 cardgen 的 SPIRITS（静态 import 恒为数组，无需兜底副本）
 const CZ_CARD_SPIRITS = CZ_SPIRITS;
@@ -32,6 +32,9 @@ function buildCardModal() {
   buildBgGrid(czCardBgs, CZ_CARD_BGS, _czCardBg, (i) => {
     _czCardBg = i;
     buildCardModal();
+    // rebuild 后把焦点还给刚选的背景块（否则键盘用户每次选择焦点掉回 body）
+    const sel = czCardBgs.querySelector('.cz-card-bg[data-i="' + i + '"]');
+    if (sel) sel.focus({ preventScroll: true });
   }, 'cz-card-bg');
   // 精神 chips：首次构建后缓存；再次打开只恢复高亮（真实 <button>，键盘天然可达）
   if (czCardSpirits.children.length === 0) {
@@ -67,11 +70,8 @@ export function openCardModal() {
 }
 
 export function closeCardModal() {
-  if (!czCardModal || !czCardModal.classList.contains('open')) return;
-  releaseFocus();
-  czCardModal.classList.remove('open');
-  czCardModal.setAttribute('aria-hidden', 'true');
-  unlockBodyScroll();
+  // 复用 closeModal 的关闭序列（releaseFocus+去类+aria-hidden+解锁），保留本弹窗专属清理
+  closeModal(czCardModal, 'open');
   _czCardDataUrl = null; // 复位，避免重开后直接导出上一张旧卡面
   if (_czCardGenTimer) { clearTimeout(_czCardGenTimer); _czCardGenTimer = null; } // 生成中途关闭：清除挂起的超时回调
   if (czCardPreview) czCardPreview.classList.add('is-hidden'); // 隐藏预览，重开不残留旧卡面
