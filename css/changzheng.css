@@ -1925,13 +1925,10 @@
     height: 28px;
   }
 
+  /* 移动端取消右上角路线图窗口（用户决定）：fixed 小窗在手机上遮挡路线/印章；
+     JS 基于 viewBox 坐标建图，display:none 不影响跳站/进度逻辑 */
   .cz-route-wrap {
-    top: 210px;
-    right: 10px;
-    width: clamp(150px, 34vw, 190px);
-    padding: 8px 12px;
-    border-radius: var(--radius);
-    gap: 8px;
+    display: none;
   }
 
   .cz-route-tag {
