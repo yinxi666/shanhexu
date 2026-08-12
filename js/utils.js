@@ -73,14 +73,22 @@ const safeStorage = {
   }
 };
 
-/* 点赞数读取（统一 key 优先；旧方案残留时用旧 key 的计数） */
+/* 省份去后缀（省/市/自治区/壮族/回族/维吾尔 → 短名），供提示语/合并去重统一使用 */
+function stripProvinceSuffix(province) {
+  return String(province || '').replace(/省|市|自治区|壮族|回族|维吾尔/g, '');
+}
+
+/* 点赞数读取：编造基数（practices.json likes）仅作展示基线 fallback，
+   真实用户增量存 redguide_likes_delta_<id>，二者相加；旧绝对值/旧 key 按"基线+增量"迁移 */
 function getLikeCount(id, fallback) {
   try {
-    const c = sessionStorage.getItem('redguide_likes_' + id);
+    const base = Number(fallback) || 0;
+    const delta = sessionStorage.getItem('redguide_likes_delta_' + id);
+    if (delta != null) return base + (parseInt(delta, 10) || 0);
     const legacy = sessionStorage.getItem('redguide_likecount_' + id);
-    if (c != null && legacy != null) return parseInt(legacy);
-    if (c != null) return parseInt(c);
-    if (legacy != null) return parseInt(legacy);
+    if (legacy != null) return base + Math.max(0, (parseInt(legacy, 10) || 0) - base);
+    const oldAbs = sessionStorage.getItem('redguide_likes_' + id);
+    if (oldAbs != null) return base + Math.max(0, (parseInt(oldAbs, 10) || 0) - base);
   } catch (e) { }
   return fallback;
 }
@@ -90,10 +98,11 @@ function isTouchDevice() {
   return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 }
 
-/* 是否已点赞：与 getLikeCount 同一套 sessionStorage 键，供渲染时保持已赞高亮 */
+/* 是否已点赞：与 getLikeCount 同一套存储键，供渲染时保持已赞高亮 */
 function isPracticeLiked(id) {
   try {
-    return sessionStorage.getItem('redguide_likes_' + id) != null
+    return sessionStorage.getItem('redguide_likes_delta_' + id) != null
+      || sessionStorage.getItem('redguide_likes_' + id) != null
       || sessionStorage.getItem('redguide_likecount_' + id) != null;
   } catch (e) { return false; }
 }
@@ -108,5 +117,6 @@ export {
   safeStorage,
   getLikeCount,
   isPracticeLiked,
-  isTouchDevice
+  isTouchDevice,
+  stripProvinceSuffix
 };

@@ -436,7 +436,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 }
 
 /* ============================================================
-   图片轮播 (Carousel)
+   详情页主图 (Detail Hero Image) — 恒为单图，无需轮播
    ============================================================ */
 .detail-carousel {
   position: relative;
@@ -446,114 +446,16 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   aspect-ratio: 16/10;
 }
 
-.carousel-track {
-  display: flex;
-  transition: transform var(--duration-normal) ease;
-  height: 100%;
-}
-
-.carousel-slide {
-  flex: 0 0 100%;
-  height: 100%;
-}
-
-.carousel-slide img {
+.detail-carousel .detail-carousel-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.carousel-prev,
-.carousel-next {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border: none;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  font-size: 28px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
-  z-index: 10;
-}
-
-.carousel-prev {
-  left: 12px;
-}
-
-.carousel-next {
-  right: 12px;
-}
-
-.carousel-prev:hover,
-.carousel-next:hover {
-  background: rgba(0, 0, 0, 0.7);
-  transform: translateY(-50%) scale(1.1);
-}
-
-.carousel-indicators {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 10;
-}
-
-.carousel-dot {
-  width: 10px;
-  height: 10px;
-  border: none;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
-}
-
-.carousel-dot:hover {
-  background: rgba(255, 255, 255, 0.7);
-  transform: scale(1.2);
-}
-
-.carousel-dot.active {
-  background: white;
-  transform: scale(1.3);
-}
-
-.carousel-counter {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 4px 12px;
-  border-radius: var(--radius);
-  font-size: 12px;
-  z-index: 10;
+  display: block;
 }
 
 @media (max-width: 640px) {
   .detail-carousel {
     aspect-ratio: 4/3;
-  }
-
-  .carousel-prev,
-  .carousel-next {
-    width: 36px;
-    height: 36px;
-    font-size: 24px;
-  }
-
-  .carousel-prev {
-    left: 8px;
-  }
-
-  .carousel-next {
-    right: 8px;
   }
 }
 
@@ -850,11 +752,12 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 }
 
 .ai-thinking-dots span:nth-child(2) {
-  animation-delay: var(--transition);
+  /* --transition 含 easing（0.25s ease），animation-delay 只收纯时长，改用时长令牌 */
+  animation-delay: var(--duration-fast);
 }
 
 .ai-thinking-dots span:nth-child(3) {
-  animation-delay: var(--duration-fast);
+  animation-delay: var(--duration-normal);
 }
 
 @keyframes ai-pulse {

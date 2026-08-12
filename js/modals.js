@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
+import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
 import {
   getBasePath,
   resolveAssetPath,
@@ -16,9 +16,9 @@ import {
   escapeAttr,
   getLikeCount,
   isPracticeLiked
-} from './utils.js?v=2026081016';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081016';
-import { getPractice } from './data.js?v=2026081016';
+} from './utils.js?v=2026081027';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081027';
+import { getPractice } from './data.js?v=2026081027';
 
 // 实践成果详情弹窗
 async function openPracticeDetail(id) {
@@ -56,6 +56,10 @@ async function openPracticeDetail(id) {
           <p class="practice-detail-team">${icon('users')} ${escapeHtml(p.team || '实践团队')}</p>
           <p class="practice-detail-summary">${escapeHtml(p.summary || '')}</p>
           ${galleryHtml}
+          ${p.video ? `
+          <div class="practice-detail-video">
+            <button class="btn primary small" data-action="open-practice-video" data-video-src="${escapeAttr(sanitizeUrl(resolveAssetPath(p.video, bp)))}">${icon('play')} 播放视频</button>
+          </div>` : ''}
           <div class="practice-detail-actions">
             <span>${icon('calendar')} ${escapeHtml(p.createdAt || '')}</span>
             <span class="practice-detail-likes${isPracticeLiked(p.id) ? ' active' : ''}" data-action="like-practice" data-id="${p.id}">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
@@ -109,4 +113,50 @@ function closeLightbox() {
   releaseFocus();
 }
 
-export { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox };
+// 实践视频弹窗（复用 pages.css 的 .video-modal-overlay 样式）
+function openPracticeVideo(src) {
+  const safeSrc = sanitizeUrl(src);
+  if (!safeSrc) { showToast('视频地址无效'); return; }
+  // 已打开则直接返回，避免重复触发叠加弹窗与锁计数失衡
+  if (document.querySelector('.video-modal-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-modal-overlay';
+  overlay.innerHTML = `
+      <div class="video-modal" role="dialog" aria-modal="true" aria-label="实践视频">
+        <button class="video-close" data-action="close-practice-video" aria-label="关闭视频">✕</button>
+        <video controls autoplay playsinline></video>
+      </div>
+    `;
+  document.body.appendChild(overlay);
+  const video = overlay.querySelector('video');
+  video.src = safeSrc;
+  video.onerror = () => {
+    closePracticeVideo();
+    showToast('视频加载失败');
+  };
+  lockBodyScroll();
+  overlay.classList.add('open');
+  const modal = overlay.querySelector('.video-modal');
+  const closeBtn = overlay.querySelector('.video-close');
+  trapFocus(modal, { initialFocus: closeBtn, onClose: closePracticeVideo });
+  onOverlayClick(overlay, closePracticeVideo);
+}
+
+// 实践视频关闭（模块级独立函数：供 trapFocus onClose 与 action-delegate 的 close-practice-video 共用）
+function closePracticeVideo() {
+  const overlay = document.querySelector('.video-modal-overlay');
+  if (!overlay || !overlay.parentNode) return;
+  const video = overlay.querySelector('video');
+  if (video) {
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    video.onerror = null;
+  }
+  overlay.remove();
+  unlockBodyScroll();
+  releaseFocus();
+}
+
+export { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo };

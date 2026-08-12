@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081016';
-import { ASSET_VERSION } from './version.js?v=2026081016';
+import { getBasePath, stripProvinceSuffix } from './utils.js?v=2026081027';
+import { ASSET_VERSION } from './version.js?v=2026081027';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
@@ -45,13 +45,18 @@ async function loadAllVenues() {
       loadExtMeta()
     ]);
     // 场馆详情与场馆列表并发预加载，供 getVenueDetail 同步读取
-    await loadVenueDetails();
+    const detailsData = await loadVenueDetails();
 
     // 如果核心数据为空，说明网络失败，抛异常触发重试
     if (!core || core.length === 0) {
       _venuesPromise = null;  // 允许下次重试
       throw new Error('核心场馆数据加载失败，将重试');
     }
+
+    // 子数据是否全部成功（loadJSON 失败返回 []，makeObjectLoader 失败返回 [] 且已重置自身 promise）
+    const extMetaOk = extMeta && typeof extMeta === 'object' && !Array.isArray(extMeta) && Object.keys(extMeta).length > 0;
+    const aliasesOk = Boolean(aliasesData && aliasesData.aliases);
+    const detailsOk = detailsData && typeof detailsData === 'object' && !Array.isArray(detailsData) && Object.keys(detailsData).length > 0;
 
     const coreNames = new Set(core.map(v => v.standardName || v.name));
     // 扩展数据中与核心场馆为同一地点的不同名称变体，加入去重集合
@@ -67,7 +72,7 @@ async function loadAllVenues() {
         ? ext.standardName : ext.name;
       const meta = (extMeta && extMeta[name]) ? extMeta[name] : {};
       // id 基于省份生成（候选按省唯一），而非依赖合并顺序——避免数据增删/重排时已持久化收藏与分享链接错位
-      const shortProvince = ext.province.replace(/省|市|自治区|壮族|回族|维吾尔/g, '');
+      const shortProvince = stripProvinceSuffix(ext.province);
       // 官方核验状态枚举共 5 种，全部视为已核验；其余（未知/缺省）才提示进一步核验
       const VERIFIED = ['已核验', '已匹配', '已匹配官方入口', '已核验官方入口', '名称已调整'];
       merged.push({
@@ -85,15 +90,16 @@ async function loadAllVenues() {
         officialUrl: ext.officialUrl || '',
         officialLinkType: ext.officialLinkType || '',
         officialVerificationStatus: ext.officialVerificationStatus || '',
-        officialVerificationDate: ext.officialVerificationDate || meta.officialVerificationDate || '',
+        officialVerificationDate: ext.officialVerificationDate || '',
         coordinates: meta.coordinates || null,
         author: (meta.source || {}).author || '',
         license: (meta.source || {}).license || '',
         sourcePage: (meta.source || {}).sourcePage || ''
       });
     }
-    // 只有成功加载的数据才缓存（核心数据非空）
-    if (merged.length > 0) {
+    // 只有核心 + 子数据全部成功才固化缓存；任一子加载失败（降级结果仍返回供首屏）不缓存，
+    // 使 loadAliases/loadExtMeta/loadVenueDetails 的失败重试钩子真正可达（否则瞬时 404 会固化整个会话）
+    if (merged.length > 0 && extMetaOk && aliasesOk && detailsOk) {
       _venuesCache = merged;
     } else {
       _venuesPromise = null;  // 允许下次重试
@@ -147,7 +153,6 @@ const loadVenueDetails = makeObjectLoader('data/venue-details.json', '[RedData] 
 function getVenueDetail(name) {
   // 旧名称/别名到新名称的映射（仅保留仍可能命中的条目）
   const nameAlias = {
-    '红岩革命纪念馆': '重庆红岩革命纪念馆',
     '雨花台烈士纪念馆（纪念建筑）': '雨花台烈士纪念馆',
   };
   const lookupName = nameAlias[name] || name;

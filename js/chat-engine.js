@@ -5,11 +5,11 @@
    说明：与 chat.js（悬浮 UI 组件）分离，本模块可在无 DOM 环境直接单元测试。
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath } from './utils.js?v=2026081016';
-import * as RedData from './data.js?v=2026081016';
-import { getVenues } from './venue-store.js?v=2026081016';
-import { knowledge } from './chat-knowledge.js?v=2026081016';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081016';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081027';
+import * as RedData from './data.js?v=2026081027';
+import { getVenues } from './venue-store.js?v=2026081027';
+import { knowledge } from './chat-knowledge.js?v=2026081027';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081027';
 
 export function generateReply(query) {
   const q = query.trim();
@@ -25,21 +25,31 @@ export function generateReply(query) {
     if (knowledge[ki].re.test(q)) return knowledge[ki].answer;
   }
 
+  // ===== 区域查询预处理：数据驱动提取地区名，避免 .{2,4} 通配吞疑问词/动词 =====
+  const region = matchRegion(q);
+  if (region
+    && /(?:有哪些|几个|多少|什么|搜集|收录|覆盖).*(?:场馆|红色|景点)|(?:场馆|红色|景点).*(?:有哪些|几个|多少|什么|搜集|收录|覆盖)/.test(q)
+    && !/(?:纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔|精神)/.test(q)) {
+    return searchByRegion(region);
+  }
+
   // ===== 第二层：场馆/省份/类别搜索模式 =====
   const patterns = [
     // 推荐路线
     { re: /(推荐|规划|设计|定制).*(路线|行程|旅游|游览|攻略)|(路线|行程|旅游|攻略).*(推荐|规划|怎么|如何)/, handler: () => recommendRoute(q) },
+    // 排名（须在宽松的"省/市"区域模式之前，否则"哪个省场馆最多"会被吞成地区查询）
+    { re: /(?:哪些|什么|哪个).*(?:省份|省|地区).*(?:最多|最少|没有)/, handler: () => getProvinceRanking() },
     // 省份/城市查询（支持"延安有什么场馆""陕西有哪些红色场馆"等变体）
     { re: /(.{2,4})(?:省|市|自治区|地区).*?(?:有哪些|几个|多少|什么|搜集|收录|覆盖).*?(?:场馆|红色|景点)/, handler: (m) => searchByRegion(m[1]) },
     { re: /(.{2,4})(?:省|市).*?(?:场馆|红色)/, handler: (m) => searchByRegion(m[1]) },
-    { re: /(.{2,4}).*?(?:有什么|有哪些|几个|多少).*?(?:场馆|红色)/, handler: (m) => searchByRegion(m[1]) },
+    { re: /(.{2,4}).*?(?:有什么|有哪些|几个|多少).*?(?:场馆|红色)/, handler: (m) => { const r = regionOf(m[1]); return r ? searchByRegion(r) : getStats(); } },
     // 统计类
     { re: /(?:有多少|几个|多少).*(?:场馆|红色|收录)|(?:场馆|红色).*(?:有多少|几个|多少|统计)/, handler: () => getStats() },
-    { re: /(?:哪些|什么).*(?:省份|省|地区).*(?:最多|最少|没有)/, handler: () => getProvinceRanking() },
     { re: /(?:有哪些|哪些|什么).*(?:省份|省|地区)|省份分布/, handler: () => getProvinceList() },
     { re: /(?:有哪些|哪些|什么).*(?:类别|类型|分类|主题)/, handler: () => getCategories() },
     // 场馆介绍
     { re: /(?:介绍|了解|说说|讲讲|查一下|查询|查看)(?:一下|下)?(.{2,})/, handler: (m) => searchVenue(m[1]) },
+    { re: /(?:怎么去|怎么走|如何去|怎么到|在哪里|在哪儿|在哪)\s*(.{2,})/, handler: (m) => searchVenueLocation(m[1]) },
     { re: /(.{2,})(?:在哪里|怎么去|在哪|地址|位置|交通|怎么走)/, handler: (m) => searchVenueLocation(m[1]) },
     { re: /(.{3,})(?:纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔)/, handler: (m) => searchVenue(m[0]) },
     // 类别查询
@@ -99,6 +109,23 @@ export function generateReply(query) {
 }
 
 /* ===== 智能搜索函数 ===== */
+
+/* 数据驱动地区名提取：从问句匹配已知省/市/区名（含去后缀变体），长名优先 */
+function matchRegion(q) {
+  const names = new Set();
+  getVenues().forEach(v => {
+    if (v.province) { names.add(v.province); names.add(stripProvinceSuffix(v.province)); }
+    if (v.city) { names.add(v.city); names.add(stripProvinceSuffix(v.city)); }
+    if (v.district) names.add(v.district);
+  });
+  const sorted = [...names].filter(Boolean).sort((a, b) => b.length - a.length);
+  return sorted.find(n => q.includes(n)) || null;
+}
+/* 正则捕获的地区名去疑问词残渣（"延安有"→"延安"）；全国/总共/一共等全局统计意图返回空串 */
+function regionOf(cap) {
+  const s = String(cap || '').replace(/[有什么哪些几个多少]+$/, '').trim();
+  return /^(全国|总共|一共|全部|所有|总)/.test(s) ? '' : s;
+}
 
 function searchByRegion(region) {
   const venues = getVenues();
@@ -218,7 +245,7 @@ function searchNearby(name) {
     (nearby.length > 0
       ? `同地区的其他场馆（${nearby.length}个）：<br>` + nearby.slice(0, 6).map(x => `• <b>${esc(x.name)}</b> — ${esc(x.category || '')}`).join('<br>')
       : `该地区目前仅收录了这一个场馆`) +
-    `<br><i> 输入「${esc(v.province.replace(/省|市|自治区/g, ''))}有哪些场馆」查看全部</i>`;
+    `<br><i> 输入「${esc(stripProvinceSuffix(v.province))}有哪些场馆」查看全部</i>`;
 }
 
 function getStats() {
@@ -234,7 +261,7 @@ function getStats() {
   return ` <b>红色场馆数据统计</b><br><br>
        场馆总数：<b>${v.length}</b> 个<br>
        覆盖省区市：<b>${provinces}</b> 个<br>
-       场馆类别：<b>${cats.length}</b> 种（${cats.join('、')}）<br>
+       场馆类别：<b>${cats.length}</b> 种（${cats.map(escapeHtml).join('、')}）<br>
        数据更新：${latest}<br><br>
       <i> 输入省份名查看该地区的场馆</i>`;
 }
@@ -243,7 +270,7 @@ function getStats() {
 function getProvinceCounts() {
   const count = {};
   getVenues().forEach(v => {
-    const p = v.province.replace(/省|市|自治区|壮族|回族|维吾尔/g, '');
+    const p = stripProvinceSuffix(v.province);
     count[p] = (count[p] || 0) + 1;
   });
   return Object.entries(count).sort((a, b) => b[1] - a[1]);
@@ -267,7 +294,7 @@ function getProvinceList() {
 
 function getCategories() {
   return ` 当前场馆覆盖的类别：<br><br>` +
-    getCategoriesRaw().map(c => `• <b>${c}</b>`).join('<br>') +
+    getCategoriesRaw().map(c => `• <b>${escapeHtml(c)}</b>`).join('<br>') +
     `<br><i> 输入类别名查看该类别下的场馆，如「革命纪念馆有哪些」</i>`;
 }
 
@@ -340,6 +367,6 @@ function recommendRoute(q) {
     }).join(' → ');
     html += '</div>';
   });
-  html += '<br><i> 点击场馆名查看详情 | 输入「长征路线」查看长征专题</i>';
+  html += '<br><i> 点击场馆名查看详情 | 输入「长征路线」可优先展示长征主题</i>';
   return html;
 }

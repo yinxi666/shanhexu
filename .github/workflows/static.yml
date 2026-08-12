@@ -44,20 +44,7 @@ jobs:
       - name: Run runtime smoke tests
         run: npm run smoke
       - name: Stage deploy files
-        shell: bash
-        run: |
-          # 仅打包站点运行所需的文件到 _site/，避免 server.js/README/docs/CI 等污染线上产物。
-          # 注意：upload-pages-artifact 的 path 只接受单个路径，不支持多行列表。
-          mkdir -p _site
-          cp index.html favicon.png manifest.json .nojekyll _site/
-          # nullglob：无匹配文件时 glob 展开为空数组，避免 cp *.jpg（当前根目录无 .jpg）因无匹配而失败
-          shopt -s nullglob
-          cp *.webp *.jpg _site/
-          cp -r pages css js data assets images templates _site/
-          # 页脚链接指向 docs/素材说明/（素材来源与授权说明）。仅拷该子目录，
-          # 不部署 docs/ 下的内部部署说明（学校服务器部署说明.md）与失效参考页
-          mkdir -p _site/docs
-          cp -r docs/素材说明 _site/docs/
+        run: node scripts/build-site.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

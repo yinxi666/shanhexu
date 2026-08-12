@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081016';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081016';
-import { ASSET_VERSION } from './version.js?v=2026081016';
+import { getBasePath } from './utils.js?v=2026081027';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081027';
+import { ASSET_VERSION } from './version.js?v=2026081027';
 
 
 // 首页热力图 - ECharts中国地图，加载失败自动降级SVG
@@ -130,6 +130,9 @@ async function initECharts(container, provinceData) {
 }
 
 function createSimpleHeatmap(container, provinceData) {
+  // SVG 降级路径无缩放能力：隐藏缩放条，避免"点了没反应"的僵尸控件
+  const zoomBar = document.getElementById('heatmap-zoom-bar');
+  if (zoomBar) zoomBar.classList.add('is-hidden');
   const provinceMap = {
     '黑龙江': { x: 85, y: 55 }, '吉林': { x: 105, y: 65 }, '辽宁': { x: 125, y: 70 },
     '内蒙古': { x: 95, y: 90 }, '北京': { x: 135, y: 85 }, '天津': { x: 142, y: 90 },

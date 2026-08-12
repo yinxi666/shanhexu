@@ -4,20 +4,19 @@
    约束：依赖 timeline(initTimeline)；被 app.js 初始化（首页）
    ============================================================ */
 
-import { initTimeline } from './timeline.js?v=2026081016';
-import { $ } from './ui.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
+import { initTimeline } from './timeline.js?v=2026081027';
+import { $ } from './ui.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
 
 function initHomepageInnovation() {
   if (!(location.pathname.endsWith('/') || location.pathname.endsWith('index.html'))) return;
 
   initTimeline();
 
-  setTimeout(() => {
-    const modulesSection = $('#modules');
-    if (!modulesSection) return;
+  const modulesSection = $('#modules');
+  if (!modulesSection) return;
 
-    const innovationHTML = `
+  const innovationHTML = `
         <section class="section">
           <div class="section-heading">
             <p class="eyebrow">Innovation</p>
@@ -56,8 +55,7 @@ function initHomepageInnovation() {
           </div>
         </section>
       `;
-    modulesSection.insertAdjacentHTML('afterend', innovationHTML);
-  }, 100);
+  modulesSection.insertAdjacentHTML('afterend', innovationHTML);
 }
 
 export { initHomepageInnovation };

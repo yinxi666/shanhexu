@@ -15,18 +15,18 @@
   <meta property="og:url" content="https://yinxi666.github.io/shanhexu/">
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/">
-  <link rel="icon" type="image/png" href="favicon.png?v=2026081016">
+  <link rel="icon" type="image/png" href="favicon.png?v=2026081027">
   <link rel="manifest" href="manifest.json">
-  <link rel="preload" as="image" href="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp">
+  <!-- 首图已在 DOM 中（.hero-bg-active），无需单独 preload；轮播图清单见 .cinematic-hero[data-hero-images] -->
   <title>赓续血脉・数绘红旅 — 红色文旅数字导览</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="css/base.css?v=2026081016">
-  <link rel="stylesheet" href="css/home.css?v=2026081016">
-  <link rel="stylesheet" href="css/components.css?v=2026081016">
-  <link rel="stylesheet" href="css/pages.css?v=2026081016">
-  <link rel="stylesheet" href="css/widgets.css?v=2026081016">
-  <link rel="stylesheet" href="css/effects.css?v=2026081016">
-  <link rel="stylesheet" href="css/dark.css?v=2026081016">
+  <link rel="stylesheet" href="css/base.css?v=2026081027">
+  <link rel="stylesheet" href="css/home.css?v=2026081027">
+  <link rel="stylesheet" href="css/components.css?v=2026081027">
+  <link rel="stylesheet" href="css/pages.css?v=2026081027">
+  <link rel="stylesheet" href="css/widgets.css?v=2026081027">
+  <link rel="stylesheet" href="css/effects.css?v=2026081027">
+  <link rel="stylesheet" href="css/dark.css?v=2026081027">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     html.entrance-active,
@@ -110,7 +110,7 @@
 
   <main>
     <!-- ===== Cinematic Hero 区域 ===== -->
-    <section class="cinematic-hero">
+    <section class="cinematic-hero" data-hero-images='["assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp","assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp","assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp","assets/全国红色场馆图片/场馆06_陕西_延安革命纪念馆.webp","assets/全国红色场馆图片/场馆05_河北_西柏坡纪念馆.webp","assets/全国红色场馆图片/场馆07_贵州_遵义会议会址.webp"]'>
       <video class="flag-video" src="assets/演示视频/国旗动态壁纸【无水印】.mp4" preload="none" poster="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp" loop muted playsinline
         aria-hidden="true"></video>
       <img class="hero-bg animate-ken-burns hero-bg-active no-context-menu" aria-hidden="true"
@@ -133,7 +133,7 @@
     <section class="section">
       <div class="stats-row">
         <div class="stat-item scroll-animate scroll-animate-delay-1">
-          <div class="stat-num" id="stat-provinces">34+</div>
+          <div class="stat-num" id="stat-provinces">31+</div>
           <div class="stat-label">覆盖省区市</div>
         </div>
         <div class="stat-item scroll-animate scroll-animate-delay-2">
@@ -145,7 +145,7 @@
           <div class="stat-label">实践成果</div>
         </div>
         <div class="stat-item scroll-animate scroll-animate-delay-4">
-          <div class="stat-num" id="stat-reflections">10+</div>
+          <div class="stat-num" id="stat-reflections">15+</div>
           <div class="stat-label">学习心得</div>
         </div>
       </div>
@@ -289,12 +289,21 @@
     </section>
   </main>
 
+  <!-- ===== 页脚扩展（覆盖共享模板"关于"列，所有页面统一从模板注入） ===== -->
+  <template id="footer-extra">
+    <h4>关于</h4>
+    <ul aria-label="关于页脚">
+      <li>四川农业大学信息工程学院</li>
+      <li>红色文旅网页设计竞赛</li>
+      <li>图文素材经授权使用，来源说明见 docs/素材说明/</li>
+    </ul>
+  </template>
   <!-- ===== 页脚（由 js/layout-loader.js 注入共享模板） ===== -->
   <div id="site-footer"></div>
 
   <!-- Hero背景轮播（ES Module，由 app.js 引入） -->
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <script type="module" src="js/app.js?v=2026081016"></script>
+  <script type="module" src="js/app.js?v=2026081027"></script>
 </body>
 
 </html>

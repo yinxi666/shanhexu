@@ -4,11 +4,11 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081016';
-import { $, onOverlayClick } from './ui.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
-import { getBasePath } from './utils.js?v=2026081016';
-import { quizData } from './quiz-data.js?v=2026081016';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081027';
+import { $, onOverlayClick } from './ui.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
+import { getBasePath } from './utils.js?v=2026081027';
+import { quizData } from './quiz-data.js?v=2026081027';
 
 function initQuiz() {
   if ($('.quiz-fab')) return;
@@ -62,10 +62,24 @@ function initQuiz() {
   const result = $('#quiz-result');
 
   function openQuiz() {
+    // 断点续答：有未完成回合则直接恢复（不用从开始屏重新开始）
+    const saved = loadState();
+    if (saved && saved.currentQ < saved.gameQuestions.length) {
+      currentQ = saved.currentQ;
+      score = saved.score;
+      gameQuestions = saved.gameQuestions;
+      answers = saved.answers;
+      result.classList.add('is-hidden');
+      renderQuestion();
+    }
     overlay.classList.add('open');
+    // 每次打开重新查询：关闭后 resetQuiz 会重建开始按钮，旧引用已脱离 DOM
+    const focusTarget = $('#quiz-start-btn')
+      || overlay.querySelector('.quiz-opt:not(.is-disabled)')
+      || $('#quiz-next-btn')
+      || $('#quiz-prev-btn');
     trapFocus(overlay.querySelector('.quiz-modal'), {
-      // 每次打开重新查询：关闭后 resetQuiz 会重建开始按钮，旧引用已脱离 DOM
-      initialFocus: $('#quiz-start-btn'),
+      initialFocus: focusTarget || undefined,
       // Esc 关闭也必须 releaseFocus，否则焦点困在隐藏弹窗内
       onClose: closeQuiz
     });
@@ -86,6 +100,33 @@ function initQuiz() {
   let answers = []; // 每题所选选项索引，null=未答
   // 无自动进题：答完停留当前题，由用户点"下一题/完成"手动前进
 
+  // 断点续答：把当次回合进度存 sessionStorage（跨页面/关闭弹窗保留），下次打开直接恢复
+  const SAVE_KEY = 'redguide_quiz';
+  function saveState() {
+    try {
+      sessionStorage.setItem(SAVE_KEY, JSON.stringify({
+        qs: gameQuestions.map(q => quizData.indexOf(q)), // 存题号，恢复时引用题库
+        currentQ: currentQ,
+        score: score,
+        answers: answers
+      }));
+    } catch (e) { /* 存储不可用（隐私模式等）时静默降级为不复位 */ }
+  }
+  function loadState() {
+    try {
+      const raw = sessionStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || !Array.isArray(s.qs) || !Array.isArray(s.answers)) return null;
+      const gq = s.qs.map(i => quizData[i]).filter(Boolean);
+      if (gq.length === 0 || gq.length !== s.answers.length) return null; // 数据损坏则丢弃
+      return { currentQ: s.currentQ, score: s.score, gameQuestions: gq, answers: s.answers };
+    } catch (e) { return null; }
+  }
+  function clearState() {
+    try { sessionStorage.removeItem(SAVE_KEY); } catch (e) { }
+  }
+
   startBtn.addEventListener('click', startQuiz);
 
   function startQuiz() {
@@ -94,6 +135,8 @@ function initQuiz() {
     gameQuestions = shuffle(quizData).slice(0, Math.min(GAME_SIZE, quizData.length));
     answers = new Array(gameQuestions.length).fill(null);
     result.classList.add('is-hidden');
+    clearState(); // 新回合清掉旧的断点
+    saveState();  // 立刻保存初始态，中途关闭可恢复
     renderQuestion();
   }
 
@@ -162,6 +205,8 @@ function initQuiz() {
         fb.classList.add(correct ? 'correct' : 'wrong');
         fb.classList.add('show');
 
+        saveState(); // 记录本题作答结果（退出后可恢复）
+
         // 答完停留当前题，把焦点交给"下一题/完成"让用户手动前进（原点击项已 disabled 会丢焦点）
         const nxt = $('#quiz-next-btn');
         if (nxt) nxt.focus();
@@ -183,9 +228,12 @@ function initQuiz() {
     if (firstEnabled) firstEnabled.focus();
     else if (nextBtn) nextBtn.focus();
     else if (prevBtn && !prevBtn.disabled) prevBtn.focus();
+
+    saveState(); // 记录翻题后的当前位置/得分
   }
 
   function showResult() {
+    clearState(); // 回合已完成，清除断点（下次打开是全新开始）
     const pct = Math.round((score / gameQuestions.length) * 100);
     let emoji, msg;
     if (pct >= 90) { emoji = icon('trophy'); msg = '太棒了！你是红色知识达人！'; }

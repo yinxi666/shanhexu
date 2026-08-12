@@ -10,7 +10,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 const net = require('net');
 const path = require('path');
 const { chromium } = require('playwright');
@@ -32,12 +32,17 @@ function waitPort(host, port, timeoutMs) {
 }
 
 async function startServer() {
-  // 自起独立端口的全新服务：避免复用已在 9876 运行的他人/过期实例
+  // 0) 组装部署产物 _site（与 CI 打包同源），冒烟直接测"真正部署的内容"——
+  //    否则 deploy 打包遗漏某目录时 CI 全绿、线上却 404
+  execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'build-site.js')], { stdio: 'pipe' });
+  const siteDir = path.join(ROOT, '_site');
+
+  // 1) 自起独立端口的全新服务：复用 server.js 但 ROOT_DIR 指向 _site（避免复用已在 9876 运行的实例）
   const port = 20000 + Math.floor(Math.random() * 20000);
   const child = spawn(process.execPath, ['server.js'], {
     cwd: ROOT,
     stdio: ['ignore', 'ignore', 'pipe'], // 捕获 stderr，启动失败可诊断
-    env: { ...process.env, PORT: String(port) }
+    env: { ...process.env, PORT: String(port), ROOT_DIR: siteDir }
   });
   let bootErr = '';
   child.stderr.on('data', (d) => { bootErr += d; });

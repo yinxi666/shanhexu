@@ -4,8 +4,8 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
 
 // 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
 function renderVenueCard(venue, basePath, isFav = false) {
@@ -53,12 +53,17 @@ function renderPracticeCard(practice, basePath) {
   const imgSrc = sanitizeUrl(resolveAssetPath(practice.image, bp));
   const fb = fallbackSrc();
   const practiceLiked = isPracticeLiked(practice.id); // 已赞保持高亮
+  const hasVideo = practice.video && practice.video.trim();
+  const videoSrc = hasVideo ? resolveAssetPath(practice.video, bp) : '';
   const esc = escapeHtml;
   const attr = escapeAttr;
   return `
       <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="${esc(practice.title || practice.name || '')}">
         <div class="practice-img">
           <img src="${attr(imgSrc)}" alt="${esc(practice.title)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
+          ${hasVideo ? `
+          <div class="has-video-badge">${icon('play')} 视频</div>
+          <div class="play-btn" role="button" tabindex="0" data-action="open-practice-video" data-video-src="${attr(videoSrc)}" aria-label="播放视频">${icon('play')}</div>` : ''}
         </div>
         <div class="practice-body">
           <h3>${esc(practice.title)}</h3>

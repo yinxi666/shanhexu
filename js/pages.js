@@ -5,16 +5,15 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081016';
-import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081016';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, isPracticeLiked } from './utils.js?v=2026081016';
-import { $, $$, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081016';
-import { initBgMusic } from './music.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
-import { initHomeHeatmap } from './heatmap.js?v=2026081016';
-import { createGuideMap } from './guide-map.js?v=2026081016';
-import { initCarousel } from './carousel.js?v=2026081016';
-import { isFavorite } from './favorites.js?v=2026081016';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081027';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081027';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, isPracticeLiked } from './utils.js?v=2026081027';
+import { $, $$, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081027';
+import { initBgMusic } from './music.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
+import { initHomeHeatmap } from './heatmap.js?v=2026081027';
+import { createGuideMap } from './guide-map.js?v=2026081027';
+import { isFavorite } from './favorites.js?v=2026081027';
 
 /* ---------- 分页公共助手（四个页面控制器复用，消除页码解析与跳转回调的四处拷贝） ---------- */
 function normalizePage(raw, totalPages) {
@@ -29,13 +28,28 @@ function navigateToPage(paramName) {
     location.href = url.toString();
   };
 }
+/* 详情页"返回导览"：尽量恢复进入详情前的导览筛选状态（无记录则回导览首页） */
+function buildGuideBackLink() {
+  let url = 'guide.html';
+  try {
+    const f = JSON.parse(sessionStorage.getItem('redguide_guide_filters') || 'null');
+    if (f && typeof f === 'object') {
+      const p = new URLSearchParams();
+      if (f.search) p.set('search', f.search);
+      if (f.province && f.province !== 'all') p.set('province', f.province);
+      if (f.category && f.category !== 'all') p.set('category', f.category);
+      if (f.page && f.page > 1) p.set('page', f.page);
+      const qs = p.toString();
+      if (qs) url += '?' + qs;
+    }
+  } catch (e) { }
+  return url;
+}
 
 /* ---------- 点赞（统一 key：redguide_likes_<id> 存计数；旧 redguide_likecount_<id> 仅作迁移兼容） ---------- */
 function likePractice(el, id) {
   const countEl = el.querySelector('.like-count');
   if (!countEl) return;
-  const key = 'redguide_likes_' + id;
-  const legacyKey = 'redguide_likecount_' + id;
   if (isPracticeLiked(id)) {
     // 已赞过：确保高亮态存在（防弹窗新渲染的副本未带 active）
     el.classList.add('active');
@@ -43,7 +57,9 @@ function likePractice(el, id) {
     setTimeout(() => el.style.transform = '', 150);
     return;
   }
+  const deltaKey = 'redguide_likes_delta_' + id;
   const newCount = parseInt(countEl.textContent) + 1;
+  const delta = (parseInt(sessionStorage.getItem(deltaKey) || '0', 10)) + 1;
   countEl.textContent = newCount;
   // 已赞保持高亮：红心填充 + 红色药丸
   el.classList.add('active');
@@ -57,8 +73,8 @@ function likePractice(el, id) {
       if (c && c !== countEl) c.textContent = newCount;
     }
   });
-  // 存下最新数值（统一 key，并清理旧的独立计数 key）
-  try { sessionStorage.setItem(key, String(newCount)); sessionStorage.removeItem(legacyKey); } catch (e) { }
+  // 权威存储只记真实用户增量（practices.json 编造基数仅作展示基线，不写入存储）
+  try { sessionStorage.setItem(deltaKey, String(delta)); } catch (e) { }
   el.style.transform = 'scale(1.2)';
   setTimeout(() => el.style.transform = '', 200);
 }
@@ -105,7 +121,7 @@ function initMessageForm() {
       id: Date.now(),
       title,
       author,
-      className: ($('#msg-class')?.value || '计算机2026级'),
+      className: ($('#msg-class')?.value || ''),  // 选填，未选不编造班级
       studentId: ($('#msg-studentid')?.value || '***'),
       content,
       submitTime: new Date().toISOString().replace('T', ' ').slice(0, 16),
@@ -310,12 +326,13 @@ async function initGuidePage() {
           toggleBtn.innerHTML = icon('map') + ' 地图视图';
         }
       } else {
-        // 移动→桌面：地图视图，隐藏切换按钮，确保地图已初始化
+        // 移动→桌面：恢复桌面初始布局（列表+地图双栏、切换按钮隐藏），避免"仅地图"死态
         mapVisible = true;
         if (guideMapEl) guideMapEl.classList.remove('is-hidden');
-        if (guideList) guideList.classList.add('is-hidden');
+        if (guideList) guideList.classList.remove('is-hidden');
         if (toggleBtn) toggleBtn.classList.add('is-hidden');
         guideMapCtrl.initMap();
+        guideMapCtrl.invalidateSize();
       }
     }, 150);
   });
@@ -346,6 +363,7 @@ async function initGuidePage() {
       if (pagContainer) pagContainer.classList.toggle('is-hidden', mapVisible);
       if (mapVisible) {
         await guideMapCtrl.initMap();
+        guideMapCtrl.invalidateSize();
         doRender(false, true);
       }
     });
@@ -360,6 +378,8 @@ async function initGuidePage() {
     if (page && page > 1) url.searchParams.set('page', page); else url.searchParams.delete('page');
     // file:// 或受限环境下 replaceState 可能抛错，不能中断渲染
     try { window.history.replaceState({}, '', url.toString()); } catch (e) { }
+    // 记录当前筛选，供详情页"返回导览"恢复筛选状态
+    try { sessionStorage.setItem('redguide_guide_filters', JSON.stringify({ search: query, province, category, page: page > 1 ? page : null })); } catch (e) { }
   }
 
   function doRender(resetPage, mapOnly) {
@@ -469,43 +489,22 @@ async function initDetailPage() {
   const subtitleEl = $('#detail-subtitle');
   if (subtitleEl) subtitleEl.textContent = `${venue.province} · ${venue.city || ''} · ${venue.category}`;
 
-  // 构建轮播图片数组（主图 + gallery）
-  const carouselImages = [venue.image].concat(detail?.gallery || []).concat(venue.gallery || []);
-  const uniqueCarousel = [...new Set(carouselImages.filter(Boolean))];
-  const hasMultipleImages = uniqueCarousel.length > 1;
-
   // 历史背景和教育意义
   const historyText = detail?.history || `${venue.name}是${venue.province}具有重要历史意义的红色文化地标。这里记录着中国共产党和中国人民在革命、建设和改革各个历史时期的光辉足迹，是传承红色基因、弘扬革命精神的重要场所。场馆通过丰富的文物、图片、史料和现代化展陈手段，生动再现了那段波澜壮阔的历史。`;
   const educationText = detail?.education || `作为爱国主义教育基地和红色旅游经典景区，${venue.name}在开展党史学习教育、革命传统教育和爱国主义教育方面发挥着重要作用。每一位到访者都能在这里汲取精神力量，坚定理想信念。`;
 
-  // 构建轮播HTML
-  const carouselHtml = `
+  // 详情主图（详情数据 gallery 与主图同源，恒为单图，无需轮播）
+  const detailImageHtml = `
       <div class="detail-carousel">
-        <div class="carousel-track">
-          ${uniqueCarousel.map((img, idx) => `
-            <div class="carousel-slide ${idx === 0 ? 'active' : ''}" data-index="${idx}">
-              <img src="${escapeAttr(sanitizeUrl(resolveAssetPath(img, bp)))}" alt="${escapeHtml(venue.name)} 图片${idx + 1}" loading="lazy" data-fallback="${escapeAttr(fb)}">
-            </div>
-          `).join('')}
-        </div>
-        ${hasMultipleImages ? `
-        <button class="carousel-prev" aria-label="上一张">‹</button>
-        <button class="carousel-next" aria-label="下一张">›</button>
-        <div class="carousel-indicators">
-          ${uniqueCarousel.map((_, idx) => `
-            <button class="carousel-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}" aria-label="切换到第${idx + 1}张"></button>
-          `).join('')}
-        </div>
-        ` : ''}
-        <div class="carousel-counter">${uniqueCarousel.length > 0 ? `1 / ${uniqueCarousel.length}` : ''}</div>
+        <img class="detail-carousel-img" src="${escapeAttr(sanitizeUrl(resolveAssetPath(venue.image, bp)))}" alt="${escapeHtml(venue.name)} 图片" loading="lazy" data-fallback="${escapeAttr(fb)}">
       </div>
     `;
 
   const detailNavHtml = `
       <div class="detail-action-bar">
-        <a href="guide.html" class="action-back">← 返回导览列表</a>
+        <a href="${buildGuideBackLink()}" class="action-back">← 返回导览列表</a>
         <div class="action-right">
-          <button class="action-btn" data-action="open-card-gen" data-name="${escapeHtml(venue.name)}" data-image="${escapeAttr(sanitizeUrl(venue.image))}" title="生成红色纪念卡">${icon('card')} 纪念卡</button>
+          <button class="action-btn" data-action="open-cardgen" data-name="${escapeHtml(venue.name)}" data-image="${escapeAttr(sanitizeUrl(venue.image))}" title="生成红色纪念卡">${icon('card')} 纪念卡</button>
           <button class="action-btn" data-action="copy-share-link" title="复制分享链接">${icon('link')} 分享</button>
           <button class="action-btn btn-print" data-action="print-page" title="打印场馆详情">${icon('print')} 打印</button>
         </div>
@@ -515,7 +514,7 @@ async function initDetailPage() {
       <div class="detail-layout">
         <div class="detail-main">
           ${detailNavHtml}
-          ${carouselHtml}
+          ${detailImageHtml}
           <div class="detail-body">
             <div class="detail-tags">
               <span class="tag-category">${escapeHtml(venue.category || '红色场馆')}</span>
@@ -550,7 +549,7 @@ async function initDetailPage() {
           </div>` : ''}
           <div class="sidebar-card">
             <h3>${icon('map')} 位置信息</h3>
-            ${venue.coordinates && venue.coordinates.lat
+            ${venue.coordinates && venue.coordinates.lat && venue.coordinates.lng
       ? `<a class="amap-static-card" href="https://uri.amap.com/marker?position=${venue.coordinates.lng},${venue.coordinates.lat}&name=${encodeURIComponent(venue.name)}" target="_blank">
             <div class="amap-static-map">
               <span class="amap-static-pin">${icon('pin')}</span>
@@ -567,14 +566,6 @@ async function initDetailPage() {
 
   container.innerHTML = html;
   bindImageFallbacks(container);
-
-  // 初始化轮播
-  if (hasMultipleImages) {
-    const destroyCarousel = initCarousel(uniqueCarousel.length);
-    if (destroyCarousel) {
-      window.addEventListener('pagehide', destroyCarousel, { once: true });
-    }
-  }
 }
 
 // 时事政策页
@@ -599,14 +590,14 @@ async function initPolicyPage() {
   const page = normalizePage(new URLSearchParams(location.search).get('page') || '1', totalPages);
   const pageItems = policies.slice((page - 1) * pageSize, page * pageSize);
 
-  const html = pageItems.map(function (p) {
+  let html = pageItems.map(function (p) {
     const imgSrc = p.image ? resolveAssetPath(p.image, bp) : (bp + 'assets/页面通用图片/时事政策模块封面.webp');
     const hasUrl = p.url && p.url.trim();
     const pubDate = p.publishedAt || '';
     return `
         <div class="policy-row">
           <div class="policy-timeline">
-            <span class="policy-date-badge">${pubDate}</span>
+            <span class="policy-date-badge">${escapeHtml(pubDate)}</span>
             <span class="policy-dot"></span>
           </div>
           <div class="policy-card">
@@ -629,13 +620,12 @@ async function initPolicyPage() {
       `;
   }).join('');
 
+  // 分页（拼进同一 innerHTML，避免 += 重解析整列表导致 bindImageFallbacks 的图片回退失效）
+  if (totalPages > 1) {
+    html += renderPagination(policies.length, pageSize, page, '.policy-list', navigateToPage('page'));
+  }
   container.innerHTML = html;
   bindImageFallbacks(container);
-
-  // 分页
-  if (totalPages > 1) {
-    container.innerHTML += renderPagination(policies.length, pageSize, page, '.policy-list', navigateToPage('page'));
-  }
 }
 
 // 实践成果页

@@ -15,14 +15,8 @@
         <li><a href="{{BASE}}pages/practice.html">实践成果</a></li>
       </ul>
     </div>
-    <div class="footer-extra">
-      <h4>关于</h4>
-      <ul aria-label="关于页脚">
-        <li>四川农业大学信息工程学院</li>
-        <li>红色文旅网页设计竞赛</li>
-        <li>图文素材经授权使用，来源说明见 docs/素材说明/</li>
-      </ul>
-    </div>
+    <!-- "关于"列由各页面 <template id="footer-extra"> 经 layout-loader.applyFooterExtra 注入 -->
+    <div class="footer-extra"></div>
   </div>
   <div class="footer-bottom">© 2026 赓续血脉・数绘红旅 · 四川农业大学信息工程学院 · 静态网页竞赛作品</div>
 </footer>

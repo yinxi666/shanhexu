@@ -92,7 +92,8 @@ html.dark .site-footer {
 html.dark input,
 html.dark select,
 html.dark textarea {
-  background: #1e293b;
+  /* 用 background-color 而非 background 简写：保留 .search-toolbar select 的自绘箭头 background-image */
+  background-color: #1e293b;
   color: #e2e8f0;
   border-color: #475569;
 }

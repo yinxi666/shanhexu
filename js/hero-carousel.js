@@ -1,18 +1,10 @@
 /* ============================================================
-   赓续血脉・数绘红旅 — 首页 Hero 背景轮播（ES Module）
-   职责：首页 Hero 双图轮播 + Ken Burns 错峰启动
-   错峰策略：等开场动画结束后再启动轮播，避免 GPU/CPU 竞争
-   说明：仅在首页（存在 .hero-bg-active）时生效；非首页调用自动 no-op。
+   赓续血脉・数绘红旅 — Hero 背景轮播（ES Module，通用）
+   职责：双图 Hero 交叉淡入轮播 + Ken Burns 错峰启动
+   说明：页面容器须提供 [data-hero-images]（JSON 数组，含 basePath 路径，
+         首项对应 .hero-bg-active、次项对应 .hero-bg-next）才轮播；
+         无双图或无配置自动 no-op。
    ============================================================ */
-
-const images = [
-  'assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp',
-  'assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp',
-  'assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp',
-  'assets/全国红色场馆图片/场馆06_陕西_延安革命纪念馆.webp',
-  'assets/全国红色场馆图片/场馆05_河北_西柏坡纪念馆.webp',
-  'assets/全国红色场馆图片/场馆07_贵州_遵义会议会址.webp',
-];
 
 export function initHeroCarousel() {
   let current = 0;
@@ -21,11 +13,23 @@ export function initHeroCarousel() {
   let timer = null;
   let started = false;
 
+  // 图片来源：唯一来源为页面容器 [data-hero-images]（JSON 数组）
+  let images = null;
+  const heroSection = document.querySelector('[data-hero-images]');
+  if (heroSection && heroSection.dataset.heroImages) {
+    try {
+      const parsed = JSON.parse(heroSection.dataset.heroImages);
+      if (Array.isArray(parsed) && parsed.length > 1) images = parsed;
+    } catch (e) { images = null; }
+  }
+
   function startCarousel() {
     if (timer) return; // 已经启动
     active = document.querySelector('.hero-bg-active');
     next = document.querySelector('.hero-bg-next');
-    if (!active || !next) return;  // 非首页（无 Hero 双图）直接 no-op
+    if (!active || !next || !images) return;  // 无双图 Hero 或无图片配置（详情/政策等页）直接 no-op
+    // 尊重"减少动效"：只展示首图，不做自动轮播
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     started = true;
 
     timer = setInterval(function () {

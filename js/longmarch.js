@@ -3,20 +3,20 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081016';
-import { getBasePath } from './utils.js?v=2026081016';
-import { $, onOverlayClick } from './ui.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
+import * as RedData from './data.js?v=2026081027';
+import { getBasePath } from './utils.js?v=2026081027';
+import { $ } from './ui.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081016';
-import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081016';
-import * as czSound from './cz-sound.js?v=2026081016';
-import { stampSvg } from './cz-stamps.js?v=2026081016';
-import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081016';
-import { openRelicDetail, closeRelic, showComplete, closeComplete, isCompleteShown, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081016';
-import { showTheater, theaterLock } from './cz-theater.js?v=2026081016';
-import { initAtmosphere } from './cz-atmosphere.js?v=2026081016';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081027';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081027';
+import * as czSound from './cz-sound.js?v=2026081027';
+import { stampSvg } from './cz-stamps.js?v=2026081027';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081027';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isCompleteShown, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081027';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081027';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081027';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化）。
    兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
@@ -660,8 +660,9 @@ function setActive(id) {
   const photo = STATION_PHOTOS[s.id];
   setPhoto(photo);
 
-  // 到达延安 → 终点成就（取代小剧场，直接进入大场面）
-  if (s.id === 17 && !isCompleteShown()) {
+  // 到达延安 → 终点成就（取代小剧场，直接进入大场面）；只播一次（已关闭后回访不再触发）
+  if (s.id === 17 && !_achievementDone) {
+    _achievementDone = true;
     _shownTheater.add(17);  // 成就取代站17小剧场，标记已播，回滚不补播
     showComplete();  // _completeShown 由 cz-modals 内部维护
     stopAutoScroll();  // 终点成就已 lockBodyScroll，停止自动行军空转 rAF
@@ -704,6 +705,7 @@ const _poemShown = new Set();
 /* 每站小剧场调度（播放本身在 cz-theater.js） */
 let _theaterTimer = null;
 const _shownTheater = new Set();  // 已播过小剧场的站（回滚不重放）
+let _achievementDone = false;  // 终点成就只触发一次（关闭后回访延安不再重弹）
 let _firstStationDone = false;
 
 /* 切换背景 mood 层（用缓存集合，不再每次 querySelector） */

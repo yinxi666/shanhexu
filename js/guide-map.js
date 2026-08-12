@@ -5,11 +5,12 @@
          以 <script defer> 静态加载（window.L）
    ============================================================ */
 
-import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081016';
+import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081027';
 
 export function createGuideMap(mapContainer) {
   let leafletMap = null;
   let venueMarkerMap = {}; // venue.id → marker 映射
+  let userMoved = false;   // 用户手动缩放/平移后，筛选不再强制 fitBounds 重置视口
 
   async function initMap() {
     if (leafletMap) return;
@@ -27,31 +28,28 @@ export function createGuideMap(mapContainer) {
       maxZoom: 18,
       attribution: '© 高德地图'
     }).addTo(leafletMap);
+    // 用户主动缩放/平移后不再自动复位视口
+    leafletMap.on('zoomstart dragstart', () => { userMoved = true; });
   }
+
+  // 容器尺寸变化（窗口 resize / 移动端切换显隐）后纠正 Leaflet 视口，防瓦片错位或空白
+  function invalidateSize() {
+    if (leafletMap) leafletMap.invalidateSize();
+  }
+  window.addEventListener('resize', () => invalidateSize());
 
   function isReady() {
     return !!leafletMap;
   }
 
-  // 默认五角星 marker
-  function makeDefaultIcon() {
+  // 五角星 marker（highlight 切换金色高亮态，其余参数一致）
+  function makeIcon(highlight) {
     return L.divIcon({
-      className: 'red-star-marker',
-      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="#b91c1c" stroke="#7f1d1d" stroke-width="0.5"/></svg><div class="rsm-shadow"></div></div>',
-      iconSize: [32, 38],
-      iconAnchor: [16, 36],
-      popupAnchor: [0, -38]
-    });
-  }
-
-  // 金色高亮 marker
-  function makeHighlightIcon() {
-    return L.divIcon({
-      className: 'red-star-marker marker-highlight',
-      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="#e8a820" stroke="#b91c1c" stroke-width="0.8"/></svg><div class="rsm-shadow"></div></div>',
-      iconSize: [38, 45],
-      iconAnchor: [19, 43],
-      popupAnchor: [0, -43]
+      className: highlight ? 'red-star-marker marker-highlight' : 'red-star-marker',
+      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="' + (highlight ? '#e8a820' : '#b91c1c') + '" stroke="' + (highlight ? '#b91c1c' : '#7f1d1d') + '" stroke-width="' + (highlight ? '0.8' : '0.5') + '"/></svg><div class="rsm-shadow"></div></div>',
+      iconSize: highlight ? [38, 45] : [32, 38],
+      iconAnchor: highlight ? [19, 43] : [16, 36],
+      popupAnchor: highlight ? [0, -43] : [0, -38]
     });
   }
 
@@ -67,8 +65,8 @@ export function createGuideMap(mapContainer) {
     const withCoords = filteredVenues.filter(function (v) { return v.coordinates && v.coordinates.lat && v.coordinates.lng; });
     if (withCoords.length === 0) return;
 
-    const defIcon = makeDefaultIcon();
-    const hlIcon = makeHighlightIcon();
+    const defIcon = makeIcon(false);
+    const hlIcon = makeIcon(true);
 
     withCoords.forEach(function (v) {
       const marker = L.marker([v.coordinates.lat, v.coordinates.lng], { icon: defIcon })
@@ -78,7 +76,7 @@ export function createGuideMap(mapContainer) {
     });
 
     const allMarkers = Object.values(venueMarkerMap).map(function (m) { return m.marker; });
-    if (allMarkers.length > 0) {
+    if (allMarkers.length > 0 && !userMoved) {
       const group = L.featureGroup(allMarkers);
       leafletMap.fitBounds(group.getBounds().pad(0.15), { maxZoom: 6 });
     }
@@ -96,5 +94,5 @@ export function createGuideMap(mapContainer) {
     }
   }
 
-  return { initMap, isReady, plotVenuesOnMap, highlightMarker };
+  return { initMap, isReady, plotVenuesOnMap, highlightMarker, invalidateSize };
 }

@@ -4,16 +4,16 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail } from './ui.js?v=2026081016';
-import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox } from './modals.js?v=2026081016';
-import { likePractice, copyShareLinkFromDetail, resetMessageForm } from './pages.js?v=2026081016';
-import { toggleFavorite } from './favorites.js?v=2026081016';
+import { goToDetail, showToast } from './ui.js?v=2026081027';
+import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081027';
+import { likePractice, copyShareLinkFromDetail, resetMessageForm } from './pages.js?v=2026081027';
+import { toggleFavorite } from './favorites.js?v=2026081027';
 
-import { openChat } from './chat.js?v=2026081016';
-import { openQuiz } from './quiz.js?v=2026081016';
-import { toggleDarkMode } from './darkmode.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
-import * as RedCardGen from './cardgen.js?v=2026081016';
+import { openChat } from './chat.js?v=2026081027';
+import { openQuiz } from './quiz.js?v=2026081027';
+import { toggleDarkMode } from './darkmode.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
+import * as RedCardGen from './cardgen.js?v=2026081027';
 
 export function initActionDelegate() {
   document.addEventListener('click', handleAction);
@@ -69,7 +69,14 @@ function handleAction(e) {
       closeLightbox();
       break;
 
-    case 'open-card-gen':
+    case 'open-practice-video':
+      openPracticeVideo(actionEl.dataset.videoSrc);
+      break;
+
+    case 'close-practice-video':
+      closePracticeVideo();
+      break;
+
     case 'open-cardgen':
       RedCardGen.open(actionEl.dataset.name, actionEl.dataset.image);
       break;
@@ -108,6 +115,7 @@ function handleToggleFavorite(btn) {
   const id = btn.dataset.id;
   if (!id) return;
   const nx = toggleFavorite(id);
+  if (nx === null) { showToast('收藏保存失败，请检查浏览器存储'); return; } // 写失败：不改 UI，避免界面与存储发散
   btn.innerHTML = icon('heart'); // 收藏态由 .active 的 CSS fill 区分
   btn.classList.toggle('active', nx);
   btn.setAttribute('aria-pressed', String(nx));

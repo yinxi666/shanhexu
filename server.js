@@ -28,7 +28,8 @@ const MIME = {
   '.webmanifest': 'application/manifest+json',
 };
 
-const ROOT = path.resolve(__dirname);
+// 默认服务仓库根目录；ROOT_DIR 环境变量可覆盖（冒烟测试用它指向 _site 部署产物，验证"实际部署的内容"）
+const ROOT = process.env.ROOT_DIR ? path.resolve(process.env.ROOT_DIR) : path.resolve(__dirname);
 
 // 端口支持环境变量覆盖（冒烟测试可用独立端口自起服务，避免误连他人/过期实例）；
 // 非法值（非整数/越界）回退默认 9876，避免 listen 同步抛 RangeError 崩溃
@@ -74,25 +75,20 @@ const server = http.createServer((req, res) => {
 
   const contentType = MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 
-  // try/catch：readFile 对非法路径可能同步抛错（如含 NUL），捕获后返回 400 而非崩溃
-  try {
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        res.writeHead(404);
-        res.end('Not found');
-      } else {
-        res.writeHead(200, {
-          'Content-Type': contentType,
-          'X-Content-Type-Options': 'nosniff',
-          'Cache-Control': 'no-cache'
-        });
-        res.end(data);
-      }
-    });
-  } catch (e) {
-    res.writeHead(400);
-    res.end('Bad request');
-  }
+  // 异步回调式 readFile 不会同步抛错（NUL 等非法输入已在前面路由阶段拦截）
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404);
+      res.end('Not found');
+    } else {
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-cache'
+      });
+      res.end(data);
+    }
+  });
 });
 
 server.listen(PORT, () => {

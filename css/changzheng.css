@@ -804,7 +804,8 @@
   text-align: center;
   color: var(--cz-paper);
 }
-.cz-relic-close {
+.cz-relic-close,
+.cz-card-close {
   position: absolute;
   top: 10px;
   right: 12px;
@@ -816,7 +817,8 @@
   padding: 4px 8px;
   transition: color var(--transition), transform var(--transition);
 }
-.cz-relic-close:hover {
+.cz-relic-close:hover,
+.cz-card-close:hover {
   color: var(--cz-gold);
   transform: scale(1.15);
 }
@@ -864,11 +866,15 @@
   background-position: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--duration-normal) ease;
+  /* 隐藏态必须不可聚焦：仅 opacity 会留下可 Tab 到的隐形按钮 */
+  visibility: hidden;
+  transition: opacity var(--duration-normal) ease, visibility 0s var(--duration-normal);
 }
 .cz-complete.show {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity var(--duration-normal) ease, visibility 0s 0s;
 }
 .cz-complete-inner {
   text-align: center;
@@ -1001,22 +1007,6 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
   color: var(--cz-paper);
   text-align: center;
-}
-.cz-card-close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  background: none;
-  border: none;
-  color: rgba(255, 215, 150, 0.7);
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: color var(--transition), transform var(--transition);
-}
-.cz-card-close:hover {
-  color: var(--cz-gold);
-  transform: scale(1.15);
 }
 .cz-card-head {
   font-family: "HongLeiZhuoShu", "STZhongsong", serif;
@@ -1639,7 +1629,7 @@
 }
 
 #cz-route-dots .cz-route-dot.active .cz-route-dot-halo {
-  animation: cz-route-pulse 1var(--duration-normal) ease-out infinite;
+  animation: cz-route-pulse var(--duration-normal) ease-out infinite;
   transform-box: fill-box;
   transform-origin: center;
 }

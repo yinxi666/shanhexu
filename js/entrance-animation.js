@@ -1191,7 +1191,7 @@ export function initEntranceAnimation() {
     if (!overlay) return;
     overlay.classList.add('fade-out');
     document.documentElement.classList.remove('entrance-active');
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
     setTimeout(function () { overlay.remove(); }, 800);
     markEntranceDone();
     finishEntrance();

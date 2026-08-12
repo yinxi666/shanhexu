@@ -5,10 +5,36 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081016';
-import { $, $$ } from './ui.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
-import { generateReply } from './chat-engine.js?v=2026081016';
+import { getBasePath, safeStorage } from './utils.js?v=2026081027';
+import { $, $$ } from './ui.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
+import { generateReply } from './chat-engine.js?v=2026081027';
+
+/* 恢复时对机器人消息 HTML 做白名单净化（用惰性的 <template> 解析，脚本不执行），
+   既保留富文本（场馆按钮/小卡片），又堵住 sessionStorage 被篡改时的注入 */
+function sanitizeBotHtml(html) {
+  const ALLOWED = new Set(['A', 'B', 'BR', 'DIV', 'SPAN', 'I', 'SMALL', 'IMG', 'STRONG', 'P']);
+  const tpl = document.createElement('template');
+  tpl.innerHTML = String(html || '');
+  const clean = function (el) {
+    Array.prototype.forEach.call(el.querySelectorAll('*'), function (node) {
+      if (!ALLOWED.has(node.tagName)) {
+        while (node.firstChild) el.insertBefore(node.firstChild, node);
+        node.remove();
+        return;
+      }
+      Array.prototype.forEach.call(node.attributes, function (attr) {
+        const name = attr.name.toLowerCase();
+        const val = attr.value.trim().toLowerCase();
+        if (name === 'style' || name === 'srcdoc' || name.indexOf('on') === 0) { node.removeAttribute(attr.name); return; }
+        if ((name === 'href' || name === 'src') && /^(javascript|vbscript|data:text\/html)/.test(val)) { node.removeAttribute(attr.name); }
+      });
+      clean(node);
+    });
+  };
+  clean(tpl.content);
+  return tpl.innerHTML;
+}
 
 function initChatWidget() {
   if ($('.chat-widget')) return;
@@ -86,11 +112,13 @@ function initChatWidget() {
 
   function saveChatHistory() {
     const bubbles = $$('.chat-bubble', messages);
-    // 统一存纯文本(textContent)：恢复时按纯文本渲染，
-    // 避免"存储 innerHTML、恢复走 textContent"导致富文本标签字面量上屏，同时防篡改注入
+    // 机器人消息存 innerHTML（富文本：场馆按钮/小卡片），用户消息只存纯文本；
+    // 恢复时对机器人 HTML 做白名单净化，防 sessionStorage 被篡改注入
     const history = bubbles.map(b => {
       const isUser = b.parentElement.classList.contains('user');
-      return { text: b.textContent, cls: isUser ? 'user' : 'bot' };
+      return isUser
+        ? { text: b.textContent, cls: 'user' }
+        : { text: b.textContent, html: b.innerHTML, cls: 'bot' };
     });
     safeStorage.set('redguide_chat', history.slice(-20), sessionStorage);
   }
@@ -102,7 +130,14 @@ function initChatWidget() {
     const existing = $$('.chat-msg', messages);
     if (existing.length <= 1) {
       messages.innerHTML = '';
-      valid.forEach(m => appendMsg(m.cls, m.text, true));
+      valid.forEach(m => {
+        if (m.cls === 'bot') {
+          // 机器人消息：有富文本存档则恢复为净化后的 HTML（场馆按钮/小卡片），无则回退纯文本
+          appendMsg('bot', m.html ? sanitizeBotHtml(m.html) : m.text, false);
+        } else {
+          appendMsg('user', m.text, true);
+        }
+      });
     }
   }
 
@@ -110,7 +145,7 @@ function initChatWidget() {
     if (!text.trim()) return;
     appendMsg('user', text);
     input.value = '';
-    quickBtns.classList.add('is-hidden');
+    // 保留底部推荐示例按钮：提问后不隐藏，随时可再点（仅折叠示例会挡住输入，不折叠则常驻）
 
     const thinkingId = appendMsg('bot', '<span class="ai-thinking"><span class="ai-thinking-icon">✦</span><span class="ai-thinking-text">正在检索知识库</span><span class="ai-thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>');
     setTimeout(() => {

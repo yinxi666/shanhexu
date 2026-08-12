@@ -45,19 +45,37 @@ test('border-radius 只取令牌刻度（0/4/6/8/10/14/20/999px、50%、var(--ra
 
 /* ---------------- 过渡时长 ---------------- */
 
-const VALID_DURATIONS = new Set(['0', '0.25s', '0.3s', '0.6s',
+const VALID_DURATIONS = new Set(['0', '0s', '0.25s', '0.3s', '0.6s',
   'var(--transition)', 'var(--duration-fast)', 'var(--duration-normal)']);
 
-test('transition 时长只取令牌刻度（0.25s/0.3s/0.6s）', () => {
+/** 提取时长值（s 与 ms 统一归一化为秒），支持 .5s 写法 */
+function extractTimes(val) {
+  const out = [];
+  const re = /(\d+(?:\.\d+)?|\.\d+)(ms|s)/g;
+  let m;
+  while ((m = re.exec(val)) !== null) {
+    const num = parseFloat(m[1]);
+    const sec = m[2] === 'ms' ? num / 1000 : num;
+    const norm = String(Math.round(sec * 10000) / 10000) + 's';
+    out.push({ sec, norm, raw: m[0] });
+  }
+  return out;
+}
+
+/** 是否处于 prefers-reduced-motion 覆盖块（其 0.01ms 杀值豁免） */
+function isReducedMotion(r) {
+  return (r.media || []).some(q => /prefers-reduced-motion/.test(q));
+}
+
+test('transition 时长只取令牌刻度（0.25s/0.3s/0.6s，含 ms 写法）', () => {
   const offenders = [];
   for (const r of allRules) {
+    if (isReducedMotion(r)) continue;
     for (const [prop, val] of Object.entries(r.decls)) {
       if (!/^transition(-duration)?$/.test(prop)) continue;
-      const times = (val.match(/(?<![\d.])0?\.\d+s|(?<![\d.])1s|\d+s/g) || [])
-        .map(t => (t.startsWith('.') ? '0' + t : t));
-      for (const t of times) {
-        if (!VALID_DURATIONS.has(t)) {
-          offenders.push(`${r.file} 「${r.selector.trim()}」 ${prop}: ${val} 时长 ${t}`);
+      for (const t of extractTimes(val)) {
+        if (!VALID_DURATIONS.has(t.norm)) {
+          offenders.push(`${r.file} 「${r.selector.trim()}」 ${prop}: ${val} 时长 ${t.raw}（=${t.norm}）`);
         }
       }
     }
@@ -66,20 +84,19 @@ test('transition 时长只取令牌刻度（0.25s/0.3s/0.6s）', () => {
     `transition 时长魔法值（应收敛到 --transition/--duration-*）:\n  ${offenders.join('\n  ')}`);
 });
 
-test('animation 时长：≤0.6s 必须取令牌刻度（>0.6s 装饰动画豁免）', () => {
+test('animation 时长：≤0.6s 必须取令牌刻度（>0.6s 装饰动画豁免，含 ms 写法）', () => {
   const offenders = [];
   for (const r of allRules) {
+    if (isReducedMotion(r)) continue;
     for (const [prop, val] of Object.entries(r.decls)) {
       if (prop !== 'animation-duration' && prop !== 'animation') continue;
       /* animation 简写：第一个时间值是 duration，其后为 delay（豁免） */
-      const times = (prop === 'animation'
-        ? val.match(/(?<![\d.])0?\.\d+s|(?<![\d.])1s|\d+s/) || []
-        : val.match(/(?<![\d.])0?\.\d+s|(?<![\d.])1s|\d+s/g) || [])
-        .map(t => (t.startsWith('.') ? '0' + t : t));
+      const times = prop === 'animation'
+        ? extractTimes(val).slice(0, 1)
+        : extractTimes(val);
       for (const t of times) {
-        const sec = parseFloat(t);
-        if (sec <= 0.6 && !VALID_DURATIONS.has(t)) {
-          offenders.push(`${r.file} 「${r.selector.trim()}」 ${prop}: ${val} 时长 ${t}`);
+        if (t.sec <= 0.6 && !VALID_DURATIONS.has(t.norm)) {
+          offenders.push(`${r.file} 「${r.selector.trim()}」 ${prop}: ${val} 时长 ${t.raw}（=${t.norm}）`);
         }
       }
     }

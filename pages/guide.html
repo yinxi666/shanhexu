@@ -15,22 +15,23 @@
   <meta property="og:url" content="https://yinxi666.github.io/shanhexu/pages/guide.html">
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/guide.html">
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026081016">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026081027">
   <link rel="manifest" href="../manifest.json">
   <title>全国红色场馆导览 - 赓续血脉・数绘红旅</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://unpkg.com">
-  <link rel="stylesheet" href="../css/base.css?v=2026081016">
-  <link rel="stylesheet" href="../css/home.css?v=2026081016">
-  <link rel="stylesheet" href="../css/components.css?v=2026081016">
-  <link rel="stylesheet" href="../css/pages.css?v=2026081016">
-  <link rel="stylesheet" href="../css/widgets.css?v=2026081016">
-  <link rel="stylesheet" href="../css/effects.css?v=2026081016">
-  <link rel="stylesheet" href="../css/dark.css?v=2026081016">
+  <link rel="stylesheet" href="../css/base.css?v=2026081027">
+  <link rel="stylesheet" href="../css/home.css?v=2026081027">
+  <link rel="stylesheet" href="../css/components.css?v=2026081027">
+  <link rel="stylesheet" href="../css/pages.css?v=2026081027">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026081027">
+  <link rel="stylesheet" href="../css/effects.css?v=2026081027">
+  <link rel="stylesheet" href="../css/dark.css?v=2026081027">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 
 <body>
@@ -41,11 +42,13 @@
 
   <main>
     <!-- ===== Cinematic Hero ===== -->
-    <section class="subpage-hero">
+    <section class="subpage-hero" data-hero-images='["../assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp","../assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp","../assets/全国红色场馆图片/场馆06_陕西_延安革命纪念馆.webp","../assets/全国红色场馆图片/场馆07_贵州_遵义会议会址.webp","../assets/全国红色场馆图片/场馆08_福建_古田会议会址.webp","../assets/全国红色场馆图片/场馆05_河北_西柏坡纪念馆.webp"]'>
       <video class="flag-video" src="../assets/演示视频/国旗动态壁纸【无水印】.mp4" preload="none" poster="../assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp" loop muted playsinline
         aria-hidden="true"></video>
-      <img class="hero-bg animate-ken-burns no-context-menu" draggable="false"
+      <img class="hero-bg animate-ken-burns hero-bg-active no-context-menu" draggable="false"
         src="../assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp" alt="" aria-hidden="true">
+      <img class="hero-bg animate-ken-burns hero-bg-next no-context-menu" draggable="false" loading="lazy"
+        src="../assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp" alt="" aria-hidden="true">
       <div class="subpage-hero-content">
         <h1 class="subpage-hero-title">全国红色场馆导览</h1>
         <p class="subpage-hero-subtitle">覆盖全国31个省级行政区的红色文旅场馆，支持按地区、类别或关键词进行内容查找</p>
@@ -90,7 +93,7 @@
   <!-- ===== 页脚扩展（覆盖共享模板第三列） ===== -->
   <template id="footer-extra">
     <h4>关于</h4>
-    <ul>
+    <ul aria-label="关于页脚">
       <li>四川农业大学信息工程学院</li>
       <li>场馆数据持续更新中</li>
       <li>信息以官方发布为准</li>
@@ -100,7 +103,7 @@
   <!-- ===== 页脚（由 js/layout-loader.js 注入共享模板） ===== -->
   <div id="site-footer"></div>
 
-  <script type="module" src="../js/app.js?v=2026081016"></script>
+  <script type="module" src="../js/app.js?v=2026081027"></script>
 
 </body>
 

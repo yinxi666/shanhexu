@@ -6,7 +6,7 @@
      setMoodBridge（注册 mood 回调，setActive 调用）
    ============================================================ */
 
-import { STATIONS } from './cz-stations.js?v=2026081016';
+import { STATIONS } from './cz-stations.js?v=2026081027';
 
 export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, getLastActiveT, setLastActiveT, setMoodBridge }) {
   if (getReduceMotion()) return;
@@ -15,16 +15,21 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
   const ctx = c.getContext('2d');
   let W, H, dpr;
   const parts = [];
-  const small = window.innerWidth < 768;
-  const isHiDpr = (window.devicePixelRatio || 1) >= 2;
-  const N_EMBER = small ? (isHiDpr ? 22 : 32) : (isHiDpr ? 52 : 72);
-  const N_SNOW = small ? (isHiDpr ? 45 : 65) : (isHiDpr ? 85 : 115);
-  const N_BLOOD = small ? (isHiDpr ? 10 : 15) : (isHiDpr ? 15 : 20);
-  const N_BUBBLE = small ? (isHiDpr ? 16 : 22) : (isHiDpr ? 28 : 40);
-  const N_GOLD = small ? (isHiDpr ? 28 : 40) : (isHiDpr ? 55 : 80);
+  let N_EMBER, N_SNOW, N_BLOOD, N_BUBBLE, N_GOLD;
   let curMood = null;
   let curCount = 0;
   let curSpawn = null;
+
+  // 粒子预算随视口宽度/设备像素密度重算（resize 穿越断点或缩放时按当前视口调整密度，而非 init 一次定死）
+  function computeBudgets() {
+    const small = window.innerWidth < 768;
+    const isHiDpr = (window.devicePixelRatio || 1) >= 2;
+    N_EMBER = small ? (isHiDpr ? 22 : 32) : (isHiDpr ? 52 : 72);
+    N_SNOW = small ? (isHiDpr ? 45 : 65) : (isHiDpr ? 85 : 115);
+    N_BLOOD = small ? (isHiDpr ? 10 : 15) : (isHiDpr ? 15 : 20);
+    N_BUBBLE = small ? (isHiDpr ? 16 : 22) : (isHiDpr ? 28 : 40);
+    N_GOLD = small ? (isHiDpr ? 28 : 40) : (isHiDpr ? 55 : 80);
+  }
 
   function resize() {
     dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -32,6 +37,16 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
     H = window.innerHeight;
     c.width = W * dpr; c.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    computeBudgets();
+    // 已进入某 mood 且预算变化时，增删当前粒子池对齐（setMoodConfig 前 curSpawn 为 null，跳过）
+    if (curSpawn) {
+      const target = { ember: N_EMBER, blood: N_BLOOD, snow: N_SNOW, swamp: N_BUBBLE, gold: N_GOLD }[curMood] || N_EMBER;
+      if (curCount !== target) {
+        curCount = target;
+        while (parts.length < curCount) parts.push(curSpawn());
+        if (parts.length > curCount) parts.length = curCount;
+      }
+    }
   }
   resize();
   window.addEventListener('resize', resize);

@@ -38,28 +38,40 @@ function stripComments(code) {
 /* ---- 1) 版本一致性 ---- */
 const versionMatch = fs.readFileSync(path.join(ROOT, 'js', 'version.js'), 'utf8')
   .match(/ASSET_VERSION\s*=\s*['"]([^'"]+)['"]/);
+let version = null;
 if (!versionMatch) {
   errors.push('js/version.js 无法解析 ASSET_VERSION');
 } else {
-  const version = versionMatch[1];
+  version = versionMatch[1];
   let htmlChecked = 0, jsChecked = 0;
+  const VERSION_RE = /\?v=([^"'\s&>]+)/g;
+  const VALID_VERSION_RE = /^\d{10,16}$/;
   walk(ROOT, (f) => {
     if (!f.endsWith('.html')) return;
     htmlChecked++;
     const content = fs.readFileSync(f, 'utf8');
-    const bad = [...new Set([...content.matchAll(/\?v=(\d{10,16})/g)].map(m => m[1]).filter(v => v !== version))];
-    if (bad.length) {
-      errors.push(`版本不一致 ${path.relative(ROOT, f)}：应=${version}，出现=${bad.join(',')}`);
+    for (const m of content.matchAll(VERSION_RE)) {
+      const v = m[1];
+      if (!VALID_VERSION_RE.test(v)) {
+        errors.push(`版本格式非法 ${path.relative(ROOT, f)}：?v=${v}（须为 10-16 位纯数字）`);
+      } else if (v !== version) {
+        errors.push(`版本不一致 ${path.relative(ROOT, f)}：应=${version}，出现=${v}`);
+      }
     }
   });
-  // JS 模块 import 上的 ?v= 同样须与 ASSET_VERSION 一致（补全"只查 HTML"口径，防 bump-version 漏同步）
+  // JS 模块 import 上的 ?v= 同样须与 ASSET_VERSION 一致（先剥注释，防注释文本干扰）
   walk(ROOT, (f) => {
     if (!f.endsWith('.js') || f.startsWith(path.join(ROOT, 'scripts'))) return;
     jsChecked++;
-    const content = fs.readFileSync(f, 'utf8');
-    const bad = [...new Set([...content.matchAll(/\?v=(\d{10,16})/g)].map(m => m[1]).filter(v => v !== version))];
-    if (bad.length) {
-      errors.push(`版本不一致 ${path.relative(ROOT, f)}：应=${version}，出现=${bad.join(',')}`);
+    const content = stripComments(fs.readFileSync(f, 'utf8'));
+    for (const m of content.matchAll(VERSION_RE)) {
+      const v = m[1];
+      if (v.includes('$')) continue; // 动态插值（如 ?v=${ASSET_VERSION}），运行时由版本号注入，跳过
+      if (!VALID_VERSION_RE.test(v)) {
+        errors.push(`版本格式非法 ${path.relative(ROOT, f)}：?v=${v}（须为 10-16 位纯数字）`);
+      } else if (v !== version) {
+        errors.push(`版本不一致 ${path.relative(ROOT, f)}：应=${version}，出现=${v}`);
+      }
     }
   });
   console.log(`版本号: ${version} | 检查 HTML ${htmlChecked} 个 / JS ${jsChecked} 个`);
@@ -71,13 +83,31 @@ const jsFiles = fs.readdirSync(jsDir).filter((f) => f.endsWith('.js'));
 for (const f of jsFiles) {
   const content = fs.readFileSync(path.join(jsDir, f), 'utf8');
   // 兼容 bump-version 写入的 ?v= 缓存破击后缀
-  for (const m of content.matchAll(/(?:from|import)\s+['"]\.\/([a-z0-9-]+)\.js(?:\?v=\d{10,16})?['"]/g)) {
+  for (const m of content.matchAll(/(?:from|import)\s+['"]\.\/([a-z0-9-]+)\.js(\?v=\d{10,16})?['"]/g)) {
     const target = path.join(jsDir, m[1] + '.js');
     if (!fs.existsSync(target)) {
       errors.push(`import 目标不存在：js/${f} → ./${m[1]}.js`);
     }
+    if (!m[2]) {
+      errors.push(`import 缺少缓存版本号：js/${f} → ./${m[1]}.js（须带 ?v=${version || 'ASSET_VERSION'}）`);
+    }
   }
 }
+
+/* ---- 2.5) HTML 本地 js/css 引用必须带缓存版本号 ---- */
+walk(ROOT, (f) => {
+  if (!f.endsWith('.html')) return;
+  const content = fs.readFileSync(f, 'utf8');
+  for (const m of content.matchAll(/(?:src|href)=["']([^"']+)["']/g)) {
+    const ref = m[1];
+    const noQuery = ref.split('?')[0].trim();
+    if (!noQuery || ref.startsWith('http') || ref.startsWith('data:') || ref.startsWith('//') || ref.startsWith('#')) continue;
+    if (!/^(\.{0,2}\/)?(js|css)\/[^"']+\.(js|css)$/.test(noQuery)) continue;
+    if (!/\?v=\d{10,16}/.test(ref)) {
+      errors.push(`缺少缓存版本号 ${path.relative(ROOT, f)}：${ref}（须带 ?v=${version || 'ASSET_VERSION'}）`);
+    }
+  }
+});
 
 /* ---- 3) 无死引用 ---- */
 for (const f of jsFiles) {

@@ -4,14 +4,13 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081016';
-import { icon } from './icons.js?v=2026081016';
-import { getVenues } from './venue-store.js?v=2026081016';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081016';
+import { getBasePath } from './utils.js?v=2026081027';
+import { icon } from './icons.js?v=2026081027';
+import { getVenues } from './venue-store.js?v=2026081027';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081027';
 
 function initTimeline() {
-  if (!(location.pathname.endsWith('/') || location.pathname.endsWith('index.html'))) return;
-
+  // 首页 guard 已在 homepage.js initHomepageInnovation 统一执行，此处不重复
   const nodes = document.querySelectorAll('.tl-node');
   const detail = document.getElementById('timeline-detail');
   if (!nodes.length || !detail) return;
@@ -51,16 +50,17 @@ function initTimeline() {
     detail.classList.remove('is-hidden');
   }
 
+  let userInteracted = false;
   nodes.forEach(function (node) {
-    node.addEventListener('click', function () { showEvent(node.dataset.year); });
+    node.addEventListener('click', function () { userInteracted = true; showEvent(node.dataset.year); });
     // 键盘可达：Enter/Space 与点击一致
     node.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showEvent(node.dataset.year); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); userInteracted = true; showEvent(node.dataset.year); }
     });
   });
 
-  // 自动激活第一个
-  setTimeout(function () { showEvent('1921'); }, 400);
+  // 自动激活第一个（若用户已在 400ms 内点过其他年份则不覆盖）
+  setTimeout(function () { if (!userInteracted) showEvent('1921'); }, 400);
 }
 
 export { initTimeline };

@@ -79,12 +79,20 @@ test('site-header.html 品牌 Logo 携带 width/height 属性', () => {
 
 /* ---------------- 6. 页脚导航 aria-label ---------------- */
 
-test('site-footer.html 两个导航 ul 均声明 aria-label', () => {
-  const html = read('templates/site-footer.html');
-  const uls = html.match(/<ul[^>]*>/g) || [];
-  assert.ok(uls.length >= 2, '页脚应有 2 个导航列表');
-  for (const ul of uls) {
-    assert.match(ul, /aria-label="/, `页脚 ul 应带 aria-label: ${ul}`);
+test('页脚导航 ul 均声明 aria-label（site-footer 导航 + 各页 footer-extra 关于列）', () => {
+  // 共享页脚模板里的导航 ul（"关于"列已改为各页面 <template id="footer-extra"> 注入）
+  const footer = read('templates/site-footer.html');
+  const footerUls = footer.match(/<ul[^>]*>/g) || [];
+  assert.ok(footerUls.length >= 1, 'site-footer.html 应至少有导航 ul');
+  for (const ul of footerUls) assert.match(ul, /aria-label="/, `页脚 ul 应带 aria-label: ${ul}`);
+  // 每个页面的 footer-extra 模板（覆盖"关于"列）也要带 aria-label 的 ul
+  for (const f of ['index.html', 'pages/guide.html', 'pages/detail.html', 'pages/changzheng.html', 'pages/policy.html', 'pages/practice.html', 'pages/message.html']) {
+    const html = read(f);
+    const tmpl = html.match(/<template id="footer-extra">([\s\S]*?)<\/template>/);
+    assert.ok(tmpl, `${f} 应提供 footer-extra 模板`);
+    const uls = tmpl[1].match(/<ul[^>]*>/g) || [];
+    assert.ok(uls.length >= 1, `${f} 的 footer-extra 应有关于 ul`);
+    for (const ul of uls) assert.match(ul, /aria-label="/, `${f} footer-extra ul 应带 aria-label: ${ul}`);
   }
 });
 
