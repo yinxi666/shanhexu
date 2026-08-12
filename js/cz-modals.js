@@ -3,10 +3,10 @@
    依赖：cz-stations(STATIONS) / cz-content(RELIC_MAP) / focus-trap / ui / cz-card-modal
    ============================================================ */
 
-import { $, onOverlayClick } from './ui.js?v=2026081304';
-import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081304';
-import { STATIONS } from './cz-stations.js?v=2026081304';
-import { RELIC_MAP } from './cz-content.js?v=2026081304';
+import { $, onOverlayClick } from './ui.js?v=2026081305';
+import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081305';
+import { STATIONS } from './cz-stations.js?v=2026081305';
+import { RELIC_MAP } from './cz-content.js?v=2026081305';
 
 /* ---------- 文物详情弹窗 ---------- */
 const relicModal = $('#cz-relic-modal');

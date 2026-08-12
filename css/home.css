@@ -69,11 +69,11 @@
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-@media (max-width: 860px) {
+/* 国旗视频仅桌面显示：移动端浏览器禁止自动播放（app.js initFlagVideo 阈值 ≥1024px），
+   视频只剩静态 poster，且 poster 与 hero 背景图同源——角落会贴一张"背景小图"，故 <1024px 隐藏 */
+@media (max-width: 1024px) {
   .flag-video {
-    width: 120px;
-    top: 8px;
-    left: 8px;
+    display: none;
   }
 }
 

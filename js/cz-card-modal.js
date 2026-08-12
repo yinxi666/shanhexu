@@ -4,12 +4,12 @@
    依赖：utils/ui/icons/cardgen/focus-trap/cz-content
    ============================================================ */
 
-import { getBasePath, isTouchDevice } from './utils.js?v=2026081304';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081304';
-import { icon } from './icons.js?v=2026081304';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081304';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081304';
-import { CZ_CARD_BGS } from './cz-content.js?v=2026081304';
+import { getBasePath, isTouchDevice } from './utils.js?v=2026081305';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081305';
+import { icon } from './icons.js?v=2026081305';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081305';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081305';
+import { CZ_CARD_BGS } from './cz-content.js?v=2026081305';
 
 // 精神词列表复用 cardgen 的 SPIRITS（静态 import 恒为数组，无需兜底副本）
 const CZ_CARD_SPIRITS = CZ_SPIRITS;

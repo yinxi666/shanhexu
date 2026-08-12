@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081304';
-import { $, $$ } from './ui.js?v=2026081304';
-import { icon } from './icons.js?v=2026081304';
-import { generateReply } from './chat-engine.js?v=2026081304';
+import { getBasePath, safeStorage } from './utils.js?v=2026081305';
+import { $, $$ } from './ui.js?v=2026081305';
+import { icon } from './icons.js?v=2026081305';
+import { generateReply } from './chat-engine.js?v=2026081305';
 
 /* 恢复时对机器人消息 HTML 做白名单净化（用惰性的 <template> 解析，脚本不执行），
    既保留富文本（场馆按钮/小卡片），又堵住 sessionStorage 被篡改时的注入 */
