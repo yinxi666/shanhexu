@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081310';
-import { $, $$ } from './ui.js?v=2026081310';
-import { icon } from './icons.js?v=2026081310';
-import { generateReply } from './chat-engine.js?v=2026081310';
+import { getBasePath, safeStorage } from './utils.js?v=2026081311';
+import { $, $$ } from './ui.js?v=2026081311';
+import { icon } from './icons.js?v=2026081311';
+import { generateReply } from './chat-engine.js?v=2026081311';
 
 /* 相对路径重定向到当前页 base：聊天历史跨页恢复时，首页生成的 'pages/…' 在 /pages/ 子页会解析成
    /pages/pages/… 404；把开头 '../' 剥成根相对再拼当前 base（http/锚点/根绝对 原样保留） */
@@ -32,7 +32,8 @@ function sanitizeBotHtml(html) {
         node.remove();
         return;
       }
-      Array.prototype.forEach.call(node.attributes, function (attr) {
+      // 先快照属性列表再遍历：直接遍历活集合时 removeAttribute 会令下标错位，跳过后续属性（如 img 的 src 移除后 onerror 漏网）
+      Array.prototype.slice.call(node.attributes).forEach(function (attr) {
         const name = attr.name.toLowerCase();
         const val = attr.value.trim().toLowerCase();
         if (name === 'style' || name === 'srcdoc' || name.indexOf('on') === 0) { node.removeAttribute(attr.name); return; }

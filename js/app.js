@@ -3,19 +3,19 @@
    职责：统一初始化所有 ES Module 模块，按固定顺序编排引导流程
    ============================================================ */
 
-import * as RedPages from './pages.js?v=2026081310';
-import * as RedCardGen from './cardgen.js?v=2026081310';
-import * as RedLongMarch from './longmarch.js?v=2026081310';
-import { initChatWidget } from './chat.js?v=2026081310';
-import { initQuiz } from './quiz.js?v=2026081310';
-import { initDarkMode } from './darkmode.js?v=2026081310';
-import { initMobileNav } from './mobile-nav.js?v=2026081310';
-import { initHomepageInnovation } from './homepage.js?v=2026081310';
-import { loadVenues } from './venue-store.js?v=2026081310';
-import { initActionDelegate } from './action-delegate.js?v=2026081310';
-import { initEntranceAnimation } from './entrance-animation.js?v=2026081310';
-import { initHeroCarousel } from './hero-carousel.js?v=2026081310';
-import { loadLayout } from './layout-loader.js?v=2026081310';
+import * as RedPages from './pages.js?v=2026081311';
+import * as RedCardGen from './cardgen.js?v=2026081311';
+import * as RedLongMarch from './longmarch.js?v=2026081311';
+import { initChatWidget } from './chat.js?v=2026081311';
+import { initQuiz } from './quiz.js?v=2026081311';
+import { initDarkMode } from './darkmode.js?v=2026081311';
+import { initMobileNav } from './mobile-nav.js?v=2026081311';
+import { initHomepageInnovation } from './homepage.js?v=2026081311';
+import { loadVenues } from './venue-store.js?v=2026081311';
+import { initActionDelegate } from './action-delegate.js?v=2026081311';
+import { initEntranceAnimation } from './entrance-animation.js?v=2026081311';
+import { initHeroCarousel } from './hero-carousel.js?v=2026081311';
+import { loadLayout } from './layout-loader.js?v=2026081311';
 
 /* ---------- 国旗视频：仅桌面大屏自动播放，且尊重"减少动效" ---------- */
 function initFlagVideo() {

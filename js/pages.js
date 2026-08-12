@@ -5,15 +5,15 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081310';
-import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081310';
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081310';
-import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081310';
-import { initBgMusic } from './music.js?v=2026081310';
-import { icon } from './icons.js?v=2026081310';
-import { initHomeHeatmap } from './heatmap.js?v=2026081310';
-import { createGuideMap } from './guide-map.js?v=2026081310';
-import { isFavorite } from './favorites.js?v=2026081310';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081311';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081311';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081311';
+import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081311';
+import { initBgMusic } from './music.js?v=2026081311';
+import { icon } from './icons.js?v=2026081311';
+import { initHomeHeatmap } from './heatmap.js?v=2026081311';
+import { createGuideMap } from './guide-map.js?v=2026081311';
+import { isFavorite } from './favorites.js?v=2026081311';
 
 /* ---------- 分页公共助手（四个页面控制器复用，消除页码解析与跳转回调的四处拷贝） ---------- */
 function normalizePage(raw, totalPages) {

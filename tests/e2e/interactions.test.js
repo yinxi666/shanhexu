@@ -222,3 +222,142 @@ test('导览地图：移动端→桌面 resize 后出现场馆标记（此前 re
     await page.context().close();
   }
 });
+
+test('长征页：迷你地图圆点跳站切换活动站', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/pages/changzheng.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#cz-route-dots g[data-station-id]', { timeout: 10000 });
+    await page.waitForTimeout(2200); // 等布局 + 初始站激活
+    const before = await page.$eval('.cz-hud-station', el => el.textContent);
+    await page.click('#cz-route-dots g[data-station-id="5"]');
+    await page.waitForTimeout(1200); // 等 setActive
+    const activeId = await page.$eval('.cz-stamp.active', el => el.dataset.stationId);
+    assert.strictEqual(activeId, '5', '点击迷你地图圆点 5 后活动站应为 5，实际 ' + activeId);
+    const after = await page.$eval('.cz-hud-station', el => el.textContent);
+    assert.notStrictEqual(after, before, 'HUD 站名应随跳站变化');
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('长征页：文物弹窗打开后 Esc 关闭', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/pages/changzheng.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.cz-note[data-station-id="1"] .cz-note-relic', { timeout: 10000 });
+    await page.waitForTimeout(2200);
+    await page.click('.cz-note[data-station-id="1"] .cz-note-relic');
+    await page.waitForSelector('#cz-relic-modal.show', { timeout: 5000 });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+    const stillOpen = await page.$eval('#cz-relic-modal', el => el.classList.contains('show'));
+    assert.strictEqual(stillOpen, false, 'Esc 后文物弹窗应关闭');
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('聊天安全：恢复被篡改的 sessionStorage 时净化脚本/事件属性/javascript 链接', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => {
+      sessionStorage.setItem('entrance_done_v2', '1');
+      // 篡改聊天历史：注入 onerror 事件属性 + javascript: 链接 + <script>
+      sessionStorage.setItem('redguide_chat', JSON.stringify([
+        { cls: 'bot', text: 'x', html: '<img src="x" onerror="window.__pwned=1"><a href="javascript:window.__pwned2=1">bad</a><script>window.__pwned3=1</script>' }
+      ]));
+    });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => document.querySelector('.chat-fab').click());
+    await page.waitForSelector('.chat-bubble', { timeout: 5000 });
+    await page.waitForTimeout(300);
+    const st = await page.evaluate(() => ({
+      pwned: window.__pwned === 1,
+      pwned2: window.__pwned2 === 1,
+      pwned3: window.__pwned3 === 1,
+      onAttr: document.querySelectorAll('.chat-bubble [onerror], .chat-bubble [onload], .chat-bubble [onclick]').length,
+      badHref: !!document.querySelector('.chat-bubble a[href^="javascript:"]')
+    }));
+    assert.strictEqual(st.pwned, false, 'onerror 不应执行');
+    assert.strictEqual(st.pwned2, false, 'javascript: 链接不应生效');
+    assert.strictEqual(st.pwned3, false, '<script> 不应执行');
+    assert.strictEqual(st.onAttr, 0, '不应残留 on* 事件属性');
+    assert.strictEqual(st.badHref, false, '不应残留 javascript: href');
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('导览收藏：再点一次取消收藏', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/pages/guide.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.venue-card .fav-btn', { timeout: 10000 });
+    await page.click('.venue-card .fav-btn');
+    await page.waitForTimeout(250);
+    const added = await page.evaluate(() => JSON.parse(localStorage.getItem('redguide_favs') || '[]'));
+    assert.ok(Array.isArray(added) && added.length >= 1, '首次点击应加入收藏');
+    await page.click('.venue-card .fav-btn'); // 再点取消
+    await page.waitForTimeout(250);
+    const id = await page.getAttribute('.venue-card .fav-btn', 'data-id');
+    const removed = await page.evaluate(() => JSON.parse(localStorage.getItem('redguide_favs') || '[]'));
+    assert.ok(!removed.includes(id), '再点应取消收藏（redguide_favs 不再含该 id）');
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('知识答题：作答后选项锁定 + 下一题/上一题导航', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => sessionStorage.setItem('entrance_done_v2', '1'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+    await page.click('[data-action="open-quiz"]');
+    await page.waitForSelector('#quiz-start-btn', { timeout: 5000 });
+    await page.click('#quiz-start-btn');
+    await page.waitForSelector('.quiz-opt', { timeout: 5000 });
+    // 作答：选项锁定 + 出现反馈
+    await page.click('.quiz-opt');
+    await page.waitForTimeout(250);
+    const locked = await page.$$eval('.quiz-opt', els => els.every(e => e.disabled));
+    assert.strictEqual(locked, true, '作答后选项应锁定');
+    const feedback = await page.textContent('#quiz-feedback');
+    assert.ok(feedback.trim().length > 0, '作答后应显示反馈');
+    // 下一题 → 上一题
+    await page.click('#quiz-next-btn');
+    await page.waitForTimeout(250);
+    const q2 = await page.textContent('.quiz-progress');
+    assert.ok(/第 2 \//.test(q2), '下一题应在第 2 题，实际: ' + q2);
+    await page.click('#quiz-prev-btn');
+    await page.waitForTimeout(250);
+    const q1 = await page.textContent('.quiz-progress');
+    assert.ok(/第 1 \//.test(q1), '上一题应回第 1 题，实际: ' + q1);
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('留言表单：内容不足 20 字被拦截不提交', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/pages/message.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#msg-form', { timeout: 10000 });
+    await page.fill('#msg-author', '测试');
+    await page.fill('#msg-title', '太短');
+    await page.fill('#msg-content', '太短内容'); // 4 字 < minlength 20
+    await page.click('.form-submit');
+    await page.waitForTimeout(600);
+    // textarea minlength=20 原生拦截：不显示成功、不写入 storage、列表不新增
+    const success = await page.$('.form-success.show');
+    assert.strictEqual(success, null, '不足 20 字不应显示成功');
+    const titles = await page.evaluate(() => JSON.parse(sessionStorage.getItem('redguide_messages') || '[]').map(m => m.title));
+    assert.ok(!titles.includes('太短'), '不足 20 字不应写入 redguide_messages');
+  } finally {
+    await page.context().close();
+  }
+});

@@ -542,6 +542,11 @@
   pointer-events: auto;
 }
 
+/* 便签整体 pointer-events:none（不挡印章点击），文物块须显式恢复 auto 才能被点击 */
+.cz-note-relic {
+  pointer-events: auto;
+}
+
 .cz-note-venue:hover {
   background: rgba(170, 25, 25, 0.92);
   color: #fff6da;

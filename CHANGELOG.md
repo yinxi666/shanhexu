@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-08-13 · v2026081311 — 交互测试补全（12 项）+ 测试抓到 2 个真 bug
+
+- 交互测试从 6 扩到 **12 项**：长征迷你地图跳站、文物弹窗 Esc、聊天安全注入拦截、收藏取消、答题作答/上一题、留言 20 字原生拦截
+- **测试抓到并修复 2 个真 bug**：
+  - `sanitizeBotHtml` 属性循环直接遍历活集合，`removeAttribute` 后下标错位会**跳过后续属性**——img 的 src 被移除后 `onerror` 漏网可执行（存储型注入面）
+  - `.cz-note-relic` 未设 `pointer-events:auto`，继承便签的 `none`，**文物块实际点不开**
+- 留言 textarea 已带 `minlength="20"`（原生拦截短提交），JS 层 toast 属冗余，测试改为断言"未提交"
+
 ## 2026-08-13 · v2026081310 — 交互行为测试 + 系统令牌化
 
 - **新增交互行为测试** `tests/e2e/interactions.test.js`（6 项，并入 smoke 顺序执行）：实践点赞自增+持久、导览收藏写 localStorage、聊天跨页恢复 base 路径（不 404）、答题断点续答、留言提交、地图移动→桌面 resize 后标记出现（拦截此前 resize 空白回归）。修复了 smoke+interactions 并发跑时 `_site` 构建竞态（改 `&&` 顺序）
