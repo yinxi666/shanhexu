@@ -1809,9 +1809,9 @@
    否则 769-1023 视口站距已收紧、便签却走桌面定位，会滑出屏/不居中） ---------- */
 @media (max-width: 1023px) {
   .cz-note {
-    width: calc(100vw - 120px);
+    width: calc(100vw - 140px);
     max-width: none;
-    padding: 16px 16px 16px;
+    padding: 12px 16px;
     /* 便签水平居中于站点坐标（transform 相对自身宽），随手卷滚动时始终贴近站点、
        不被纸带出屏；此前"停靠左缘 left:-14px"会让便签整体滑出视口，滚动后看不到内容 */
     transform: translateX(-50%) translateY(-120vh) rotate(-12deg) scale(0.9);
@@ -1821,17 +1821,20 @@
     transform: translateX(-50%) rotate(var(--note-tilt, 0deg));
   }
 
+  /* 移动端便签宽度 + 左右偏移协同定间隙：相邻便签间距 = perStationW(330) - 宽 - 72(±36)。
+     390px 时宽 min(360,60vw)=234 → 间隙 24px，比原 70vw+±24 的 -8px 重叠大幅拉开；
+     卡片整体缩小后不再互相遮挡 */
   .cz-note.place-left,
   .cz-note.place-right {
-    width: min(400px, 70vw);
+    width: min(360px, 60vw);
   }
 
   .cz-note.place-left {
-    margin-left: -24px;
+    margin-left: -36px;
   }
 
   .cz-note.place-right {
-    margin-left: 24px;
+    margin-left: 36px;
   }
 }
 
@@ -1867,9 +1870,11 @@
     opacity: 0.6;
   }
 
-  /* 便签定位规则已上移至 ≤1023 块（与 JS 站间距断点对齐），此处只保留手机专属缩放 */
+  /* 便签定位规则已上移至 ≤1023 块（与 JS 站间距断点对齐），此处只保留手机专属缩放。
+     手机笺纸紧凑化：照片隐藏（实景照小剧场已有），头部/诗句/事件/文物图标全面收紧，
+     卡高从 ~380px 降到 ~240px，不再占手机半屏 */
   .cz-note-photo {
-    height: 56px;
+    display: none;
   }
 
   .cz-stamp {
@@ -1877,16 +1882,47 @@
     height: 56px;
   }
 
+  .cz-note-head {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
   .cz-note-name {
-    font-size: 19px;
+    font-size: 17px;
+  }
+
+  .cz-note-date {
+    font-size: 12px;
   }
 
   .cz-note-poem {
-    font-size: 14.5px;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 8px 12px;
+    margin: 8px 0 8px;
   }
 
   .cz-note-event {
-    font-size: 13.5px;
+    font-size: 13px;
+    line-height: 1.55;
+    text-indent: 2em;
+  }
+
+  .cz-note-venue {
+    margin-top: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .cz-note-relic {
+    width: 32px;
+    height: 32px;
+    margin: 8px 8px 0 0;
+  }
+
+  .cz-note-relic-icon {
+    width: 28px;
+    height: 28px;
   }
 
   .cz-route-wrap {
