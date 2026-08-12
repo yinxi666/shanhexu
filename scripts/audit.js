@@ -79,17 +79,27 @@ if (!versionMatch) {
 
 /* ---- 2) import 完整性 ---- */
 const jsDir = path.join(ROOT, 'js');
-const jsFiles = fs.readdirSync(jsDir).filter((f) => f.endsWith('.js'));
+// 递归收集 js/ 下全部 .js（支持将来拆子目录；现为平铺，等价于原逻辑）
+function collectJsFiles(dir, out) {
+  for (const entry of fs.readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    const st = fs.statSync(full);
+    if (st.isDirectory()) collectJsFiles(full, out);
+    else if (entry.endsWith('.js')) out.push(full);
+  }
+  return out;
+}
+const jsFiles = collectJsFiles(jsDir, []);
 for (const f of jsFiles) {
-  const content = fs.readFileSync(path.join(jsDir, f), 'utf8');
-  // 兼容 bump-version 写入的 ?v= 缓存破击后缀
-  for (const m of content.matchAll(/(?:from|import)\s+['"]\.\/([a-z0-9-]+)\.js(\?v=\d{10,16})?['"]/g)) {
+  const content = fs.readFileSync(f, 'utf8');
+  // 兼容 bump-version 写入的 ?v= 缓存破击后缀（支持 ./x.js 与 ./sub/x.js）
+  for (const m of content.matchAll(/(?:from|import)\s+['"]\.\/([a-z0-9-]+(?:\/[a-z0-9-]+)*)\.js(\?v=\d{10,16})?['"]/g)) {
     const target = path.join(jsDir, m[1] + '.js');
     if (!fs.existsSync(target)) {
-      errors.push(`import 目标不存在：js/${f} → ./${m[1]}.js`);
+      errors.push(`import 目标不存在：js/${path.relative(jsDir, f)} → ./${m[1]}.js`);
     }
     if (!m[2]) {
-      errors.push(`import 缺少缓存版本号：js/${f} → ./${m[1]}.js（须带 ?v=${version || 'ASSET_VERSION'}）`);
+      errors.push(`import 缺少缓存版本号：js/${path.relative(jsDir, f)} → ./${m[1]}.js（须带 ?v=${version || 'ASSET_VERSION'}）`);
     }
   }
 }
@@ -111,10 +121,10 @@ walk(ROOT, (f) => {
 
 /* ---- 3) 无死引用 ---- */
 for (const f of jsFiles) {
-  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
+  const code = stripComments(fs.readFileSync(f, 'utf8'));
   for (const d of DEAD_FILES) {
     if (new RegExp(`['"]\\.?\\/?${d.replace('.', '\\.')}(?:\\?v=\\d+)?['"]`).test(code)) {
-      errors.push(`死引用：js/${f} 指向已删除的 ${d}`);
+      errors.push(`死引用：js/${path.relative(jsDir, f)} 指向已删除的 ${d}`);
     }
   }
 }
@@ -160,8 +170,8 @@ walk(ROOT, (f) => {
 // 3.6.1 禁内联 HTML 事件属性（应用 data-action 委托；程序化 .onload= 不算，负向断言排除）
 const INLINE_EVENT_RE = /(?<=["'\s])on(?:click|mouseover|mouseout|change|dblclick|submit|keydown|keyup|focus|blur|load|error)\s*=/;
 for (const f of jsFiles) {
-  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
-  if (INLINE_EVENT_RE.test(code)) errors.push(`内联事件（应用 data-action 委托）：js/${f}`);
+  const code = stripComments(fs.readFileSync(f, 'utf8'));
+  if (INLINE_EVENT_RE.test(code)) errors.push(`内联事件（应用 data-action 委托）：js/${path.relative(jsDir, f)}`);
 }
 walk(ROOT, (f) => {
   if (!f.endsWith('.html')) return;
@@ -170,14 +180,14 @@ walk(ROOT, (f) => {
 // 3.6.2 禁裸 fetch 相对 data 路径（应走 data.js loadJSON，统一 basePath/缓存/?v=）
 const BARE_FETCH_RE = /fetch\(\s*['"](?:\.\.\/)?(?:data|templates|pages|css|js)\//;
 for (const f of jsFiles) {
-  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
-  if (BARE_FETCH_RE.test(code)) errors.push(`裸 fetch（应走 loadJSON/getBasePath）：js/${f}`);
+  const code = stripComments(fs.readFileSync(f, 'utf8'));
+  if (BARE_FETCH_RE.test(code)) errors.push(`裸 fetch（应走 loadJSON/getBasePath）：js/${path.relative(jsDir, f)}`);
 }
 // 3.6.3 禁 location.href 裸相对 pages 路径（应用 getBasePath）
 const BARE_HREF_RE = /location\.href\s*=\s*['"](?:\.\.\/)?pages\//;
 for (const f of jsFiles) {
-  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
-  if (BARE_HREF_RE.test(code)) errors.push(`裸导航路径（应用 getBasePath）：js/${f}`);
+  const code = stripComments(fs.readFileSync(f, 'utf8'));
+  if (BARE_HREF_RE.test(code)) errors.push(`裸导航路径（应用 getBasePath）：js/${path.relative(jsDir, f)}`);
 }
 
 /* ---- 4) 数据健康（仅报告） ---- */
