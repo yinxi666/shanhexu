@@ -1,27 +1,9 @@
 [
   {
-    "province": "北京市",
-    "name": "中国共产党历史展览馆",
-    "standardName": "中国共产党历史展览馆",
-    "officialUrl": "https://www.cpcmuseum.cn/",
-    "officialLinkType": "独立官网",
-    "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
     "province": "天津市",
     "name": "周恩来邓颖超纪念馆",
     "standardName": "周恩来邓颖超纪念馆",
     "officialUrl": "http://www.mzhoudeng.com/",
-    "officialLinkType": "独立官网",
-    "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
-    "province": "河北省",
-    "name": "西柏坡纪念馆",
-    "standardName": "西柏坡纪念馆",
-    "officialUrl": "http://www.xbpjng.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已匹配",
     "officialVerificationDate": "2026-07-12"
@@ -45,15 +27,6 @@
     "officialVerificationDate": "2026-07-12"
   },
   {
-    "province": "辽宁省",
-    "name": "九一八历史博物馆",
-    "standardName": "沈阳“九·一八”历史博物馆",
-    "officialUrl": "http://www.918museum.org.cn/",
-    "officialLinkType": "独立官网",
-    "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
     "province": "吉林省",
     "name": "四平战役纪念馆",
     "standardName": "四平战役纪念馆",
@@ -69,24 +42,6 @@
     "officialUrl": "https://www.jn1948.cn/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
-    "province": "上海市",
-    "name": "中共一大纪念馆",
-    "standardName": "中共一大纪念馆",
-    "officialUrl": "https://www.zgyd1921.com/",
-    "officialLinkType": "独立官网",
-    "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
-    "province": "江苏省",
-    "name": "雨花台烈士纪念馆",
-    "standardName": "雨花台烈士纪念馆",
-    "officialUrl": "https://yht.nanjing.gov.cn/",
-    "officialLinkType": "属地政府官网",
-    "officialVerificationStatus": "已匹配官方入口",
     "officialVerificationDate": "2026-07-12"
   },
   {
@@ -111,18 +66,9 @@
     "province": "福建省",
     "name": "古田会议纪念馆",
     "standardName": "古田会议纪念馆",
-    "officialUrl": "https://www.gthyjng.com/",
+    "officialUrl": "https://www.fjcdi.gov.cn/cms/html/fjsjwjw/gthyjng/index.html",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已匹配",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
-    "province": "江西省",
-    "name": "井冈山革命博物馆",
-    "standardName": "井冈山革命博物馆",
-    "officialUrl": "http://www.jgs.gov.cn/",
-    "officialLinkType": "属地政府官网",
-    "officialVerificationStatus": "已匹配官方入口",
     "officialVerificationDate": "2026-07-12"
   },
   {
@@ -171,15 +117,6 @@
     "officialVerificationDate": "2026-07-12"
   },
   {
-    "province": "广西壮族自治区",
-    "name": "百色起义纪念馆",
-    "standardName": "百色起义纪念馆",
-    "officialUrl": "http://www.baise.gov.cn/",
-    "officialLinkType": "属地政府官网",
-    "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
     "province": "海南省",
     "name": "母瑞山革命根据地纪念园",
     "standardName": "母瑞山革命根据地纪念园",
@@ -198,19 +135,10 @@
     "officialVerificationDate": "2026-07-12"
   },
   {
-    "province": "四川省",
-    "name": "泸定桥革命文物陈列馆",
-    "standardName": "泸定桥革命文物陈列馆",
-    "officialUrl": "http://www.luding.gov.cn/",
-    "officialLinkType": "属地政府官网",
-    "officialVerificationStatus": "已匹配官方入口",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
     "province": "贵州省",
     "name": "遵义会议纪念馆",
     "standardName": "遵义会议纪念馆",
-    "officialUrl": "https://www.zunyi.gov.cn/",
+    "officialUrl": "https://www.zunyihy.cn/",
     "officialLinkType": "属地政府官网",
     "officialVerificationStatus": "已匹配官方入口",
     "officialVerificationDate": "2026-07-12"
@@ -231,15 +159,6 @@
     "officialUrl": "https://www.xzxw.com/resource/2022xzbwnnjf/",
     "officialLinkType": "独立官网",
     "officialVerificationStatus": "已核验",
-    "officialVerificationDate": "2026-07-12"
-  },
-  {
-    "province": "陕西省",
-    "name": "延安革命纪念馆",
-    "standardName": "延安革命纪念馆",
-    "officialUrl": "http://www.yanan.gov.cn/",
-    "officialLinkType": "属地政府官网",
-    "officialVerificationStatus": "已匹配官方入口",
     "officialVerificationDate": "2026-07-12"
   },
   {
