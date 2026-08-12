@@ -1885,7 +1885,8 @@
   }
 
   .cz-hud {
-    top: 60px;
+    /* 移动端 header 单行化后约 68px，HUD 放在其下，避免两"条"重叠 */
+    top: 76px;
     left: 50%;
     transform: translateX(-50%);
     bottom: auto;

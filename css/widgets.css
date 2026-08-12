@@ -56,12 +56,18 @@
     max-width: 70px;
   }
 
-  .brand strong {
-    font-size: 12px;
-  }
-
+  .brand strong,
   .brand small {
     font-size: 12px;
+    /* 单行省略，防止窄屏折行把 header 撑高到 100px+（会压到 changzheng 顶部 HUD / 移动端下拉菜单） */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand > span:last-child {
+    min-width: 0;
+    flex: 1;
   }
 
   .nav-links {
