@@ -5,7 +5,7 @@
          被 chat.js / timeline.js 引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026081027';
+import * as RedData from './data.js?v=2026081035';
 
 async function loadVenues() {
   try {

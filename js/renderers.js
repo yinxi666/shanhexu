@@ -4,8 +4,8 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081027';
-import { icon } from './icons.js?v=2026081027';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081035';
+import { icon } from './icons.js?v=2026081035';
 
 // 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
 function renderVenueCard(venue, basePath, isFav = false) {

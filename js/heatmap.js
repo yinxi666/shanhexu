@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081027';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081027';
-import { ASSET_VERSION } from './version.js?v=2026081027';
+import { getBasePath } from './utils.js?v=2026081035';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081035';
+import { ASSET_VERSION } from './version.js?v=2026081035';
 
 
 // 首页热力图 - ECharts中国地图，加载失败自动降级SVG

@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081027';
-import { icon } from './icons.js?v=2026081027';
+import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081035';
+import { icon } from './icons.js?v=2026081035';
 import {
   getBasePath,
   resolveAssetPath,
@@ -16,9 +16,9 @@ import {
   escapeAttr,
   getLikeCount,
   isPracticeLiked
-} from './utils.js?v=2026081027';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081027';
-import { getPractice } from './data.js?v=2026081027';
+} from './utils.js?v=2026081035';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081035';
+import { getPractice } from './data.js?v=2026081035';
 
 // 实践成果详情弹窗
 async function openPracticeDetail(id) {
