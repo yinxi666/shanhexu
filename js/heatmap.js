@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081311';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081311';
-import { ASSET_VERSION } from './version.js?v=2026081311';
+import { getBasePath } from './utils.js?v=2026081312';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081312';
+import { ASSET_VERSION } from './version.js?v=2026081312';
 
 /* 读取 CSS 令牌（含深色覆盖后的计算值），供 ECharts/SVG 主题适配 */
 function cssVar(name, fallback) {
@@ -82,6 +82,7 @@ async function initECharts(container, provinceData) {
     const exist = echarts.getInstanceByDom(container);
     if (exist) exist.dispose();
     const chart = echarts.init(container);
+    try { window.__homeHeatmapChart = chart; } catch (e) { }  // 供 e2e 交互测试读取缩放/中心状态
     applyHeatmapOption(chart, chartData, provinceData);
 
     // 缩放按钮（实例无关：点击时按当前实例操作，dispose 后不残留旧 chart 引用）

@@ -361,3 +361,97 @@ test('留言表单：内容不足 20 字被拦截不提交', async () => {
     await page.context().close();
   }
 });
+
+test('深色切换：热力图保留用户缩放（MutationObserver 不重置视图）', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => sessionStorage.setItem('entrance_done_v2', '1'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
+    // ECharts 从 CDN 加载，失败走 SVG 降级（无 chart 可测）——等不到就跳过
+    try { await page.waitForFunction('window.echarts && window.__homeHeatmapChart', null, { timeout: 8000 }); } catch (e) { /* 跳过 */ }
+    const hasChart = await page.evaluate(() => !!window.__homeHeatmapChart);
+    if (!hasChart) return;
+    await page.waitForTimeout(1200);
+    // 放大
+    await page.click('[data-zoom="in"]');
+    await page.waitForTimeout(300);
+    const zoomBefore = await page.evaluate(() => window.__homeHeatmapChart.getOption().series[0].zoom);
+    assert.ok(zoomBefore > 1.7, '点 + 后 zoom 应大于 1.7，实际 ' + zoomBefore);
+    // 切深色 → 重渲染但 zoom 保留（回归修复点）
+    await page.click('[data-action="toggle-dark"]');
+    await page.waitForTimeout(400);
+    const zoomAfter = await page.evaluate(() => window.__homeHeatmapChart.getOption().series[0].zoom);
+    assert.strictEqual(zoomAfter, zoomBefore, '深色切换后 zoom 应保持，实际 ' + zoomAfter);
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('详情页：分享按钮把详情链接复制到剪贴板', async () => {
+  const ctx = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'] });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(baseUrl + '/pages/detail.html?id=1', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-action="copy-share-link"]', { timeout: 10000 });
+    await page.click('[data-action="copy-share-link"]');
+    await page.waitForTimeout(400);
+    const clip = await page.evaluate(() => navigator.clipboard.readText().catch(() => ''));
+    assert.ok(clip.includes('detail.html?id=1'), '剪贴板应含详情页链接，实际: ' + clip);
+  } finally {
+    await ctx.close();
+  }
+});
+
+test('详情页：打印按钮触发 window.print', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/pages/detail.html?id=1', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-action="print-page"]', { timeout: 10000 });
+    await page.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
+    await page.click('[data-action="print-page"]');
+    await page.waitForTimeout(300);
+    const printed = await page.evaluate(() => window.__printed);
+    assert.ok(printed >= 1, '点击打印应调用 window.print');
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('导览页：搜索关键词过滤场馆列表', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/pages/guide.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.venue-card', { timeout: 10000 });
+    const before = await page.$$eval('.venue-card', els => els.length);
+    assert.ok(before > 0, '初始应有场馆卡');
+    await page.fill('#search-input', '延安');
+    await page.click('#guide-search-btn');
+    await page.waitForTimeout(900);
+    const cards = await page.$$eval('.venue-card', els => els.map(e => e.textContent));
+    assert.ok(cards.length > 0 && cards.every(c => c.includes('延安')), '搜索延安后应只剩含延安的场馆，实际 ' + cards.length + ' 张');
+  } finally {
+    await page.context().close();
+  }
+});
+
+test('深色模式：切换 html.dark 并写入 localStorage', async () => {
+  const page = await newPage();
+  try {
+    await page.goto(baseUrl + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => sessionStorage.setItem('entrance_done_v2', '1'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1500);
+    await page.click('[data-action="toggle-dark"]');
+    await page.waitForTimeout(300);
+    const dark = await page.evaluate(() => ({
+      html: document.documentElement.classList.contains('dark'),
+      stored: localStorage.getItem('redguide_dark')
+    }));
+    assert.strictEqual(dark.html, true, '切换后 html 应带 dark 类');
+    assert.strictEqual(dark.stored, '1', '应写入 redguide_dark=1');
+  } finally {
+    await page.context().close();
+  }
+});

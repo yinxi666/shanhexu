@@ -3,20 +3,20 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081311';
-import { getBasePath } from './utils.js?v=2026081311';
-import { $ } from './ui.js?v=2026081311';
-import { icon } from './icons.js?v=2026081311';
+import * as RedData from './data.js?v=2026081312';
+import { getBasePath } from './utils.js?v=2026081312';
+import { $ } from './ui.js?v=2026081312';
+import { icon } from './icons.js?v=2026081312';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081311';
-import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081311';
-import * as czSound from './cz-sound.js?v=2026081311';
-import { stampSvg } from './cz-stamps.js?v=2026081311';
-import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081311';
-import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081311';
-import { showTheater, theaterLock } from './cz-theater.js?v=2026081311';
-import { initAtmosphere } from './cz-atmosphere.js?v=2026081311';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081312';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081312';
+import * as czSound from './cz-sound.js?v=2026081312';
+import { stampSvg } from './cz-stamps.js?v=2026081312';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081312';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081312';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081312';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081312';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化）。
    兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
