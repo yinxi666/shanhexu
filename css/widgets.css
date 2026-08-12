@@ -229,6 +229,31 @@
   .message-card {
     padding: 16px 20px 16px;
   }
+
+  /* 政策页：≤480px 收走左侧 90px 时间列（日期徽章移到卡上方、圆点隐藏），卡恢复全宽，
+     再配横向缩略图（图 120×90 左 + 文字右）——卡高从 ~414px 降到 ~180px，信息密度提升 */
+  .policy-row {
+    grid-template-columns: 1fr;
+  }
+
+  .policy-timeline {
+    margin-bottom: 8px;
+  }
+
+  .policy-dot {
+    display: none;
+  }
+
+  .policy-card {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .policy-card .policy-img {
+    width: 120px;
+    height: 90px;
+    flex-shrink: 0;
+  }
 }
 
 .brand-logo {

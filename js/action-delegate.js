@@ -4,16 +4,16 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail, showToast } from './ui.js?v=2026081307';
-import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081307';
-import { likePractice, copyShareLinkFromDetail, resetMessageForm } from './pages.js?v=2026081307';
-import { toggleFavorite } from './favorites.js?v=2026081307';
+import { goToDetail, showToast } from './ui.js?v=2026081308';
+import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081308';
+import { likePractice, copyShareLinkFromDetail, resetMessageForm } from './pages.js?v=2026081308';
+import { toggleFavorite } from './favorites.js?v=2026081308';
 
-import { openChat } from './chat.js?v=2026081307';
-import { openQuiz } from './quiz.js?v=2026081307';
-import { toggleDarkMode } from './darkmode.js?v=2026081307';
-import { icon } from './icons.js?v=2026081307';
-import * as RedCardGen from './cardgen.js?v=2026081307';
+import { openChat } from './chat.js?v=2026081308';
+import { openQuiz } from './quiz.js?v=2026081308';
+import { toggleDarkMode } from './darkmode.js?v=2026081308';
+import { icon } from './icons.js?v=2026081308';
+import * as RedCardGen from './cardgen.js?v=2026081308';
 
 export function initActionDelegate() {
   document.addEventListener('click', handleAction);
