@@ -118,6 +118,11 @@
     flex-shrink: 0;
   }
 
+  /* 140px 小图放不下"类别+地区"两个并排角标（会重叠成乱码）；地区已在卡身 card-meta 显示，角标只留类别 */
+  .venue-card .card-province {
+    display: none;
+  }
+
   .venue-card .card-img img {
     height: 100%;
     min-height: 120px;
@@ -175,6 +180,8 @@
 
   .guide-map-sticky {
     position: static;
+    /* 桌面端 margin-top:160px 是为 sticky 让位（地图贴在导航下方），static 后必须清零，否则移动端地图上方凭空多 160px 空隙 */
+    margin-top: 0;
   }
 
   #map-container {

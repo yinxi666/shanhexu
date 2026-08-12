@@ -1411,7 +1411,7 @@
 
 .cz-route-dot.active text {
   fill: #fff3c2;
-  font-size: 21;
+  font-size: 21px;
   opacity: 1;
   font-weight: 700;
   filter: drop-shadow(0 0 3px rgba(255, 200, 120, 0.7));
@@ -1463,7 +1463,7 @@
   /* 印章 SVG 四周留有透明边距，不能用白底——否则露出白色边框；透明让印章直接盖在宣纸上 */
 }
 
-/* 5 种 mood 的径向渐变在下方 .cz-bg-mood-*/active 中定义；此处不可清 background-image，
+/* 5 种 mood 的径向渐变在下方 .cz-bg-mood-* 的 active 中定义；此处不可清 background-image，
    否则 !important 会把所有站点氛围色叠加层压成透明 */
 .cz-bg-mood.active {
   opacity: 0.5;

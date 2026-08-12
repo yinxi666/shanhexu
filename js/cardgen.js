@@ -2,10 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081312';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081312';
-import { icon } from './icons.js?v=2026081312';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081312';
+import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081314';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081314';
+import { icon } from './icons.js?v=2026081314';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081314';
 
 /* ---- 可选数据 ---- */
 const SPIRITS = ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];

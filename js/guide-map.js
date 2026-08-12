@@ -5,7 +5,7 @@
          以 <script defer> 静态加载（自托管 assets/leaflet/，window.L）
    ============================================================ */
 
-import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081312';
+import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081314';
 
 export function createGuideMap(mapContainer) {
   let leafletMap = null;

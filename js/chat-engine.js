@@ -5,11 +5,11 @@
    说明：与 chat.js（悬浮 UI 组件）分离，本模块可在无 DOM 环境直接单元测试。
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081312';
-import * as RedData from './data.js?v=2026081312';
-import { getVenues } from './venue-store.js?v=2026081312';
-import { knowledge } from './chat-knowledge.js?v=2026081312';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081312';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081314';
+import * as RedData from './data.js?v=2026081314';
+import { getVenues } from './venue-store.js?v=2026081314';
+import { knowledge } from './chat-knowledge.js?v=2026081314';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081314';
 
 export function generateReply(query) {
   const q = query.trim();
