@@ -224,6 +224,11 @@
     height: 44px;
     font-size: 13px;
   }
+
+  /* 留言卡收紧内边距，压矮（内容本身较长，窄屏下减少"卡大内容少"的观感；padding 须 4px 网格倍数） */
+  .message-card {
+    padding: 16px 20px 16px;
+  }
 }
 
 .brand-logo {

@@ -3,20 +3,20 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081306';
-import { getBasePath } from './utils.js?v=2026081306';
-import { $ } from './ui.js?v=2026081306';
-import { icon } from './icons.js?v=2026081306';
+import * as RedData from './data.js?v=2026081307';
+import { getBasePath } from './utils.js?v=2026081307';
+import { $ } from './ui.js?v=2026081307';
+import { icon } from './icons.js?v=2026081307';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081306';
-import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081306';
-import * as czSound from './cz-sound.js?v=2026081306';
-import { stampSvg } from './cz-stamps.js?v=2026081306';
-import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081306';
-import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081306';
-import { showTheater, theaterLock } from './cz-theater.js?v=2026081306';
-import { initAtmosphere } from './cz-atmosphere.js?v=2026081306';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081307';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081307';
+import * as czSound from './cz-sound.js?v=2026081307';
+import { stampSvg } from './cz-stamps.js?v=2026081307';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081307';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081307';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081307';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081307';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化）。
    兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
@@ -108,8 +108,13 @@ function layout() {
 
   const vw = handrollWin.clientWidth;           // 手卷窗口宽
   const vh = window.innerHeight - 120;          // 手卷舞台高(去掉导航)
-  const perStationW = Math.max(660, vw * 0.9);  // 每站占宽（加大站间距，避免定格与下一站卡片重叠）
-  const sidePad = vw * 0.5;                     // 两侧 padding,让首尾站能居中
+  // 每站占宽：移动端（vw<1024，含手机竖屏/横屏/小平板）收紧站间距——
+  // 竖屏 390px 从 660 降到 ~330px（滚动密度翻倍、空白纸减少、垂直滚动路程减半）；
+  // 横屏手机 844px 上限 540px（窗口宽，仍可看到约 1.5 站）。桌面 ≥1024 保持 ≥660，保留手卷"展开感"。
+  // 间距 > 便签宽 + 间隙，避免定格与下一站卡片重叠
+  const perStationW = vw < 1024 ? Math.max(330, Math.min(540, vw * 0.8)) : Math.max(660, vw * 0.9);
+  // 两侧 padding：桌面保持 vw/2；移动端收紧为 (vw-每站宽)/2，让首站初始即居中（否则首站便签初始被裁掉一半）
+  const sidePad = vw < 768 ? Math.max(20, (vw - perStationW) / 2) : vw * 0.5;
   const totalW = perStationW * STATIONS.length + sidePad * 2;
 
   handroll.style.width = totalW + 'px';

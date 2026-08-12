@@ -6,7 +6,7 @@
      setMoodBridge（注册 mood 回调，setActive 调用）
    ============================================================ */
 
-import { STATIONS } from './cz-stations.js?v=2026081306';
+import { STATIONS } from './cz-stations.js?v=2026081307';
 
 export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, getLastActiveT, setLastActiveT, setMoodBridge }) {
   if (getReduceMotion()) return;

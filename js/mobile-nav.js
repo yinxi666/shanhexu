@@ -4,9 +4,9 @@
    约束：依赖 utils(getBasePath)；被 app.js 初始化（所有页面）
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081306';
-import { $ } from './ui.js?v=2026081306';
-import { icon } from './icons.js?v=2026081306';
+import { getBasePath } from './utils.js?v=2026081307';
+import { $ } from './ui.js?v=2026081307';
+import { icon } from './icons.js?v=2026081307';
 
 function initMobileNav() {
   if ($('.mobile-nav')) return;
