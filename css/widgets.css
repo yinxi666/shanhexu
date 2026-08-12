@@ -874,6 +874,15 @@
     box-shadow: none ;
   }
 
+  /* 移动端无 hover：点按触发的 sticky-hover 会让 .music-player:hover 渲染出白底矩形框
+     （音量滑条已 display:none，hover 没有任何可展开内容），须把 hover 态也压回透明 */
+  .music-player:hover {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
   .music-toggle {
     width: 44px ;
     height: 44px ;

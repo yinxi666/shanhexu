@@ -863,8 +863,11 @@
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
+  /* 内容超高（手机窄屏）时允许纵向滚动；居中交给 .cz-complete-inner 的 margin:auto，
+     避免 align-items:center 在溢出时把顶部裁掉够不到按钮 */
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
   /* 长征全景做背景 + 暗色压暗保证文字可读 */
   background:
     radial-gradient(ellipse at center, rgba(18, 6, 4, 0.5) 0%, rgba(10, 4, 3, 0.76) 60%, rgba(4, 1, 0, 0.92) 100%),
@@ -884,8 +887,11 @@
   transition: opacity var(--duration-normal) ease, visibility 0s 0s;
 }
 .cz-complete-inner {
+  /* margin:auto 双轴居中：内容不超高时垂直居中，超高时上下 auto margin 归零、
+     配合 .cz-complete 的 overflow-y 从顶部可滚——按钮不再被裁 */
+  margin: auto;
   text-align: center;
-  padding: 0 24px;
+  padding: 32px 24px;
 }
 .cz-complete-portrait {
   position: relative;
@@ -1933,6 +1939,34 @@
 
   .cz-route-tag {
     display: none;
+  }
+
+  /* 终点成就弹窗移动端适配：圆像缩小、文字/按钮收紧，配合外层 overflow-y:auto + inner
+     margin:auto，窄屏内容超高时可滚动，不再裁掉底部按钮 */
+  .cz-complete-inner {
+    padding: 24px 16px;
+  }
+
+  .cz-complete-portrait {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+  }
+
+  .cz-complete-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    margin-top: 20px;
+  }
+
+  .cz-complete-btn {
+    margin-top: 24px;
+    padding: 12px 28px;
+    font-size: 15px;
+  }
+
+  .cz-complete-close {
+    margin-top: 16px;
   }
 
   .cz-route-title {

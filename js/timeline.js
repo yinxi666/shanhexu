@@ -4,11 +4,11 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081319';
-import { icon } from './icons.js?v=2026081319';
-import { getVenues } from './venue-store.js?v=2026081319';
-import { findVenueByName } from './data.js?v=2026081319';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081319';
+import { getBasePath } from './utils.js?v=2026081320';
+import { icon } from './icons.js?v=2026081320';
+import { getVenues } from './venue-store.js?v=2026081320';
+import { findVenueByName } from './data.js?v=2026081320';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081320';
 
 function initTimeline() {
   // 首页 guard 已在 homepage.js initHomepageInnovation 统一执行，此处不重复

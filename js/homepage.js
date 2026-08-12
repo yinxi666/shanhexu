@@ -4,10 +4,10 @@
    约束：依赖 timeline(initTimeline)；被 app.js 初始化（首页）
    ============================================================ */
 
-import { initTimeline } from './timeline.js?v=2026081319';
-import { $ } from './ui.js?v=2026081319';
-import { icon } from './icons.js?v=2026081319';
-import { isHomePage } from './utils.js?v=2026081319';
+import { initTimeline } from './timeline.js?v=2026081320';
+import { $ } from './ui.js?v=2026081320';
+import { icon } from './icons.js?v=2026081320';
+import { isHomePage } from './utils.js?v=2026081320';
 
 function initHomepageInnovation() {
   if (!isHomePage()) return;
