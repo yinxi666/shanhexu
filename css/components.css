@@ -334,6 +334,9 @@
   transform: scale(1.06);
 }
 
+/* 角标不再用 backdrop-filter：4px 虚化几乎不可见，却让每卡产生 2 个独立 blur 合成层，
+   导览页 9 卡 ×2 累积 18+ 层，叠加 body fixed 背景在 Chrome Android 滚动时会触发
+   合成器把错误纹理画到卡片上（整页类别/地区错乱成同一场馆） */
 .venue-card .card-img .card-category {
   position: absolute;
   top: 10px;
@@ -344,7 +347,6 @@
   font-size: 12px;
   font-weight: 600;
   border-radius: var(--radius-xs);
-  backdrop-filter: blur(4px);
 }
 
 .venue-card .card-img .card-province {
@@ -356,7 +358,6 @@
   color: var(--on-primary);
   font-size: 12px;
   border-radius: var(--radius-xs);
-  backdrop-filter: blur(4px);
 }
 
 .venue-card .card-body {

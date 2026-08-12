@@ -235,8 +235,8 @@
   background: rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid rgba(185, 28, 28, 0.1);
   box-shadow: 0 2px 20px rgba(185, 28, 28, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  /* 不再 backdrop-filter：背景已 0.95 近不透明，blur 几乎不可见，却让 sticky 页头成为全宽
+     blur 合成层——Chrome Android 滚动时页头拖影/内容错绘的经典元凶（深色 html.dark 同样 0.95） */
 }
 
 .navbar {
@@ -384,6 +384,14 @@
     linear-gradient(to top, rgba(200, 180, 150, 0.08) 0%, transparent 35%),
     /* 天空层：暖黄雾霭 */
     radial-gradient(ellipse 60% 40% at 50% 60%, rgba(220, 200, 160, 0.03) 0%, transparent 70%);
+}
+
+/* 触屏禁用此全视口 fixed 装饰层（滚动时又多一个固定合成层，叠加 body fixed 背景易触发
+   合成器滚动错乱）；改 absolute 后随 .section 一起滚动，淡化背景观感几乎无差 */
+@media (hover: none) {
+  .subpage-hero+.section::after {
+    position: absolute;
+  }
 }
 
 .section-heading {

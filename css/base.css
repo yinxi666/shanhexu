@@ -163,6 +163,16 @@ body {
     radial-gradient(ellipse 55% 45% at 92% 96%, rgba(214, 160, 60, 0.07), transparent 70%),
     linear-gradient(180deg, #fdfbf7 0%, #f7f1e5 100%);
   background-attachment: fixed;
+}
+
+/* 触屏设备禁用 fixed 背景：background-attachment:fixed 在 Chrome Android 合成器下
+   滚动时会把错误的源纹理画到内容上（整页卡片类别/地区错乱成同一场馆、随滚动换源），
+   headless 软件光栅化复现不了；(hover:none) 精确命中触屏主设备，桌面鼠标不受影响 */
+@media (hover: none) {
+  body {
+    background-attachment: scroll;
+  }
+}
   font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

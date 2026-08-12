@@ -7,6 +7,12 @@ html.dark body {
     linear-gradient(180deg, #0f172a 0%, #0a0f1d 100%);
   background-attachment: fixed;
 }
+/* 与 base.css 的 (hover:none) 覆盖保持一致：触屏禁用 fixed 背景防合成器滚动错乱 */
+@media (hover: none) {
+  html.dark body {
+    background-attachment: scroll;
+  }
+}
 html.dark {
   --red: #ef4444;
   --gold: #fbbf24;

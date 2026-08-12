@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-08-13 · v2026081315 — 移动端滚动"整页卡片标签错乱成同一场馆"合成器修复
+
+- **根因**：非数据/非 JS——多场景 Playwright（390/360/768/1280 × 拖拽/滚动 × URL 栏收起 resize）证实 DOM 卡片标签全部各异且 **0 次重渲染**，headless 软件光栅化无法复现；用户真实手机（GPU 合成器）上 Chrome Android 的合成器把错误卡片的纹理画到所有卡片上，滚动时换源 → "整页同时变成同一场馆的类别+地区、随滚动再变另一个"
+- **修复（削减移动端常驻合成层）**：
+  - `body { background-attachment: fixed }`（base + dark）在 `@media (hover:none)` 触屏下改 `scroll`——fixed 背景是 Chrome Android 滚动错误绘制的公认元凶
+  - sticky 页头 `backdrop-filter: blur(16px)` 移除（背景本就 rgba(…,0.95) 近不透明，blur 几乎不可见，却是全宽 sticky blur 合成层）
+  - 场馆卡片类别/地区角标 `backdrop-filter: blur(4px)` 移除（导览页 9 卡 ×2 = 18+ 独立 blur 层）
+  - `.subpage-hero+.section::after` 全视口 `position:fixed` 装饰层在触屏下改 `absolute`
+- 桌面不受影响（hover 设备保留 fixed 背景）；其余 backdrop-filter（聊天面板/答题遮罩/导航帷幕/详情侧栏/长征）均为瞬态或他页，未动
+
 ## 2026-08-13 · v2026081314 — 移动端导览卡片角标重叠修复 + CSS 语法修正
 
 - **导览页移动端"滚动错乱"根因**：≤860px 卡片转横排后图片缩到 140px 宽，红色类别角标（左）与黑色地区角标（右）在每张卡上并排重叠 24px+（长省名如"广西壮族自治区"覆盖 72px），黑色徽章压在红色徽章上形成文字缠绕，视觉上"每张卡的地区标注都像同一个"（DOM 数据实际各异，Playwright 量测证实）
