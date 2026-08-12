@@ -156,6 +156,30 @@ walk(ROOT, (f) => {
   }
 });
 
+/* ---- 3.6) 约定检查：内联事件 / 裸路径（把"人记得"的规矩变成工具拦） ---- */
+// 3.6.1 禁内联 HTML 事件属性（应用 data-action 委托；程序化 .onload= 不算，负向断言排除）
+const INLINE_EVENT_RE = /(?<=["'\s])on(?:click|mouseover|mouseout|change|dblclick|submit|keydown|keyup|focus|blur|load|error)\s*=/;
+for (const f of jsFiles) {
+  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
+  if (INLINE_EVENT_RE.test(code)) errors.push(`内联事件（应用 data-action 委托）：js/${f}`);
+}
+walk(ROOT, (f) => {
+  if (!f.endsWith('.html')) return;
+  if (INLINE_EVENT_RE.test(fs.readFileSync(f, 'utf8'))) errors.push(`内联事件（应用 data-action 委托）：${path.relative(ROOT, f)}`);
+});
+// 3.6.2 禁裸 fetch 相对 data 路径（应走 data.js loadJSON，统一 basePath/缓存/?v=）
+const BARE_FETCH_RE = /fetch\(\s*['"](?:\.\.\/)?(?:data|templates|pages|css|js)\//;
+for (const f of jsFiles) {
+  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
+  if (BARE_FETCH_RE.test(code)) errors.push(`裸 fetch（应走 loadJSON/getBasePath）：js/${f}`);
+}
+// 3.6.3 禁 location.href 裸相对 pages 路径（应用 getBasePath）
+const BARE_HREF_RE = /location\.href\s*=\s*['"](?:\.\.\/)?pages\//;
+for (const f of jsFiles) {
+  const code = stripComments(fs.readFileSync(path.join(jsDir, f), 'utf8'));
+  if (BARE_HREF_RE.test(code)) errors.push(`裸导航路径（应用 getBasePath）：js/${f}`);
+}
+
 /* ---- 4) 数据健康（仅报告） ---- */
 let pendingResidue = 0;
 for (const f of fs.readdirSync(path.join(ROOT, 'data')).filter((f) => f.endsWith('.json'))) {
