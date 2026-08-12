@@ -116,7 +116,9 @@
 - detail 返回链接经 `buildGuideBackLink()` 从 sessionStorage `redguide_guide_filters` 恢复导览筛选状态（search/province/category/page），无记录才回 `guide.html`；地图筛选/搜索不再强制 `fitBounds` 重置视口（`guide-map.js` 的 userMoved 守卫：用户手动缩放/平移后保持）。
 - guide-map 暴露 `invalidateSize()`：容器显隐/跨断点 resize 后须调用（移动端切地图视图、resize 分支已接），否则瓦片错位/空白。
 - chat-engine 区域查询用 `matchRegion()` **数据驱动**提取地区名（非通配正则），改聊天地域逻辑先读它；省份名统一经 `utils.stripProvinceSuffix`。
-- changzheng.css:1642 `1var(--duration-normal)` 非法（路线图圆点脉冲光环不生效，无害）。
+- 移动端滚动"卡片错乱成同一张/重复"是 **Chrome Android 合成器**问题（headless 软件光栅化复现不了）：`body` 在 `(hover:none)` 下已改 `background-attachment:scroll`；普通页面卡面/页头**禁用 backdrop-filter**（不透明背景上 blur 无意义且养合成层——导览卡角标、页头、详情侧栏卡的 blur 移除即为此）。别在卡片/页头上重新加 backdrop-filter。
+- 导览卡移动端（≤860px）隐藏地区角标（140px 图放不下"类别+地区"两个角标，地区在卡身 card-meta 显示）；`.guide-map-sticky` 移动端须 `margin-top:0`（桌面 160px 是给 sticky 让位）。
+- 长征页移动端（≤768px）右上路线图 `.cz-route-wrap` 已隐藏（`display:none`，JS 基于 viewBox 坐标不受影响），跳站靠印章/小剧场/HUD；移动端笺纸卡已紧凑化（照片隐藏、宽 `min(360px,60vw)`、左右偏移 ±36），改笺纸定位须保持相邻间隙 ≥24px 且 padding/margin 对齐 4px 网格。
 - 场馆坐标 lat=0 会被当缺失（`plotVenuesOnMap` 过滤 `v.coordinates.lat && v.coordinates.lng`）。
 - showToast 用 innerHTML：只传常量文案，**禁传用户输入**。
 - 所有动态文本 `escapeHtml/escapeAttr` + URL `sanitizeUrl`（留言 sessionStorage 回填是存储型 XSS 面）。
