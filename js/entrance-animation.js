@@ -173,7 +173,7 @@ export function initEntranceAnimation() {
     }
   };
   tiananmenImg.onerror = function () { tiananmenReady = false; };
-  tiananmenImg.src = '天安门.webp';
+  tiananmenImg.src = 'assets/通用/天安门.webp';
 
   let taFireCanvas = document.createElement('canvas');
   taFireCanvas.setAttribute('aria-hidden', 'true');

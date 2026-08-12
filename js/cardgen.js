@@ -19,7 +19,7 @@ const BG_IMAGES = [
   { label: '南湖红船', src: 'assets/全国红色场馆图片/场馆03_浙江_嘉兴南湖红船.webp' },
   { label: '井冈山', src: 'assets/全国红色场馆图片/场馆04_江西_井冈山革命博物馆.webp' },
   { label: '延安', src: 'assets/全国红色场馆图片/场馆06_陕西_延安革命纪念馆.webp' },
-  { label: '天安门', src: '天安门.webp' },
+  { label: '天安门', src: 'assets/通用/天安门.webp' },
   { label: '一大会址', src: 'assets/全国红色场馆图片/场馆01_上海_中共一大会址.webp' },
   { label: '西柏坡', src: 'assets/全国红色场馆图片/场馆05_河北_西柏坡纪念馆.webp' },
   { label: '遵义', src: 'assets/全国红色场馆图片/场馆07_贵州_遵义会议会址.webp' },

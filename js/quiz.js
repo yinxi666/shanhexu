@@ -40,7 +40,7 @@ function initQuiz() {
 
   const html = `
       <button class="quiz-fab" aria-label="红色知识问答" title="红色知识挑战赛">
-        <span><img class="quiz-fab-icon" src="${getBasePath()}挑战赛.webp" alt="红色知识挑战赛"></span>
+        <span><img class="quiz-fab-icon" src="${getBasePath()}assets/通用/挑战赛.webp" alt="红色知识挑战赛"></span>
       </button>
       <div class="quiz-modal-overlay" id="quiz-overlay">
         <div class="quiz-modal" role="dialog" aria-modal="true" aria-label="红色知识挑战赛">

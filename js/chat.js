@@ -42,13 +42,13 @@ function initChatWidget() {
   const html = `
       <div class="chat-widget">
         <button class="chat-fab" aria-label="AI导览助手" title="AI智能导览助手">
-          <img class="chat-fab-icon" src="${getBasePath()}ai图标.webp" alt="AI导览助手">
+          <img class="chat-fab-icon" src="${getBasePath()}assets/通用/ai图标.webp" alt="AI导览助手">
           <span class="chat-fab-badge">AI</span>
         </button>
         <div class="chat-panel">
           <div class="chat-header">
             <div class="chat-header-left">
-              <img class="chat-avatar" src="${getBasePath()}ai图标.webp" alt="">
+              <img class="chat-avatar" src="${getBasePath()}assets/通用/ai图标.webp" alt="">
               <div>
                 <strong>红旅AI助手</strong>
                 <small>智能导览 · 知识库 Agent</small>
