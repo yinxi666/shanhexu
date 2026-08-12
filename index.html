@@ -15,18 +15,18 @@
   <meta property="og:url" content="https://yinxi666.github.io/shanhexu/">
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/">
-  <link rel="icon" type="image/png" href="favicon.png?v=2026081008">
+  <link rel="icon" type="image/png" href="favicon.png?v=2026081016">
   <link rel="manifest" href="manifest.json">
   <link rel="preload" as="image" href="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp">
   <title>赓续血脉・数绘红旅 — 红色文旅数字导览</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="css/base.css?v=2026081008">
-  <link rel="stylesheet" href="css/home.css?v=2026081008">
-  <link rel="stylesheet" href="css/components.css?v=2026081008">
-  <link rel="stylesheet" href="css/pages.css?v=2026081008">
-  <link rel="stylesheet" href="css/widgets.css?v=2026081008">
-  <link rel="stylesheet" href="css/effects.css?v=2026081008">
-  <link rel="stylesheet" href="css/dark.css?v=2026081008">
+  <link rel="stylesheet" href="css/base.css?v=2026081016">
+  <link rel="stylesheet" href="css/home.css?v=2026081016">
+  <link rel="stylesheet" href="css/components.css?v=2026081016">
+  <link rel="stylesheet" href="css/pages.css?v=2026081016">
+  <link rel="stylesheet" href="css/widgets.css?v=2026081016">
+  <link rel="stylesheet" href="css/effects.css?v=2026081016">
+  <link rel="stylesheet" href="css/dark.css?v=2026081016">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     html.entrance-active,
@@ -101,10 +101,6 @@
 </head>
 
 <body>
-  <div id="nav-curtain">
-    <div class="nc-front"></div>
-    <div class="nc-back"></div>
-  </div>
   <div id="entrance-overlay">
     <canvas id="entrance-canvas"></canvas>
     <button id="skip">跳过→</button>
@@ -114,7 +110,7 @@
 
   <main>
     <!-- ===== Cinematic Hero 区域 ===== -->
-    <section class="cinematic-hero" id="home">
+    <section class="cinematic-hero">
       <video class="flag-video" src="assets/演示视频/国旗动态壁纸【无水印】.mp4" preload="none" poster="assets/全国红色场馆图片/场馆02_北京_中国共产党历史展览馆.webp" loop muted playsinline
         aria-hidden="true"></video>
       <img class="hero-bg animate-ken-burns hero-bg-active no-context-menu" aria-hidden="true"
@@ -134,7 +130,7 @@
     </section>
 
     <!-- ===== 数据统计 ===== -->
-    <section class="section scroll-animate">
+    <section class="section">
       <div class="stats-row">
         <div class="stat-item scroll-animate scroll-animate-delay-1">
           <div class="stat-num" id="stat-provinces">34+</div>
@@ -162,7 +158,7 @@
         <h2>红色记忆时间线</h2>
         <p>左右滑动，点击年份了解关键事件与相关场馆</p>
       </div>
-      <div class="timeline-scroll scroll-animate" id="home-timeline">
+      <div class="timeline-scroll scroll-animate">
         <div class="timeline-track">
           <div class="tl-node" tabindex="0" role="button" data-year="1921">
             <div class="tl-dot"></div>
@@ -269,7 +265,7 @@
           <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 16 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg></div>
           <span class="card-num">01</span>
           <h3>全国红色场馆导览</h3>
-          <p>按地区、类别或关键词检索全国34个省级行政区的红色文旅场馆，查看详情、图片和官方链接。</p>
+          <p>按地区、类别或关键词检索全国31个省级行政区的红色文旅场馆，查看详情、图片和官方链接。</p>
         </a>
         <a class="feature-card feature-link" href="pages/message.html">
           <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.5L3 21l2-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div>
@@ -296,10 +292,9 @@
   <!-- ===== 页脚（由 js/layout-loader.js 注入共享模板） ===== -->
   <div id="site-footer"></div>
 
-  <!-- Hero背景轮播 -->
-  <script src="js/hero-carousel.js?v=2026081008"></script>
+  <!-- Hero背景轮播（ES Module，由 app.js 引入） -->
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <script type="module" src="js/app.js?v=2026081008"></script>
+  <script type="module" src="js/app.js?v=2026081016"></script>
 </body>
 
 </html>

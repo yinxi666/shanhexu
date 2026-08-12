@@ -3,18 +3,19 @@
    职责：统一初始化所有 ES Module 模块，按固定顺序编排引导流程
    ============================================================ */
 
-import * as RedPages from './pages.js?v=2026081008';
-import * as RedCardGen from './cardgen.js?v=2026081008';
-import * as RedLongMarch from './longmarch.js?v=2026081008';
-import { initChatWidget } from './chat.js?v=2026081008';
-import { initQuiz } from './quiz.js?v=2026081008';
-import { initDarkMode } from './darkmode.js?v=2026081008';
-import { initMobileNav } from './mobile-nav.js?v=2026081008';
-import { initHomepageInnovation } from './homepage.js?v=2026081008';
-import { loadVenues } from './venue-store.js?v=2026081008';
-import { initActionDelegate } from './action-delegate.js?v=2026081008';
-import { initEntranceAnimation } from './entrance-animation.js?v=2026081008';
-import { loadLayout } from './layout-loader.js?v=2026081008';
+import * as RedPages from './pages.js?v=2026081016';
+import * as RedCardGen from './cardgen.js?v=2026081016';
+import * as RedLongMarch from './longmarch.js?v=2026081016';
+import { initChatWidget } from './chat.js?v=2026081016';
+import { initQuiz } from './quiz.js?v=2026081016';
+import { initDarkMode } from './darkmode.js?v=2026081016';
+import { initMobileNav } from './mobile-nav.js?v=2026081016';
+import { initHomepageInnovation } from './homepage.js?v=2026081016';
+import { loadVenues } from './venue-store.js?v=2026081016';
+import { initActionDelegate } from './action-delegate.js?v=2026081016';
+import { initEntranceAnimation } from './entrance-animation.js?v=2026081016';
+import { initHeroCarousel } from './hero-carousel.js?v=2026081016';
+import { loadLayout } from './layout-loader.js?v=2026081016';
 
 /* ---------- 国旗视频：仅桌面大屏自动播放，且尊重"减少动效" ---------- */
 function initFlagVideo() {
@@ -42,9 +43,10 @@ async function boot() {
   });
 
   try {
-    // 首页先启动入场动画（有 entrance-overlay 时才执行）
+    // 首页先启动入场动画（有 entrance-overlay 时才执行），随后接 Hero 轮播
     if (!location.pathname.includes('/pages/')) {
       initEntranceAnimation();
+      initHeroCarousel();
     }
 
     // 先注册全局动作委托，替代 innerHTML + onclick

@@ -5,10 +5,11 @@
    约束：只依赖 utils.js，被 pages/music/modals/cardgen/longmarch/action-delegate 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
+import { getBasePath } from './utils.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
 
 /* 统一绑定图片失败回退：避免在 HTML 字符串里写 onerror 内联处理器 */
 function bindImageFallbacks(container) {
@@ -177,6 +178,14 @@ function initContextMenuBlock() {
   });
 }
 
+/* 弹窗"点遮罩关闭"统一处理：overlay 自身点击（或命中可选内部关闭触发）即关闭 */
+function onOverlayClick(overlay, closeFn, closeSel) {
+  if (!overlay) return;
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || (closeSel && e.target.closest(closeSel))) closeFn();
+  });
+}
+
 /* 复制分享链接（非安全上下文优雅降级） */
 function copyShareLink(text) {
   const url = location.href;
@@ -193,9 +202,12 @@ function copyShareLink(text) {
 }
 
 export {
+  $,
+  $$,
   bindImageFallbacks,
   goToDetail,
   showToast,
+  onOverlayClick,
   initNavigation,
   initBackToTop,
   initCurtainTransition,

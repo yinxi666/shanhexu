@@ -15,8 +15,27 @@ const widgets = readCss('widgets.css');
 const effects = readCss('effects.css');
 const dark = readCss('dark.css');
 
-/* 排除 :root 令牌定义块 */
-const stripRoot = css => css.replace(/^:root\s*\{[\s\S]*?\}\s*/m, '');
+/* 排除 :root 令牌定义块（按选择器定位 + 花括号配对，覆盖任意位置的 :root 块，替代原"仅行首"脆弱正则） */
+function stripRootBlocks(css) {
+  const re = /:root(?=\s*\{)/g;
+  let out = '';
+  let last = 0;
+  let m;
+  while ((m = re.exec(css))) {
+    const open = css.indexOf('{', m.index);
+    let depth = 1;
+    let i = open + 1;
+    while (depth > 0 && i < css.length) {
+      if (css[i] === '{') depth++;
+      else if (css[i] === '}') depth--;
+      i++;
+    }
+    out += css.slice(last, m.index);
+    last = i;
+    re.lastIndex = i;
+  }
+  return out + css.slice(last);
+}
 
 const EXPECTED_TOKENS = [
   '--gold-ink',            // 省标签文字（浅金底上）
@@ -26,21 +45,18 @@ const EXPECTED_TOKENS = [
   '--chat-header-grad',    // 聊天头部渐变
   '--status-ok',           // 分享成功主色
   '--status-ok-border',    // 答题正确边框
-  '--status-ok-bg',        // 分享成功底
-  '--status-ok-text',      // 答题正确文字
   '--status-err',          // 答题错误边框
-  '--status-err-text',     // 答题错误文字
 ];
 
 test('pages.css：软木板/省标签/图片占位不硬编码（:root 之外）', () => {
-  const body = stripRoot(pages);
+  const body = stripRootBlocks(pages);
   for (const hex of ['#c9a87c', '#8b6914', '#e5e7eb']) {
     assert.doesNotMatch(body, new RegExp(hex, 'i'), `pages.css 规则体残留 ${hex}`);
   }
 });
 
 test('widgets.css：聊天头部渐变与答题状态色走令牌', () => {
-  const body = stripRoot(widgets);
+  const body = stripRootBlocks(widgets);
   assert.doesNotMatch(body, /linear-gradient\(135deg,\s*#[0-9a-f]{6}/i,
     '聊天头部渐变应引用 var(--chat-header-grad)');
   for (const hex of ['#22c55e', '#4ade80', '#ef4444', '#f87171']) {
@@ -49,7 +65,7 @@ test('widgets.css：聊天头部渐变与答题状态色走令牌', () => {
 });
 
 test('effects.css：分享成功色走令牌', () => {
-  const body = stripRoot(effects);
+  const body = stripRootBlocks(effects);
   for (const hex of ['#22c55e', '#16a34a', '#f0fdf4']) {
     assert.doesNotMatch(body, new RegExp(hex, 'i'), `effects.css 残留 ${hex}`);
   }

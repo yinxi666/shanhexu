@@ -5,7 +5,7 @@
    - getStation：返回当前站点的回调（用于确定 mood）
    ============================================================ */
 
-import { icon } from './icons.js?v=2026081008';
+import { icon } from './icons.js?v=2026081016';
 
 let _audioCtx = null;
 let _soundMaster = null;
@@ -32,6 +32,11 @@ function _noiseBuffer(ctx, brown) {
   }
   return buf;
 }
+// 工具：停止并摘除整条音频链上的节点（stop 只停源/振荡器，filter/gain 仍挂在图上会泄漏）
+function _stopChain(nodes) {
+  for (const n of nodes) { try { if (typeof n.stop === 'function') n.stop(); } catch (e) { } }
+  for (const n of nodes) { try { n.disconnect(); } catch (e) { } }
+}
 function _windNode(ctx, level, cutoff) {
   const src = ctx.createBufferSource();
   src.buffer = _noiseBuffer(ctx, false);
@@ -43,7 +48,7 @@ function _windNode(ctx, level, cutoff) {
   lfo.connect(lg).connect(g.gain);
   src.connect(f).connect(g).connect(_soundMaster);
   src.start(); lfo.start();
-  return { stop() { try { src.stop(); } catch (e) { } try { lfo.stop(); } catch (e) { } } };
+  return { stop() { _stopChain([src, f, g, lfo, lg]); } };
 }
 function _rumbleNode(ctx) {
   const src = ctx.createBufferSource();
@@ -53,7 +58,7 @@ function _rumbleNode(ctx) {
   const g = ctx.createGain(); g.gain.value = 0.5;
   src.connect(f).connect(g).connect(_soundMaster);
   src.start();
-  return { stop() { try { src.stop(); } catch (e) { } } };
+  return { stop() { _stopChain([src, f, g]); } };
 }
 function _droneNode(ctx, freq, level) {
   const o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = freq;
@@ -61,7 +66,7 @@ function _droneNode(ctx, freq, level) {
   const g = ctx.createGain(); g.gain.value = level;
   o1.connect(g); o2.connect(g); g.connect(_soundMaster);
   o1.start(); o2.start();
-  return { stop() { try { o1.stop(); } catch (e) { } try { o2.stop(); } catch (e) { } } };
+  return { stop() { _stopChain([o1, o2, g]); } };
 }
 function _padNode(ctx) {
   const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 700;
@@ -74,9 +79,9 @@ function _padNode(ctx) {
     const og = ctx.createGain(); og.gain.value = 1 / (i + 1);
     o.connect(og); o2.connect(og); og.connect(filter);
     o.start(); o2.start();
-    return [o, o2];
+    return [o, o2, og];
   }).flat();
-  return { stop() { nodes.forEach(n => { try { n.stop(); } catch (e) { } }); } };
+  return { stop() { _stopChain([filter, g, ...nodes]); } };
 }
 function _boomOnce() {
   if (!_audioCtx) return;
@@ -89,6 +94,11 @@ function _boomOnce() {
   g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
   osc.connect(g).connect(_soundMaster);
   osc.start(); osc.stop(ctx.currentTime + 2.1);
+  // 炮声播完后摘除整条链，避免每次 boom 向音频图泄漏 osc+gain
+  setTimeout(() => {
+    try { osc.disconnect(); } catch (e) { }
+    try { g.disconnect(); } catch (e) { }
+  }, 2200);
 }
 function _scheduleBooms() {
   clearTimeout(_boomTimer);

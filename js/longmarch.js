@@ -3,27 +3,36 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081008';
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081008';
-import { showToast } from './ui.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, dataUrlToBlob as czDataUrlToBlob } from './cardgen.js?v=2026081008';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081008';
+import * as RedData from './data.js?v=2026081016';
+import { getBasePath } from './utils.js?v=2026081016';
+import { $, onOverlayClick } from './ui.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081008';
-import { RELIC_MAP, POEM_MOMENTS, CZ_CARD_BGS } from './cz-content.js?v=2026081008';
-import * as czSound from './cz-sound.js?v=2026081008';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081016';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081016';
+import * as czSound from './cz-sound.js?v=2026081016';
+import { stampSvg } from './cz-stamps.js?v=2026081016';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081016';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isCompleteShown, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081016';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081016';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081016';
 
-/* 共享 reduced-motion 检测（动态响应系统设置变化） */
+/* 共享 reduced-motion 检测（动态响应系统设置变化）。
+   兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
+   Safari 13.1 只有 addListener——此处为模块顶层，未守卫会拖垮整站模块图，
+   故用特性检测 + 旧 API 回退 */
 const _reduceMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');
 let _reduceMotion = _reduceMotionMQ.matches;
-_reduceMotionMQ.addEventListener('change', e => { _reduceMotion = e.matches; });
+if (typeof _reduceMotionMQ.addEventListener === 'function') {
+  _reduceMotionMQ.addEventListener('change', e => { _reduceMotion = e.matches; });
+} else if (typeof _reduceMotionMQ.addListener === 'function') {
+  _reduceMotionMQ.addListener(e => { _reduceMotion = e.matches; });
+}
 
 async function resolveVenueLinks() {
-  const guideHref = getBasePath() + 'pages/guide.html';
-  // 默认：站内无对应场馆 → 不显示「探访」按钮
-  STATIONS.forEach(s => { s._venueHref = guideHref; s._venueResolved = false; });
+  // 默认：站内无对应场馆 → 不显示「探访」按钮（_venueHref 仅在命中后赋值，未命中值无消费方）
+  STATIONS.forEach(s => { s._venueResolved = false; });
   try {
     const venues = await RedData.loadAllVenues();
     STATIONS.forEach(s => {
@@ -37,10 +46,22 @@ async function resolveVenueLinks() {
   } catch (e) { }
 }
 
-/* ---------- DOM 引用 ---------- */
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+/* 场馆链接异步解析完成后，把"探访"按钮补进已渲染的笺纸（layout 先跑，不阻塞首屏） */
+function patchVenueLinks() {
+  STATIONS.forEach((s, i) => {
+    if (!s._venueResolved) return;
+    const note = state._noteEls[i];
+    if (!note || note.querySelector('.cz-note-venue')) return;
+    const a = document.createElement('a');
+    a.className = 'cz-note-venue';
+    a.href = s._venueHref;
+    a.innerHTML = `${icon('pin')} 探访${s.venue}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>`;
+    note.appendChild(a);
+  });
+}
 
+/* ---------- DOM 引用 ---------- */
 const main = $('#cz-main');
 const handroll = $('#czHandroll');
 const handrollWin = document.querySelector('.cz-handroll-window');
@@ -65,12 +86,10 @@ const routeMarker = $('#cz-route-marker');
 
 /* 全局状态 */
 const state = {
-  handrollW: 0,        // 手卷总宽度
   viewportW: 0,        // 手卷窗口宽度
   scrollH: 0,          // 驱动条总高
   maxTranslateX: 0,    // 手卷最大 translateX
   maxScroll: 0,        // 驱动条最大 scroll
-  currX: 0,            // 当前 translateX
   activeStationId: null,
   _lastActiveT: 0,     // 上次交互时间(用于暂停粒子)
   // DOM 缓存(避免每帧 $$ 查询)
@@ -95,7 +114,6 @@ function layout() {
 
   handroll.style.width = totalW + 'px';
 
-  state.handrollW = totalW;
   state.viewportW = vw;
   state.maxTranslateX = Math.max(0, totalW - vw);
   // 滚动驱动条高度（降低总滚动量，减轻滚动疲劳）
@@ -132,6 +150,17 @@ function buildInkDots(totalW, vh) {
 }
 
 /* 构建手卷内容：SVG路线 + 印章 + 笺纸 */
+/* 路径长度近似：相邻点直线距离累加 ×1.12 修正贝塞尔弧长（手卷主线与迷你地图共用） */
+function approxPathLen(pts) {
+  let len = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const dx = pts[i].x - pts[i - 1].x;
+    const dy = pts[i].y - pts[i - 1].y;
+    len += Math.sqrt(dx * dx + dy * dy);
+  }
+  return len * 1.12;
+}
+
 function buildContents(totalW, vh, perStationW, sidePad) {
   if (!handrollCont) return;
   handrollCont.innerHTML = '';
@@ -186,15 +215,8 @@ function buildContents(totalW, vh, perStationW, sidePad) {
   // 改经 CSS filter 列表同时应用描边阴影滤镜 + 进度线投影暖光
   progPath.setAttribute('style', 'filter: url(#czHandShadow) drop-shadow(0 0 10px rgba(255,100,60,0.55));');
 
-  // 先估算路径总长度
-  // 用直线近似总和
-  let approxLen = 0;
-  for (let i = 1; i < pts.length; i++) {
-    const dx = pts[i].x - pts[i - 1].x;
-    const dy = pts[i].y - pts[i - 1].y;
-    approxLen += Math.sqrt(dx * dx + dy * dy);
-  }
-  approxLen = approxLen * 1.12;  // 贝塞尔修正
+  // 先估算路径总长度（直线近似 ×1.12 贝塞尔修正，与迷你地图共用同一 helper）
+  const approxLen = approxPathLen(pts);
   progPath.setAttribute('stroke-dasharray', `${approxLen} ${approxLen + 200}`);
   progPath.setAttribute('stroke-dashoffset', approxLen);
 
@@ -229,7 +251,14 @@ function buildContents(totalW, vh, perStationW, sidePad) {
           ${stampSvg(s)}
         </div>
       `;
+    // 印章键盘可达：tabindex + Enter/Space 触发跳站（与点击同路径）
+    stamp.tabIndex = 0;
+    stamp.setAttribute('role', 'button');
+    stamp.setAttribute('aria-label', `跳转到第 ${s.id} 站 ${s.name}`);
     stamp.addEventListener('click', () => scrollToStation(s.id));
+    stamp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToStation(s.id); }
+    });
     handrollCont.appendChild(stamp);
     state._stampEls.push(stamp);
     state._stampXs.push(p.x);
@@ -278,68 +307,14 @@ function buildContents(totalW, vh, perStationW, sidePad) {
   });
 }
 
-/* 生成单站朱砂印章 SVG（站内文字竖排） */
-function stampSvg(s) {
-  const ch = s.name;
-  const len = ch.length;
-  // 1字:一行；2字:两行各1；3字:左1右2；4字:2x2
-  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="cz-station-svg">
-      <defs>
-        <filter id="stampTex_${s.id}" x="-10%" y="-10%" width="120%" height="120%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="1" seed="${s.id * 7}"/>
-          <feColorMatrix values="0 0 0 0 0.2  0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0.5 0"/>
-          <feComposite in2="SourceGraphic" operator="in"/>
-          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode/></feMerge>
-        </filter>
-      </defs>
-      <rect x="5" y="5" width="90" height="90" rx="6" ry="6"
-            fill="#b22222" stroke="#6b1111" stroke-width="3.2"
-            filter="url(#stampTex_${s.id})" opacity="0.92"/>
-      <rect x="11" y="11" width="78" height="78" rx="3" ry="3"
-            fill="none" stroke="#fff3c2" stroke-width="1" opacity="0.45"/>
-      <g font-family="'STKaiti','KaiTi','FangSong',serif" font-weight="800" fill="#fff3d2"
-         text-anchor="middle" dominant-baseline="central">
-        ${renderStampText(ch, len)}
-      </g>
-    </svg>`;
-  return svg;
-}
-
-function renderStampText(chars, len) {
-  const arr = Array.from(chars);
-  if (len === 1) {
-    return `<text x="50" y="52" font-size="60">${arr[0]}</text>`;
-  }
-  if (len === 2) {
-    return `<text x="50" y="30" font-size="38">${arr[0]}</text>
-              <text x="50" y="72" font-size="38">${arr[1]}</text>`;
-  }
-  if (len === 3) {
-    return `<text x="28" y="52" font-size="42" writing-mode="tb">${arr[0]}</text>
-              <text x="68" y="30" font-size="34">${arr[1]}</text>
-              <text x="68" y="70" font-size="34">${arr[2]}</text>`;
-  }
-  // 4字及以上：2列竖排，从左到右（左列先上后下，右列再上后下）
-  const left = arr.slice(0, Math.ceil(len / 2));
-  const right = arr.slice(Math.ceil(len / 2));
-  const topY = 50 - ((left.length - 1) * 22) / 2;
-  const fs = len >= 6 ? 26 : 30;
-  let out = '';
-  left.forEach((c, i) => { out += `<text x="34" y="${topY + i * 22}" font-size="${fs}">${c}</text>`; });
-  const topY2 = 50 - ((right.length - 1) * 22) / 2;
-  right.forEach((c, i) => { out += `<text x="66" y="${topY2 + i * 22}" font-size="${fs}">${c}</text>`; });
-  return out;
-}
-
-
 /* ---------- 滚动 → translateX 映射 ---------- */
 function onScroll() {
   state._lastActiveT = performance.now();
   // 全屏定格期间：锁住滚动，让卷轴停在当前站，不跟着滚走
-  if (_cinematicHoldScroll !== null) {
+  if (theaterLock.active) {
     const y = window.pageYOffset || document.documentElement.scrollTop;
     // 用 instant 而非默认（默认会继承 CSS scroll-behavior:smooth，与滚轮打架导致抖动）
-    if (Math.abs(y - _cinematicHoldScroll) > 1) _instantScroll(_cinematicHoldScroll);
+    if (Math.abs(y - theaterLock.getY()) > 1) _instantScroll(theaterLock.getY());
     return;
   }
   if (!state.maxScroll || state.maxScroll <= 0) return;
@@ -348,7 +323,6 @@ function onScroll() {
   const progress = clampedScroll / state.maxScroll;  // 0~1
 
   const x = -progress * state.maxTranslateX;
-  state.currX = x;
   handroll.style.transform = `translate3d(${x.toFixed(2)}px, 0, 0)`;
 
   // 卷轴木纹滚动效果 (两根卷轴: 左卷轴收, 右卷轴放)
@@ -555,7 +529,7 @@ function startAutoScroll() {
   const tick = (t) => {
     const dt = Math.min(100, t - lastT);  // 封顶100ms，防后台标签恢复后跳一大段
     lastT = t;
-    if (_cinematicHoldScroll === null) {  // 全屏定格期间暂停等待
+    if (!theaterLock.active) {  // 全屏定格期间暂停等待
       const y = window.pageYOffset || document.documentElement.scrollTop;
       const next = Math.max(0, Math.min(state.maxScroll, y + speedPerMs * dt));
       _instantScroll(next);
@@ -583,190 +557,6 @@ function toggleAutoScroll() {
   startAutoScroll();
 }
 
-/* ---------- 文物详情弹窗 ---------- */
-const relicModal = $('#cz-relic-modal');
-const relicSvgBox = $('#cz-relic-svg');
-const relicNameEl = $('#cz-relic-name');
-const relicStoryEl = $('#cz-relic-story');
-const relicStationEl = $('#cz-relic-station');
-function openRelicDetail(stationId) {
-  const s = STATIONS[stationId - 1];
-  const relic = RELIC_MAP[s && s.id];
-  if (!s || !relic || !relicModal) return;
-  if (relicSvgBox) relicSvgBox.innerHTML = relic.svg;
-  if (relicNameEl) relicNameEl.textContent = relic.name;
-  if (relicStoryEl) relicStoryEl.textContent = relic.story;
-  if (relicStationEl) relicStationEl.textContent = `${s.name} · ${s.date} · 已走 ${s.miles} 里`;
-  relicModal.classList.add('show');
-  relicModal.setAttribute('aria-hidden', 'false');
-  lockBodyScroll();
-  const closeBtn = $('#cz-relic-close');
-  trapFocus(relicModal, {
-    initialFocus: closeBtn,
-    onClose: closeRelic
-  });
-}
-function closeRelic() {
-  // 仅当文物弹窗确实打开时才解锁，避免 Escape 误触发把滚动锁计数减穿
-  if (!relicModal || !relicModal.classList.contains('show')) return;
-  releaseFocus();
-  relicModal.classList.remove('show');
-  relicModal.setAttribute('aria-hidden', 'true');
-  unlockBodyScroll();
-}
-
-/* ---------- 终点成就：走完全程 → 长征纪念卡 ---------- */
-const completeOverlay = $('#cz-complete');
-let _completeShown = false;
-function showComplete() {
-  if (!completeOverlay) return;
-  completeOverlay.classList.add('show');
-  completeOverlay.setAttribute('aria-hidden', 'false');
-  lockBodyScroll();
-  const completeBtn = $('#cz-complete-btn');
-  trapFocus(completeOverlay, {
-    initialFocus: completeBtn,
-    onClose: closeComplete
-  });
-}
-function closeComplete() {
-  if (!completeOverlay || !completeOverlay.classList.contains('show')) return;
-  releaseFocus();
-  completeOverlay.classList.remove('show');
-  completeOverlay.setAttribute('aria-hidden', 'true');
-  unlockBodyScroll();
-}
-
-/* ---------- 长征纪念卡：专属弹窗 ---------- */
-// 精神词列表复用 cardgen 的 SPIRITS（单一来源，避免两处漂移）
-const CZ_CARD_SPIRITS = Array.isArray(CZ_SPIRITS) ? CZ_SPIRITS : ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];
-const czCardModal = $('#cz-card-modal');
-const czCardBgs = $('#cz-card-bgs');
-const czCardSpirits = $('#cz-card-spirits');
-const czCardName = $('#cz-card-name');
-const czCardPreview = $('#cz-card-preview');
-const czCardPreviewImg = $('#cz-card-preview-img');
-const czCardSavehint = $('#cz-card-savehint');
-let _czCardBg = 0;
-let _czCardSpirit = 0;
-let _czCardDataUrl = null;
-
-function buildCardModal() {
-  if (!czCardBgs || !czCardSpirits) return;
-  if (czCardBgs.children.length > 0) {
-    // 已构建过：保留用户已选的背景/精神高亮
-    czCardBgs.querySelectorAll('.cz-card-bg').forEach(x => x.classList.toggle('selected', parseInt(x.dataset.i, 10) === _czCardBg));
-    czCardSpirits.querySelectorAll('.cz-card-chip').forEach(x => x.classList.toggle('selected', parseInt(x.dataset.i, 10) === _czCardSpirit));
-    return;
-  }
-  const bp = getBasePath();
-  czCardBgs.innerHTML = CZ_CARD_BGS.map((b, i) =>
-    `<div class="cz-card-bg${i === 0 ? ' selected' : ''}" data-i="${i}" data-src="${escapeAttr(bp + b.src)}"><span>${b.label}</span></div>`
-  ).join('');
-  czCardBgs.querySelectorAll('.cz-card-bg').forEach(el => {
-    const src = el.dataset.src;
-    if (src) el.style.backgroundImage = 'url(' + src + ')';
-    el.addEventListener('click', () => {
-      _czCardBg = parseInt(el.dataset.i, 10);
-      czCardBgs.querySelectorAll('.cz-card-bg').forEach(x => x.classList.toggle('selected', x === el));
-    });
-  });
-  czCardSpirits.innerHTML = CZ_CARD_SPIRITS.map((s, i) =>
-    `<button type="button" class="cz-card-chip${i === 0 ? ' selected' : ''}" data-i="${i}">${s}</button>`
-  ).join('');
-  czCardSpirits.querySelectorAll('.cz-card-chip').forEach(el => {
-    el.addEventListener('click', () => {
-      _czCardSpirit = parseInt(el.dataset.i, 10);
-      czCardSpirits.querySelectorAll('.cz-card-chip').forEach(x => x.classList.toggle('selected', x === el));
-    });
-  });
-}
-function openCardModal() {
-  if (!czCardModal) return;
-  buildCardModal();
-  czCardModal.classList.add('open');
-  lockBodyScroll();
-  trapFocus(czCardModal, {
-    initialFocus: czCardName,
-    onClose: closeCardModal
-  });
-}
-function closeCardModal() {
-  if (!czCardModal || !czCardModal.classList.contains('open')) return;
-  releaseFocus();
-  czCardModal.classList.remove('open');
-  unlockBodyScroll();
-  _czCardDataUrl = null; // 复位，避免重开后直接导出上一张旧卡面
-}
-function generateLongMarchCard() {
-  const genBtn = $('#cz-card-gen');
-  if (genBtn && genBtn.disabled) return;
-  if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '正在盖章…'; }
-  const resetBtn = () => { if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = icon('sparkle') + ' 生成纪念卡'; } };
-  const name = (czCardName && czCardName.value.trim()) || '同学';
-  const spirit = CZ_CARD_SPIRITS[_czCardSpirit] || '长征';
-  const bg = CZ_CARD_BGS[_czCardBg] || CZ_CARD_BGS[0];
-  if (typeof czRenderCard !== 'function') {
-    resetBtn();
-    showToast('纪念卡模块未加载');
-    return;
-  }
-  const img = new Image();
-  // 背景图挂起时 8 秒超时复位按钮，避免长期禁用
-  const failTimer = setTimeout(() => {
-    if (genBtn && genBtn.disabled) { resetBtn(); showToast('背景图加载超时，请重试'); }
-  }, 8000);
-  img.onload = () => {
-    clearTimeout(failTimer);
-    try {
-      _czCardDataUrl = czRenderCard(img, spirit, name, '二万五千里 · 走完全程');
-    } catch (e) {
-      _czCardDataUrl = null;
-      resetBtn();
-      showToast('生成失败，请重试');
-      return;
-    }
-    if (czCardPreview && czCardPreviewImg) {
-      czCardPreviewImg.src = _czCardDataUrl;
-      czCardPreview.classList.remove('is-hidden');
-    }
-    if (czCardSavehint) {
-      const showHint = isTouchDevice() && window.innerWidth < 900;
-      czCardSavehint.classList.toggle('is-hidden', !showHint);
-    }
-    resetBtn();
-  };
-  img.onerror = () => { clearTimeout(failTimer); _czCardDataUrl = null; resetBtn(); showToast('背景图加载失败'); };
-  img.src = getBasePath() + bg.src;
-}
-function downloadLongMarchCard() {
-  if (!_czCardDataUrl || typeof czDataUrlToBlob !== 'function') return;
-  const blob = czDataUrlToBlob(_czCardDataUrl);
-  if (!blob) return;
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.download = '长征纪念卡_' + Date.now() + '.png';
-  a.href = url;
-  document.body.appendChild(a);
-  a.addEventListener('click', ev => ev.stopPropagation());
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 3000);
-}
-function shareLongMarchCard() {
-  if (!_czCardDataUrl || typeof czDataUrlToBlob !== 'function') return;
-  const blob = czDataUrlToBlob(_czCardDataUrl);
-  if (!blob) return;
-  if (navigator.share && navigator.canShare) {
-    const file = new File([blob], '长征纪念卡.png', { type: 'image/png' });
-    if (navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: '长征纪念卡', text: '我走完了二万五千里长征' }).catch(() => { });
-      return;
-    }
-  }
-  downloadLongMarchCard();
-}
-
 /* 接线：音景开关 + 文物弹窗关闭 + 笺纸文物点击（事件委托） */
 function initImmersiveUI() {
   // 环境音引擎初始化(自包含模块管理开关点击与状态，注入当前站点回调供 mood 使用)
@@ -787,35 +577,36 @@ function initImmersiveUI() {
   });
   const relicClose = $('#cz-relic-close');
   if (relicClose) relicClose.addEventListener('click', closeRelic);
-  if (relicModal) relicModal.addEventListener('click', (e) => { if (e.target === relicModal) closeRelic(); });
+  initModalsUI(); // 文物/成就弹窗的遮罩点击接线收在 cz-modals 内
   // Escape：按"最上层弹窗优先"关闭，避免误关下层弹窗并破坏 body 滚动锁计数
   // 已与 focus-trap.js 协作：focus-trap 处理 Escape 时会 preventDefault，此处跳过已处理事件
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || e.defaultPrevented) return;
-    if (czCardModal && czCardModal.classList.contains('open')) { closeCardModal(); return; }
-    if (completeOverlay && completeOverlay.classList.contains('show')) { closeComplete(); return; }
+    if (isCardModalOpen()) { closeCardModal(); return; }
+    if (isCompleteOpen()) { closeComplete(); return; }
     closeRelic();
   });
-  // 终点成就：领取长征纪念卡（打开专属弹窗）/ 关闭
+  // 终点成就：领取长征纪念卡（打开专属弹窗）/ 关闭（成就弹窗遮罩接线已在 initModalsUI 内）
   const completeBtn = $('#cz-complete-btn');
   if (completeBtn) completeBtn.addEventListener('click', (e) => { e.stopPropagation(); openCardModal(); });
   const completeClose = $('#cz-complete-close');
   if (completeClose) completeClose.addEventListener('click', closeComplete);
-  if (completeOverlay) completeOverlay.addEventListener('click', (e) => { if (e.target === completeOverlay) closeComplete(); });
-  // 长征纪念卡弹窗：关闭 / 生成 / 下载 / 分享
-  const czCardClose = $('#cz-card-close');
-  if (czCardClose) czCardClose.addEventListener('click', closeCardModal);
-  if (czCardModal) czCardModal.addEventListener('click', (e) => { if (e.target === czCardModal) closeCardModal(); });
-  const czCardGen = $('#cz-card-gen');
-  if (czCardGen) czCardGen.addEventListener('click', generateLongMarchCard);
-  const czCardDownload = $('#cz-card-download');
-  if (czCardDownload) czCardDownload.addEventListener('click', downloadLongMarchCard);
-  const czCardShare = $('#cz-card-share');
-  if (czCardShare) czCardShare.addEventListener('click', shareLongMarchCard);
+  // 长征纪念卡弹窗：关闭 / 生成 / 下载 / 分享（接线收在 cz-card-modal 内）
+  initCardModalUI();
   if (handrollCont) {
     handrollCont.addEventListener('click', (e) => {
       const relicEl = e.target.closest('.cz-note-relic');
       if (!relicEl) return;
+      const note = relicEl.closest('.cz-note');
+      const sid = note ? parseInt(note.dataset.stationId, 10) : 0;
+      if (sid) openRelicDetail(sid);
+    });
+    // 文物块 role=button 键盘可达：Enter/Space 触发同一打开路径（与 click 委托一致）
+    handrollCont.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const relicEl = e.target.closest('.cz-note-relic');
+      if (!relicEl) return;
+      e.preventDefault();
       const note = relicEl.closest('.cz-note');
       const sid = note ? parseInt(note.dataset.stationId, 10) : 0;
       if (sid) openRelicDetail(sid);
@@ -870,20 +661,21 @@ function setActive(id) {
   setPhoto(photo);
 
   // 到达延安 → 终点成就（取代小剧场，直接进入大场面）
-  if (s.id === 17 && !_completeShown) {
-    _completeShown = true;
+  if (s.id === 17 && !isCompleteShown()) {
     _shownTheater.add(17);  // 成就取代站17小剧场，标记已播，回滚不补播
-    showComplete();
+    showComplete();  // _completeShown 由 cz-modals 内部维护
+    stopAutoScroll();  // 终点成就已 lockBodyScroll，停止自动行军空转 rAF
   } else if (_firstStationDone && !_shownTheater.has(s.id)) {
-    // 每站小剧场：先让笺纸卡片落定，再切入该站实景 + 专属天气（每站只播一次，回滚不重放）
-    _shownTheater.add(s.id);
+    // 每站小剧场：先让笺纸卡片落定，再切入该站实景 + 专属天气
+    // 仅在真正开播时标记"已播"：快速滑过/被取消的站不记入，回滚回来会重新调度，避免"快速路过"永久丢失
     const sid = s.id;
     clearTimeout(_theaterTimer);
     _theaterTimer = setTimeout(() => {
-      // 若用户已滑到别的站则不播
+      // 若用户已滑到别的站则不播（不标记，回来可补播）
       if (state.activeStationId !== sid) return;
-      _cinematicHoldScroll = window.pageYOffset || document.documentElement.scrollTop;
-      showTheater(sid);
+      _shownTheater.add(sid);
+      theaterLock.hold();
+      showTheater(sid, scrollToStation);  // 收场后补执行被吞掉的跳站
     }, 1000);
   }
 }
@@ -909,125 +701,10 @@ let _dropGen = 0;
 /* 诗词每站只浮现一次 */
 const _poemShown = new Set();
 
-/* 每站小剧场：到站切入该站实景 + 专属天气 + 氛围 */
+/* 每站小剧场调度（播放本身在 cz-theater.js） */
 let _theaterTimer = null;
-let _theaterHideTimer = null;
-let _cinematicHoldScroll = null;  // 小剧场期间锁定的滚动位置（防卷轴跟着滚走）
 const _shownTheater = new Set();  // 已播过小剧场的站（回滚不重放）
 let _firstStationDone = false;
-let _theaterRaf = null;
-const theaterOverlay = $('#cz-theater');
-const theaterPhoto = $('#cz-theater-photo');
-const theaterName = $('#cz-theater-name');
-const theaterDate = $('#cz-theater-date');
-const theaterWeatherCv = $('#cz-theater-weather');
-/* 手绘山水场景为静态 HTML（czScrollScene），由 CSS 驱动，无需 JS 注入 */
-
-function showTheater(id) {
-  const s = STATIONS[id - 1];
-  if (!s || !theaterOverlay) {
-    _cinematicHoldScroll = null;  // 早退也复位，避免锁死滚动
-    return;
-  }
-  const photo = STATION_PHOTOS[s.id];
-  if (photo && theaterPhoto) theaterPhoto.style.backgroundImage = `url(${getBasePath()}images/longmarch/${photo})`;
-  if (theaterName) theaterName.textContent = s.name;
-  if (theaterDate) theaterDate.textContent = s.date + ' · 已走 ' + (s.miles || 0).toLocaleString() + ' 里';
-  theaterOverlay.classList.toggle('fog-on', s.mood === 'swamp');
-  theaterOverlay.classList.toggle('flash-on', s.mood === 'blood');  // 血战站雷暴电闪
-  startTheaterWeather(s.mood);
-  theaterOverlay.classList.add('show');
-  theaterOverlay.setAttribute('aria-hidden', 'false');
-  clearTimeout(_theaterHideTimer);
-  _theaterHideTimer = setTimeout(() => {
-    _cinematicHoldScroll = null;  // 收场：恢复滚动
-    theaterOverlay.classList.remove('show');
-    theaterOverlay.setAttribute('aria-hidden', 'true');
-    stopTheaterWeather();
-  }, 1000);
-}
-
-/* 小剧场天气：Canvas 粒子（血色雨+火光余烬+硝烟 / 风雪 / 星火 / 金光 / 阴雾细雨） */
-function startTheaterWeather(mood) {
-  const cv = theaterWeatherCv;
-  if (!cv) return;
-  cv.width = window.innerWidth;
-  cv.height = window.innerHeight;
-  const ctx = cv.getContext('2d');
-  const type = (mood === 'blood') ? 'bloodrain' : (mood === 'snow') ? 'snow' : (mood === 'gold') ? 'gold' : (mood === 'swamp') ? 'fog' : 'embers';
-  const parts = [];
-  const add = (t, n) => { for (let i = 0; i < n; i++) parts.push(_makeWPart(t)); };
-  if (type === 'snow') add('snow', 130);
-  else if (type === 'bloodrain') { add('bloodrain', 90); add('embers', 50); add('smoke', 14); }
-  else if (type === 'embers') add('embers', 60);
-  else if (type === 'gold') add('gold', 60);
-  // swamp 的雾气由 CSS .cz-theater-fog 层实现；canvas 无 fog 更新/绘制分支，
-  // 不再创建每帧空跑的不渲染死粒子
-  cancelAnimationFrame(_theaterRaf);
-  const draw = () => {
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    for (let i = 0; i < parts.length; i++) {
-      const t = parts[i]._t;
-      _drawWPart(ctx, parts[i], cv.width, cv.height, t);
-      _updateWPart(parts[i], t);
-    }
-    _theaterRaf = requestAnimationFrame(draw);
-  };
-  _theaterRaf = requestAnimationFrame(draw);
-}
-function stopTheaterWeather() {
-  cancelAnimationFrame(_theaterRaf);
-  _theaterRaf = null;
-}
-function _makeWPart(type) {
-  const p = { x: Math.random(), y: Math.random(), phase: Math.random() * Math.PI * 2, r: 1.5, spd: 0.01, len: 0.02, w: 2, _t: type };
-  if (type === 'bloodrain') { p.len = 0.018 + Math.random() * 0.03; p.spd = 0.03 + Math.random() * 0.05; p.w = 1.5 + Math.random() * 1.5; }
-  else if (type === 'snow') { p.r = 1.5 + Math.random() * 3; p.spd = 0.006 + Math.random() * 0.014; p.sway = 0.5 + Math.random(); }
-  else if (type === 'embers') { p.r = 1 + Math.random() * 2.5; p.spd = 0.004 + Math.random() * 0.01; p.sway = 0.3 + Math.random() * 0.8; }
-  else if (type === 'gold') { p.r = 0.8 + Math.random() * 2; p.spd = 0.003 + Math.random() * 0.008; p.sway = 0.4 + Math.random(); }
-  else if (type === 'smoke') { p.r = 8 + Math.random() * 16; p.spd = 0.002 + Math.random() * 0.004; p.sway = 0.4 + Math.random() * 0.6; p.op = 0.12 + Math.random() * 0.18; }
-  return p;
-}
-function _updateWPart(p, type) {
-  if (type === 'bloodrain') {
-    p.x += 0.005; p.y += p.spd;
-    if (p.y > 1) { p.y = -0.03; p.x = Math.random(); }
-    if (p.x > 1) p.x = -0.02;
-  } else if (type === 'snow') {
-    p.phase += 0.03; p.x += Math.sin(p.phase) * p.sway * 0.002; p.y += p.spd;
-    if (p.y > 1) { p.y = -0.02; p.x = Math.random(); }
-  } else if (type === 'embers' || type === 'gold') {
-    p.phase += (type === 'embers' ? 0.04 : 0.02);
-    p.x += Math.sin(p.phase) * p.sway * 0.002; p.y -= p.spd;
-    if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
-  } else if (type === 'smoke') {
-    p.phase += 0.015; p.x += Math.sin(p.phase) * p.sway * 0.0012; p.y -= p.spd; p.r += 0.02;
-    if (p.y < -0.05 || p.r > 60) { p.y = 1.02; p.x = Math.random(); p.r = 8 + Math.random() * 16; }
-  }
-}
-function _drawWPart(ctx, p, w, h, type) {
-  const X = p.x * w, Y = p.y * h;
-  if (type === 'bloodrain') {
-    ctx.strokeStyle = 'rgba(200, 30, 20, 0.5)';
-    ctx.lineWidth = p.w;
-    ctx.beginPath(); ctx.moveTo(X, Y); ctx.lineTo(X - p.len * w * 0.05, Y + p.len * h); ctx.stroke();
-  } else if (type === 'snow') {
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.beginPath(); ctx.arc(X, Y, p.r, 0, Math.PI * 2); ctx.fill();
-  } else if (type === 'embers') {
-    ctx.fillStyle = 'rgba(255,150,70,0.8)';
-    ctx.beginPath(); ctx.arc(X, Y, p.r, 0, Math.PI * 2); ctx.fill();
-  } else if (type === 'gold') {
-    ctx.fillStyle = 'rgba(255,215,110,0.7)';
-    ctx.beginPath(); ctx.arc(X, Y, p.r, 0, Math.PI * 2); ctx.fill();
-  } else if (type === 'smoke') {
-    const g = ctx.createRadialGradient(X, Y, 0, X, Y, p.r);
-    g.addColorStop(0, `rgba(45,32,25,${p.op})`);
-    g.addColorStop(1, 'rgba(45,32,25,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(X, Y, p.r, 0, Math.PI * 2); ctx.fill();
-  }
-}
 
 /* 切换背景 mood 层（用缓存集合，不再每次 querySelector） */
 function setMood(mood) {
@@ -1076,19 +753,15 @@ function buildMiniRoute() {
   routeTrack.setAttribute('d', d);
   routeFill.setAttribute('d', d);
 
-  // 估算路径总长，用于 stroke-dasharray 控制进度
-  let approxLen = 0;
-  for (let i = 1; i < pts.length; i++) {
-    const dx = pts[i].x - pts[i - 1].x;
-    const dy = pts[i].y - pts[i - 1].y;
-    approxLen += Math.sqrt(dx * dx + dy * dy);
-  }
-  approxLen = approxLen * 1.12;
+  // 估算路径总长，用于 stroke-dasharray 控制进度（与手卷主线共用 approxPathLen）
+  const approxLen = approxPathLen(pts);
   state._miniRouteLen = approxLen;
   routeFill.setAttribute('stroke-dasharray', `${approxLen} ${approxLen + 200}`);
   routeFill.setAttribute('stroke-dashoffset', approxLen);
 
   // 17个站点圆点(点击跳转)
+  // 只给关键站标名，避免 17 个名字在 200-300px 小卡片上糊成一团
+  const KEY_STATIONS = [1, 7, 11, 16, 17];
   routeDots.innerHTML = '';
   state._miniDotEls.length = 0;
   pts.forEach((p, i) => {
@@ -1120,8 +793,7 @@ function buildMiniRoute() {
     c.setAttribute('stroke-width', 1.8);
     g.appendChild(c);
 
-    // 标签（偶数站上，奇数站下）——只给关键站标名，避免 17 个名字在 200-300px 小卡片上糊成一团
-    const KEY_STATIONS = [1, 7, 11, 16, 17];
+    // 标签（偶数站上，奇数站下）——只给关键站标名
     if (KEY_STATIONS.includes(s.id)) {
       const label = document.createElementNS(svgNS, 'text');
       label.setAttribute('x', 0);
@@ -1135,7 +807,14 @@ function buildMiniRoute() {
       g.appendChild(label);
     }
 
+    // 迷你圆点键盘可达：tabindex + Enter/Space 触发跳站（SVG 元素经 tabindex 可聚焦）
+    g.setAttribute('tabindex', '0');
+    g.setAttribute('role', 'button');
+    g.setAttribute('aria-label', `跳转到第 ${s.id} 站 ${s.name}`);
     g.addEventListener('click', () => scrollToStation(s.id));
+    g.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToStation(s.id); }
+    });
     routeDots.appendChild(g);
     state._miniDotEls.push(g);
   });
@@ -1144,6 +823,8 @@ function buildMiniRoute() {
 function scrollToStation(id) {
   // 手动跳转站台时立即接管自动行军，避免 rAF 逐帧把目标跳转覆盖回去
   stopAutoScroll();
+  // 小剧场 hold 期间滚动手卷会被 _instantScroll 拉回：挂起跳转，收场后补执行
+  if (theaterLock.active) { theaterLock.deferStation(id); return; }
   const sx = state._stampXs[id - 1];
   if (sx === undefined || !state.maxTranslateX) return;
   // 想让 sx 落在手卷窗口中心 = translateX = state.viewportW/2 - sx
@@ -1156,292 +837,29 @@ function scrollToStation(id) {
 }
 
 /* ---------- Canvas 气候粒子系统：5 种粒子按 mood 切换 ---------- */
-function initAtmosphere() {
-  if (_reduceMotion) return;
-  const c = document.getElementById('cz-atmos');
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  let W, H, dpr;
-  const parts = [];
-  const small = window.innerWidth < 768;
-  const isHiDpr = (window.devicePixelRatio || 1) >= 2;
-  const N_EMBER = small ? (isHiDpr ? 22 : 32) : (isHiDpr ? 52 : 72);
-  const N_SNOW = small ? (isHiDpr ? 45 : 65) : (isHiDpr ? 85 : 115);
-  const N_BLOOD = small ? (isHiDpr ? 10 : 15) : (isHiDpr ? 15 : 20);
-  const N_BUBBLE = small ? (isHiDpr ? 16 : 22) : (isHiDpr ? 28 : 40);
-  const N_GOLD = small ? (isHiDpr ? 28 : 40) : (isHiDpr ? 55 : 80);
-  let curMood = null;
-  let curCount = 0;
-  let curSpawn = null;
-
-  function resize() {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    W = window.innerWidth;
-    H = window.innerHeight;
-    c.width = W * dpr; c.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // ========== 粒子生成器 ==========
-  const spawners = {
-    ember: () => ({
-      type: 'ember',
-      x: Math.random() * W,
-      y: H + Math.random() * 40,
-      vx: -0.3 + Math.random() * 0.6,
-      vy: -0.5 - Math.random() * 1.1,
-      r: 1 + Math.random() * 2.6,
-      life: 0,
-      maxLife: 4000 + Math.random() * 5000,
-      hue: 10 + Math.random() * 38,
-      flick: Math.random() * Math.PI * 2
-    }),
-    snow: () => ({
-      type: 'snow',
-      x: Math.random() * W,
-      y: -10 - Math.random() * 40,
-      vx: -0.6 + Math.random() * 1.2,
-      vy: 0.4 + Math.random() * 1.1,
-      r: 0.9 + Math.random() * 2.6,
-      life: 0,
-      maxLife: 6000 + Math.random() * 6000,
-      drift: Math.random() * Math.PI * 2,
-      driftSp: 0.001 + Math.random() * 0.002
-    }),
-    blood: () => ({
-      type: 'blood',
-      x: Math.random() * W,
-      y: -10 - Math.random() * 60,
-      vx: -0.15 + Math.random() * 0.3,
-      vy: 0.7 + Math.random() * 1.4,
-      r: 0.7 + Math.random() * 1.8,
-      life: 0,
-      maxLife: 5000 + Math.random() * 4000
-    }),
-    swamp: () => ({
-      type: 'bubble',
-      x: Math.random() * W,
-      y: H + Math.random() * 60,
-      vx: -0.2 + Math.random() * 0.4,
-      vy: -0.3 - Math.random() * 0.7,
-      r: 1.5 + Math.random() * 4.5,
-      life: 0,
-      maxLife: 5500 + Math.random() * 5500,
-      wob: Math.random() * Math.PI * 2
-    }),
-    gold: () => ({
-      type: 'gold',
-      x: Math.random() * W,
-      y: H + Math.random() * 40,
-      vx: -0.4 + Math.random() * 0.8,
-      vy: -0.6 - Math.random() * 1.4,
-      r: 0.8 + Math.random() * 2.4,
-      life: 0,
-      maxLife: 4500 + Math.random() * 5500,
-      spin: Math.random() * Math.PI * 2,
-      sparkle: Math.random() * Math.PI * 2
-    })
-  };
-
-  function setMoodConfig(mood) {
-    if (mood === curMood) return;
-    curMood = mood;
-    if (mood === 'ember') { curCount = N_EMBER; curSpawn = spawners.ember; }
-    else if (mood === 'blood') { curCount = N_BLOOD; curSpawn = spawners.blood; }
-    else if (mood === 'snow') { curCount = N_SNOW; curSpawn = spawners.snow; }
-    else if (mood === 'swamp') { curCount = N_BUBBLE; curSpawn = spawners.swamp; }
-    else if (mood === 'gold') { curCount = N_GOLD; curSpawn = spawners.gold; }
-    else { curCount = N_EMBER; curSpawn = spawners.ember; }
-    // 整体重建粒子池：旧类型粒子不残留（否则切 mood 后雪花/余烬残留数秒）
-    parts.length = 0;
-    for (let i = 0; i < curCount; i++) parts.push(curSpawn());
-  }
-  state._setAtmoMood = setMoodConfig;
-  setMoodConfig('ember');
-
-  // ========== 渲染循环 ==========
-  let lastT = performance.now();
-  let atmosRafId = 0;
-  let paused = false;
-
-  function resume() {
-    if (!paused) return;
-    paused = false;
-    lastT = performance.now();
-    if (atmosRafId) cancelAnimationFrame(atmosRafId);
-    atmosRafId = requestAnimationFrame(loop);
-  }
-  function pause() {
-    paused = true;
-    if (atmosRafId) cancelAnimationFrame(atmosRafId);
-    atmosRafId = 0;
-    ctx.clearRect(0, 0, W, H);
-  }
-
-  function loop(t) {
-    atmosRafId = requestAnimationFrame(loop);
-    const dt = Math.min(60, t - lastT); lastT = t;
-    if (document.hidden) { pause(); return; }
-    const idleMs = t - (state._lastActiveT || 0);
-    if (idleMs > 4500 && parts.length) {
-      pause();
-      return;
-    }
-    ctx.clearRect(0, 0, W, H);
-
-    // 按粒子类型走独立分支（优化：避免每粒子 5 次 if 判断）
-    const spawnFn = curSpawn;
-    for (let i = parts.length - 1; i >= 0; i--) {
-      const p = parts[i];
-      p.life += dt;
-      let dead = false;
-      if (p.type === 'ember') {
-        p.flick += dt * 0.01;
-        p.x += p.vx;
-        p.y += p.vy - 0.15 * Math.sin(p.flick);
-        const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
-        if (alpha > 0.02) {
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.5);
-          grad.addColorStop(0, `hsla(${p.hue},100%,75%,${alpha * 0.95})`);
-          grad.addColorStop(0.35, `hsla(${p.hue},100%,55%,${alpha * 0.45})`);
-          grad.addColorStop(1, `hsla(${p.hue},100%,50%,0)`);
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        if (p.life > p.maxLife || p.y < -10) dead = true;
-      } else if (p.type === 'snow') {
-        p.drift += dt * p.driftSp;
-        p.x += p.vx + Math.sin(p.drift) * 0.55;
-        p.y += p.vy;
-        const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
-        if (alpha > 0.02) {
-          ctx.fillStyle = `hsla(210,100%,96%,${alpha * 0.92})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `hsla(205,100%,88%,${alpha * 0.4})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 2.2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        if (p.life > p.maxLife || p.y > H + 15) dead = true;
-      } else if (p.type === 'blood') {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.0025 * dt;
-        const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
-        if (alpha > 0.02) {
-          ctx.fillStyle = `hsla(0,88%,32%,${alpha * 0.92})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `hsla(0,70%,22%,${alpha * 0.5})`;
-          ctx.beginPath();
-          ctx.arc(p.x + 0.8, p.y + 0.6, p.r * 0.55, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        if (p.life > p.maxLife || p.y > H + 15) dead = true;
-      } else if (p.type === 'bubble') {
-        p.wob += dt * 0.002;
-        p.x += p.vx + Math.sin(p.wob) * 0.35;
-        p.y += p.vy;
-        const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
-        if (alpha > 0.02) {
-          const a1 = alpha * 0.8;
-          const a2 = alpha * 0.18;
-          ctx.strokeStyle = `hsla(98,45%,68%,${a1})`;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.fillStyle = `hsla(98,55%,78%,${a2})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `hsla(98,70%,90%,${a1})`;
-          ctx.beginPath();
-          ctx.arc(p.x - p.r * 0.35, p.y - p.r * 0.35, Math.max(0.5, p.r * 0.25), 0, Math.PI * 2);
-          ctx.fill();
-        }
-        if (p.life > p.maxLife || p.y < -15) dead = true;
-      } else if (p.type === 'gold') {
-        p.spin += dt * 0.006;
-        p.sparkle += dt * 0.005;
-        p.x += p.vx;
-        p.y += p.vy;
-        const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
-        if (alpha > 0.02) {
-          const a1 = alpha * 0.95;
-          const a2 = alpha * 0.45;
-          const sparkM = 0.65 + 0.35 * Math.sin(p.sparkle);
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
-          grad.addColorStop(0, `hsla(48,100%,82%,${alpha * 0.9})`);
-          grad.addColorStop(0.4, `hsla(46,100%,62%,${a2})`);
-          grad.addColorStop(1, `hsla(44,100%,55%,0)`);
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `hsla(52,100%,${Math.round(70 + sparkM * 22)}%,${a1})`;
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.spin);
-          const s = p.r * 1.4;
-          ctx.beginPath();
-          ctx.moveTo(0, -s);
-          ctx.lineTo(s * 0.28, -s * 0.28);
-          ctx.lineTo(s, 0);
-          ctx.lineTo(s * 0.28, s * 0.28);
-          ctx.lineTo(0, s);
-          ctx.lineTo(-s * 0.28, s * 0.28);
-          ctx.lineTo(-s, 0);
-          ctx.lineTo(-s * 0.28, -s * 0.28);
-          ctx.closePath();
-          ctx.fill();
-          ctx.restore();
-        }
-        if (p.life > p.maxLife || p.y < -10) dead = true;
-      }
-      if (dead) {
-        if (spawnFn) parts[i] = spawnFn();
-        else { parts[i] = parts[parts.length - 1]; parts.pop(); }
-      }
-    }
-  }
-  atmosRafId = requestAnimationFrame(loop);
-  state._lastActiveT = performance.now();
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) pause();
-    else { resume(); state._lastActiveT = performance.now(); }
-  });
-  const wake = () => { state._lastActiveT = performance.now(); if (paused) resume(); };
-  window.addEventListener('scroll', wake, { passive: true });
-  window.addEventListener('pointerdown', wake, { passive: true });
-  window.addEventListener('wheel', wake, { passive: true });
-}
 
 /* ---------- 初始化 ---------- */
 async function init() {
   if (!main) return;
-  await resolveVenueLinks();
+  // 手卷是首屏唯一视觉核心：先 layout 立即展开，场馆 JSON 解析改为后台进行，完成后补"探访"链接
   layout();
+  resolveVenueLinks().then(patchVenueLinks);
   initImmersiveUI();
   // 滚动驱动：scroll 事件 + RAF 节流
   let ticking = false;
   const onScrollRaf = () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { try { onScroll(); } finally { ticking = false; } }); } };
   window.addEventListener('scroll', onScrollRaf, { passive: true });
 
-  // 键盘导航：Left/Right 切换站点
+  // 键盘导航：Left/Right 切换站点（弹窗/小剧场开启时不响应，与 Escape 处理器的逐层守卫一致）
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       // 忽略输入框内的按键
       const tag = (document.activeElement || {}).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (isCardModalOpen()) return;
+      if (isCompleteOpen()) return;
+      if (isRelicOpen()) return;
+      if (theaterLock.active) return;
       e.preventDefault();
       const cur = state.activeStationId || 1;
       const next = e.key === 'ArrowLeft' ? Math.max(1, cur - 1) : Math.min(STATIONS.length, cur + 1);
@@ -1455,15 +873,24 @@ async function init() {
     resizing = setTimeout(layout, 180);
   });
 
-  // 初始展开第一站
-  setActive(1);
+  // 初始展开第一站：layout() 末尾的 onScroll 已按当前位置选中站点，
+  // 仅当未激活任何站点时兜底到第 1 站，避免覆盖浏览器恢复的滚动位置导致 HUD/氛围错位
+  if (!state.activeStationId) setActive(1);
   _firstStationDone = true;  // 首站（加载即达）不播小剧场
 
-  // 粒子特效
+  // 粒子特效（状态访问器注入，解耦 cz-atmosphere 与手卷 state）
+  const startAtmosphere = () => initAtmosphere({
+    canvas: document.getElementById('cz-atmos'),
+    getReduceMotion: () => _reduceMotion,
+    getActiveStationId: () => state.activeStationId,
+    getLastActiveT: () => state._lastActiveT,
+    setLastActiveT: (t) => { state._lastActiveT = t; },
+    setMoodBridge: (fn) => { state._setAtmoMood = fn; }
+  });
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(initAtmosphere, 100);
+    setTimeout(startAtmosphere, 100);
   } else {
-    window.addEventListener('load', initAtmosphere, { once: true });
+    window.addEventListener('load', startAtmosphere, { once: true });
   }
 
   // 每隔一段时间自动飘点尘埃（增加空气流动的真实感）

@@ -6,7 +6,10 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "smoke": "node --test tests/e2e/smoke.test.js",
-    "audit": "node scripts/audit.js"
+    "audit": "node scripts/audit.js",
+    "start": "node server.js",
+    "bump": "node scripts/bump-version.js",
+    "converge": "node scripts/converge-design-tokens.js"
   },
   "devDependencies": {
     "playwright": "^1.49.0"

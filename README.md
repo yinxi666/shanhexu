@@ -101,7 +101,8 @@
 │   ├── audit.js            # 零依赖静态审计（版本一致性/import 完整/无死引用/数据健康报告）
 │   └── converge-design-tokens.js # 圆角/时长/间距魔法值收敛为 CSS 令牌（幂等）
 ├── tests/
-│   └── *.test.js           # 零依赖契约测试（node --test tests/*.test.js，含数据回归）：深色模式/设计令牌/色彩收敛/减少动效/排版/emoji 清理/长征深色/无障碍/数据
+│   ├── *.test.js           # 零依赖契约测试（node --test tests/*.test.js，含数据回归）：深色模式/设计令牌/色彩收敛/减少动效/排版/emoji 清理/长征深色/无障碍/数据
+│   └── e2e/smoke.test.js   # 运行时冒烟（npm run smoke，Playwright + 系统 Chrome 无头开 7 页，捕获 JS 异常/模块加载失败/资源 404）
 ├── data/
 │   ├── venues.json         # 15 个核心场馆
 │   ├── province-candidates.json  # 扩展候选场馆
@@ -129,7 +130,7 @@
 │   └── 素材说明/            # 素材来源、授权与核验说明
 ├── manifest.json           # PWA 配置
 ├── favicon.png             # 网站图标
-├── server.js               # 本地开发服务器（端口9876）
+├── server.js               # 本地开发服务器（默认端口9876，可用 PORT 环境变量覆盖）
 ├── .nojekyll               # GitHub Pages 绕过 Jekyll
 └── README.md
 ```
@@ -164,7 +165,7 @@ node server.js
 ## 数据说明
 
 - 场馆坐标均通过高德地图精确校正（已对齐 venues.json 与扩展数据）
-- 首页热力图数据源为《全国红色旅游经典景区名录》（国家发改委等14部门，2016年，共300处）分省统计，三条渲染路径统一
+- 首页热力图数据源为《全国红色旅游经典景区名录》（国家发改委等14部门，2016年，共300处）分省统计，ECharts 与内联 SVG 两条渲染路径共用同一份数据
 - 图片来源详见 `docs/素材说明/扩展场馆图片来源说明.md`
 - 15 条留言为前端演示数据，学号已脱敏
 - 场馆官网信息截止 2026 年 8 月，正式上线前建议再次核验

@@ -57,9 +57,9 @@
   transition: opacity var(--duration-normal) ease-in-out;
 }
 
-/* Hero 入场动画延迟（替代内联 style） */
-.animate-fade-in-up[data-delay="var(--transition)"] { animation-delay: var(--transition); }
-.animate-fade-in-up[data-delay="var(--duration-fast)"] { animation-delay: var(--duration-fast); }
+/* Hero 入场动画延迟（替代内联 style）：index.html 传 0.2s/0.4s/0.6s/0.8s 字面值，选择器须按字面匹配 */
+.animate-fade-in-up[data-delay="0.2s"] { animation-delay: 0.2s; }
+.animate-fade-in-up[data-delay="0.4s"] { animation-delay: 0.4s; }
 .animate-fade-in-up[data-delay="0.6s"] { animation-delay: 0.6s; }
 .animate-fade-in-up[data-delay="0.8s"] { animation-delay: 0.8s; }
 
@@ -145,7 +145,7 @@
   font-size: 1rem;
   font-weight: 700;
   border-radius: var(--radius-pill);
-  transition: all var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
   letter-spacing: 0.06em;
   cursor: pointer;
   position: relative;
@@ -309,7 +309,7 @@
   font-size: 16px;
   font-weight: 600;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
 }
 
 /* 底部指示条 */
@@ -322,7 +322,7 @@
   height: 2.5px;
   background: var(--red);
   border-radius: var(--radius-xs);
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--duration-fast) var(--ease-smooth);
 }
 
 .nav-links li a:hover {
@@ -535,7 +535,7 @@
   border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: var(--radius-xl);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 12px 40px rgba(0, 0, 0, 0.04);
-  transition: all var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-fast) var(--ease-smooth);
   position: relative;
   overflow: hidden;
 }
@@ -549,7 +549,7 @@
   height: 3px;
   background: linear-gradient(90deg, #b45309, #b8860b);
   transform: scaleX(0);
-  transition: transform var(--duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--duration-fast) var(--ease-smooth);
 }
 
 .stat-item:hover {

@@ -4,12 +4,11 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
-import { getBasePath } from './utils.js?v=2026081008';
-import { quizData } from './quiz-data.js?v=2026081008';
-
-const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081016';
+import { $, onOverlayClick } from './ui.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
+import { getBasePath } from './utils.js?v=2026081016';
+import { quizData } from './quiz-data.js?v=2026081016';
 
 function initQuiz() {
   if ($('.quiz-fab')) return;
@@ -28,6 +27,17 @@ function initQuiz() {
     return a;
   }
 
+  // 开始屏 HTML（初始注入与 resetQuiz 重建共用，避免两份拷贝漂移）
+  const startScreenHtml = () => `
+        <div class="quiz-start">
+          <div class="quiz-logo">${icon('star')}</div>
+          <h3>红色知识挑战赛</h3>
+          <p>测测你对红色场馆和革命历史的了解程度！</p>
+          <p class="quiz-meta">每局随机 ${GAME_SIZE} 题 · 即时反馈 · 不限时间</p>
+          <button class="btn primary" id="quiz-start-btn">开始挑战 →</button>
+        </div>
+      `;
+
   const html = `
       <button class="quiz-fab" aria-label="红色知识问答" title="红色知识挑战赛">
         <span><img class="quiz-fab-icon" src="${getBasePath()}挑战赛.webp" alt="红色知识挑战赛"></span>
@@ -36,13 +46,7 @@ function initQuiz() {
         <div class="quiz-modal" role="dialog" aria-modal="true" aria-label="红色知识挑战赛">
           <button class="quiz-close" aria-label="关闭">✕</button>
           <div class="quiz-body" id="quiz-body">
-            <div class="quiz-start">
-              <div class="quiz-logo">${icon('star')}</div>
-              <h3>红色知识挑战赛</h3>
-              <p>测测你对红色场馆和革命历史的了解程度！</p>
-              <p class="quiz-meta">每局随机 ${GAME_SIZE} 题 · 即时反馈 · 不限时间</p>
-              <button class="btn primary" id="quiz-start-btn">开始挑战 →</button>
-            </div>
+            ${startScreenHtml()}
           </div>
           <div class="quiz-result is-hidden" id="quiz-result"></div>
         </div>
@@ -74,7 +78,7 @@ function initQuiz() {
 
   fab.addEventListener('click', openQuiz);
   closeBtn.addEventListener('click', closeQuiz);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeQuiz(); });
+  onOverlayClick(overlay, closeQuiz);
 
   let currentQ = 0;
   let score = 0;
@@ -209,15 +213,7 @@ function initQuiz() {
 
   function resetQuiz() {
     currentQ = 0; score = 0; gameQuestions = []; answers = [];
-    body.innerHTML = `
-        <div class="quiz-start">
-          <div class="quiz-logo">${icon('star')}</div>
-          <h3>红色知识挑战赛</h3>
-          <p>测测你对红色场馆和革命历史的了解程度！</p>
-          <p class="quiz-meta">每局随机 ${GAME_SIZE} 题 · 即时反馈 · 不限时间</p>
-          <button class="btn primary" id="quiz-start-btn">开始挑战 →</button>
-        </div>
-      `;
+    body.innerHTML = startScreenHtml();
     result.classList.add('is-hidden');
     const newStartBtn = $('#quiz-start-btn');
     if (newStartBtn) newStartBtn.addEventListener('click', startQuiz);

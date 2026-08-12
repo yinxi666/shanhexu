@@ -16,27 +16,23 @@
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/changzheng.html">
   <title>长征·二万五千里 - 赓续血脉・数绘红旅</title>
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026081008">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026081016">
   <link rel="manifest" href="../manifest.json">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="../css/base.css?v=2026081008">
-  <link rel="stylesheet" href="../css/home.css?v=2026081008">
-  <link rel="stylesheet" href="../css/components.css?v=2026081008">
-  <link rel="stylesheet" href="../css/pages.css?v=2026081008">
-  <link rel="stylesheet" href="../css/widgets.css?v=2026081008">
-  <link rel="stylesheet" href="../css/effects.css?v=2026081008">
-  <link rel="stylesheet" href="../css/dark.css?v=2026081008">
-  <link rel="stylesheet" href="../css/changzheng.css?v=2026081008">
+  <link rel="stylesheet" href="../css/base.css?v=2026081016">
+  <link rel="stylesheet" href="../css/home.css?v=2026081016">
+  <link rel="stylesheet" href="../css/components.css?v=2026081016">
+  <link rel="stylesheet" href="../css/pages.css?v=2026081016">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026081016">
+  <link rel="stylesheet" href="../css/effects.css?v=2026081016">
+  <link rel="stylesheet" href="../css/dark.css?v=2026081016">
+  <link rel="stylesheet" href="../css/changzheng.css?v=2026081016">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     /* ===== 长征页面禁用body默认padding ===== */
     body.cz-body {
       background: #0a0604;
       overflow-x: hidden;
-    }
-
-    html.cz-html,
-    body.cz-body {
       margin: 0;
       padding: 0;
     }
@@ -44,10 +40,6 @@
 </head>
 
 <body class="cz-body">
-  <div id="nav-curtain">
-    <div class="nc-front"></div>
-    <div class="nc-back"></div>
-  </div>
 
   <!-- ===== 导航栏（由 js/layout-loader.js 注入共享模板） ===== -->
   <div id="site-header"></div>
@@ -86,7 +78,7 @@
         <div class="cz-roller-shaft"></div>
         <div class="cz-roller-cap cz-cap-top"></div>
         <div class="cz-roller-cap cz-cap-bottom"></div>
-        <div class="cz-roller-grain" id="czGrainL"></div>
+        <div class="cz-roller-grain"></div>
       </div>
 
       <!-- 中：横向手卷舞台（固定位置，内部手卷做translateX） -->
@@ -135,7 +127,7 @@
           <div class="cz-handroll-contents" id="czHandrollContents"></div>
         </div>
         <!-- 展开边缘的暖光（右手边展开轴附近一道更亮的光） -->
-        <div class="cz-unfold-glow" id="czUnfoldGlow"></div>
+        <div class="cz-unfold-glow"></div>
         <!-- 从展开轴飘出的小尘埃 -->
         <div class="cz-dust" id="czDust" aria-hidden="true"></div>
       </div>
@@ -145,7 +137,7 @@
         <div class="cz-roller-shaft"></div>
         <div class="cz-roller-cap cz-cap-top"></div>
         <div class="cz-roller-cap cz-cap-bottom"></div>
-        <div class="cz-roller-grain" id="czGrainR"></div>
+        <div class="cz-roller-grain"></div>
         <div class="cz-roller-light"></div>
       </div>
     </div>
@@ -234,22 +226,22 @@
   </div>
 
   <!-- ===== 长征纪念卡：专属弹窗 ===== -->
-  <div class="cz-card-modal" id="cz-card-modal" role="dialog" aria-modal="true" aria-label="长征纪念卡">
+  <div class="cz-card-modal" id="cz-card-modal" role="dialog" aria-modal="true" aria-label="长征纪念卡" aria-hidden="true">
     <div class="cz-card-box">
       <button class="cz-card-close" id="cz-card-close" type="button" aria-label="关闭">✕</button>
       <div class="cz-card-head"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="M9.2 13.2L7.5 21l4.5-2.5L16.5 21l-1.7-7.8"/></svg> 长征纪念卡</div>
       <p class="cz-card-sub">走完全程 · 二万五千里，留下一张专属纪念</p>
       <div class="cz-card-field">
-        <label>① 选择背景</label>
-        <div class="cz-card-bgs" id="cz-card-bgs"></div>
+        <label id="cz-card-bgs-label">① 选择背景</label>
+        <div class="cz-card-bgs" id="cz-card-bgs" role="group" aria-labelledby="cz-card-bgs-label"></div>
       </div>
       <div class="cz-card-field">
-        <label>② 你的姓名</label>
-        <input type="text" id="cz-card-name" maxlength="6" placeholder="输入姓名（最多6字）">
+        <label for="cz-card-name">② 你的姓名</label>
+        <input type="text" id="cz-card-name" maxlength="6" placeholder="输入姓名（最多6字）" aria-required="true">
       </div>
       <div class="cz-card-field">
-        <label>③ 精神关键词</label>
-        <div class="cz-card-spirits" id="cz-card-spirits"></div>
+        <label id="cz-card-spirits-label">③ 精神关键词</label>
+        <div class="cz-card-spirits" id="cz-card-spirits" role="group" aria-labelledby="cz-card-spirits-label"></div>
       </div>
       <button class="cz-card-gen" id="cz-card-gen" type="button"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/><path d="M12 4l1.8 6.2L20 12l-6.2 1.8L12 20l-1.8-6.2L4 12l6.2-1.8z"/></svg> 生成纪念卡</button>
       <div class="cz-card-preview is-hidden" id="cz-card-preview">
@@ -290,7 +282,7 @@
   <div id="site-footer"></div>
 
   <!-- ===== 脚本 ===== -->
-  <script type="module" src="../js/app.js?v=2026081008"></script>
+  <script type="module" src="../js/app.js?v=2026081016"></script>
 </body>
 
 </html>

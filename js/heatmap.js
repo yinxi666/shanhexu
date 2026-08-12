@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081008';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081008';
-import { ASSET_VERSION } from './version.js?v=2026081008';
+import { getBasePath } from './utils.js?v=2026081016';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081016';
+import { ASSET_VERSION } from './version.js?v=2026081016';
 
 
 // 首页热力图 - ECharts中国地图，加载失败自动降级SVG
@@ -15,7 +15,7 @@ async function initHomeHeatmap() {
   const container = document.getElementById('home-heatmap');
   if (!container) return;
 
-  // 用官方名录分省数据构建(港澳台补 0)，三条渲染路径共用同一份数据
+  // 用官方名录分省数据构建(港澳台补 0)，ECharts 完整地图与内联 SVG 降级两条渲染路径共用同一份数据
   const provinceData = { ...OFFICIAL_ATTRACTIONS, '香港特别行政区': 0, '澳门特别行政区': 0, '台湾省': 0 };
 
   // 等待ECharts加载后初始化（最多约15秒，超时降级SVG，避免无限轮询）

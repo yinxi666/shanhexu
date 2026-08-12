@@ -4,18 +4,16 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail, copyShareLink } from './ui.js?v=2026081008';
-import { openVideo, openPracticeDetail, openLightbox, closePracticeDetail } from './modals.js?v=2026081008';
-import { likePractice } from './pages.js?v=2026081008';
-import { toggleFavorite } from './favorites.js?v=2026081008';
-import { openChat } from './chat.js?v=2026081008';
-import { openQuiz } from './quiz.js?v=2026081008';
-import { toggleDarkMode } from './darkmode.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
-import * as RedCardGen from './cardgen.js?v=2026081008';
-import { releaseFocus } from './focus-trap.js?v=2026081008';
+import { goToDetail } from './ui.js?v=2026081016';
+import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox } from './modals.js?v=2026081016';
+import { likePractice, copyShareLinkFromDetail, resetMessageForm } from './pages.js?v=2026081016';
+import { toggleFavorite } from './favorites.js?v=2026081016';
 
-const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+import { openChat } from './chat.js?v=2026081016';
+import { openQuiz } from './quiz.js?v=2026081016';
+import { toggleDarkMode } from './darkmode.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
+import * as RedCardGen from './cardgen.js?v=2026081016';
 
 export function initActionDelegate() {
   document.addEventListener('click', handleAction);
@@ -55,10 +53,6 @@ function handleAction(e) {
       openPracticeDetail(actionEl.dataset.id);
       break;
 
-    case 'play-video':
-      openVideo(actionEl.dataset.src);
-      break;
-
     case 'like-practice':
       likePractice(actionEl, actionEl.dataset.id);
       break;
@@ -72,8 +66,7 @@ function handleAction(e) {
       break;
 
     case 'close-lightbox':
-      actionEl.closest('.lightbox-overlay')?.remove();
-      releaseFocus();
+      closeLightbox();
       break;
 
     case 'open-card-gen':
@@ -82,7 +75,7 @@ function handleAction(e) {
       break;
 
     case 'copy-share-link':
-      copyShareLink($('#detail-name')?.textContent || '');
+      copyShareLinkFromDetail();  // 读 #detail-name 的实现在 pages.js（页面归属方）
       break;
 
     case 'print-page':
@@ -102,7 +95,7 @@ function handleAction(e) {
       break;
 
     case 'reset-message-form':
-      handleResetMessageForm();
+      resetMessageForm();  // 读 #message-form-card/#msg-form 的实现在 pages.js（页面归属方）
       break;
 
     default:
@@ -118,15 +111,4 @@ function handleToggleFavorite(btn) {
   btn.innerHTML = icon('heart'); // 收藏态由 .active 的 CSS fill 区分
   btn.classList.toggle('active', nx);
   btn.setAttribute('aria-pressed', String(nx));
-}
-
-function handleResetMessageForm() {
-  const fc = document.getElementById('message-form-card');
-  if (!fc) return;
-  const body = fc.querySelector('.form-body');
-  const success = fc.querySelector('.form-success');
-  const form = document.getElementById('msg-form');
-  if (body) body.classList.remove('is-hidden');
-  if (success) success.classList.remove('show');
-  if (form) form.reset();
 }

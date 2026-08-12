@@ -42,7 +42,7 @@ if (!versionMatch) {
   errors.push('js/version.js 无法解析 ASSET_VERSION');
 } else {
   const version = versionMatch[1];
-  let htmlChecked = 0;
+  let htmlChecked = 0, jsChecked = 0;
   walk(ROOT, (f) => {
     if (!f.endsWith('.html')) return;
     htmlChecked++;
@@ -52,7 +52,17 @@ if (!versionMatch) {
       errors.push(`版本不一致 ${path.relative(ROOT, f)}：应=${version}，出现=${bad.join(',')}`);
     }
   });
-  console.log(`版本号: ${version} | 检查 HTML ${htmlChecked} 个`);
+  // JS 模块 import 上的 ?v= 同样须与 ASSET_VERSION 一致（补全"只查 HTML"口径，防 bump-version 漏同步）
+  walk(ROOT, (f) => {
+    if (!f.endsWith('.js') || f.startsWith(path.join(ROOT, 'scripts'))) return;
+    jsChecked++;
+    const content = fs.readFileSync(f, 'utf8');
+    const bad = [...new Set([...content.matchAll(/\?v=(\d{10,16})/g)].map(m => m[1]).filter(v => v !== version))];
+    if (bad.length) {
+      errors.push(`版本不一致 ${path.relative(ROOT, f)}：应=${version}，出现=${bad.join(',')}`);
+    }
+  });
+  console.log(`版本号: ${version} | 检查 HTML ${htmlChecked} 个 / JS ${jsChecked} 个`);
 }
 
 /* ---- 2) import 完整性 ---- */
@@ -84,6 +94,34 @@ walk(ROOT, (f) => {
   for (const d of DEAD_FILES) {
     if (new RegExp(`(?:href|src|url\\()=["']?[^"')]*${d.replace('.', '\\.')}`).test(content)) {
       errors.push(`死引用：${path.relative(ROOT, f)} 指向已删除的 ${d}`);
+    }
+  }
+});
+
+/* ---- 3.5) 资源存在性：HTML src/href 与 CSS url() 指向的本地文件必须存在 ---- */
+function resolveRef(ref, fileDir) {
+  // 模板 {{BASE}} 占位符部署时替换为 '' 或 '../'，按根相对解析（根版本必然存在）
+  if (ref.startsWith('{{BASE}}')) return path.join(ROOT, ref.slice('{{BASE}}'.length));
+  return path.resolve(fileDir, ref);
+}
+walk(ROOT, (f) => {
+  if (!/\.(html|css)$/.test(f)) return;
+  const fileDir = path.dirname(f);
+  const content = fs.readFileSync(f, 'utf8');
+  const refs = [];
+  for (const m of content.matchAll(/(?:src|href|poster)=["']([^"'#]+)["']/g)) refs.push(m[1]);
+  for (const m of content.matchAll(/url\((['"]?)([^'")]+)\1\)/g)) refs.push(m[2]);
+  for (let ref of refs) {
+    ref = ref.split('?')[0].trim(); // 去掉 ?v= 缓存破击后缀
+    // 跳过外链 / 锚点 / 协议内联 / 根绝对路径；%23 为 URL 编码的 #（SVG 滤镜片段引用）
+    if (!ref || ref.startsWith('http') || ref.startsWith('mailto') || ref.startsWith('tel')
+      || ref.startsWith('data:') || ref.startsWith('blob:') || ref.startsWith('//')
+      || ref.startsWith('#') || ref.startsWith('%23') || ref.startsWith('/')) continue;
+    // BASE 混在路径中间（非常规）跳过，避免误报
+    if (ref.includes('{{BASE}}') && !ref.startsWith('{{BASE}}')) continue;
+    const target = resolveRef(ref, fileDir);
+    if (!fs.existsSync(target)) {
+      errors.push(`资源不存在：${path.relative(ROOT, f)} 引用 ${ref}`);
     }
   }
 });

@@ -131,42 +131,40 @@ main {
   animation: pageFadeIn var(--duration-normal) cubic-bezier(0.2, 0, 0.0, 1);
 }
 
-/* 卡片弹入（全浏览器通用） */
+/* 卡片弹入（全浏览器通用）。注意 stat-item 不用 pageFadeIn——
+   首页统计项带 .scroll-animate/.scroll-animate-delay-*（transition 机制），
+   若再加 pageFadeIn 动画会双机制错峰、滚动前可能闪回 */
 .venue-card,
 .policy-card,
 .practice-card,
 .message-card,
-.feature-card,
-.stat-item {
+.feature-card {
   animation: pageFadeIn var(--duration-normal) cubic-bezier(0.2, 0, 0.0, 1) backwards;
 }
 
+/* 卡片弹入按 0.1s 逐级延迟（与 .scroll-animate-delay-* 阶梯惯例一致） */
 .venue-card:nth-child(1),
-.feature-card:nth-child(1),
-.stat-item:nth-child(1) {
-  animation-delay: 0.06s;
+.feature-card:nth-child(1) {
+  animation-delay: 0.1s;
 }
 
 .venue-card:nth-child(2),
-.feature-card:nth-child(2),
-.stat-item:nth-child(2) {
-  animation-delay: var(--transition);
+.feature-card:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
 .venue-card:nth-child(3),
-.feature-card:nth-child(3),
-.stat-item:nth-child(3) {
-  animation-delay: var(--transition);
+.feature-card:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
 .venue-card:nth-child(4),
-.feature-card:nth-child(4),
-.stat-item:nth-child(4) {
-  animation-delay: 0.24s;
+.feature-card:nth-child(4) {
+  animation-delay: 0.4s;
 }
 
 .venue-card:nth-child(5) {
-  animation-delay: 0.30s;
+  animation-delay: 0.5s;
 }
 
 /* ============================================================
@@ -234,7 +232,7 @@ main {
   margin-bottom: 16px;
   position: relative;
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: all var(--duration-fast) ease;
 }
 
 .tl-node:hover .tl-dot,
@@ -609,7 +607,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   width: 32px;
   height: 38px;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
-  transition: filter 0.25s ease, transform 0.25s ease;
+  transition: filter var(--transition), transform var(--transition);
 }
 
 .red-star-marker:hover .rsm-inner {
@@ -626,7 +624,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   height: 4px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.25);
-  transition: all 0.25s ease;
+  transition: all var(--transition);
 }
 
 .red-star-marker:hover .rsm-shadow {
@@ -888,7 +886,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 
 /* AI 回复淡入上浮 */
 .chat-msg.bot .chat-bubble {
-  animation: ai-reply-in var(--duration-normal) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: ai-reply-in var(--duration-normal) var(--ease-cinematic) both;
 }
 
 @keyframes ai-reply-in {

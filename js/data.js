@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081008';
-import { ASSET_VERSION } from './version.js?v=2026081008';
+import { getBasePath } from './utils.js?v=2026081016';
+import { ASSET_VERSION } from './version.js?v=2026081016';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
@@ -29,10 +29,6 @@ async function loadJSON(filename) {
 // 缓存：只加载一次
 let _venuesPromise = null;          // 重新加载时可重置
 let _venuesCache = null;            // 重新加载时可重置
-let _venueDetailsPromise = null;
-let _venueDetailsCache = null;
-let _extMetaPromise = null;
-let _extMetaCache = null;
 let _aliasesPromise = null;
 let _aliasesCache = null;
 
@@ -70,8 +66,12 @@ async function loadAllVenues() {
       const displayName = (ext.name && ext.name.includes('需进一步核验') && ext.standardName)
         ? ext.standardName : ext.name;
       const meta = (extMeta && extMeta[name]) ? extMeta[name] : {};
+      // id 基于省份生成（候选按省唯一），而非依赖合并顺序——避免数据增删/重排时已持久化收藏与分享链接错位
+      const shortProvince = ext.province.replace(/省|市|自治区|壮族|回族|维吾尔/g, '');
+      // 官方核验状态枚举共 5 种，全部视为已核验；其余（未知/缺省）才提示进一步核验
+      const VERIFIED = ['已核验', '已匹配', '已匹配官方入口', '已核验官方入口', '名称已调整'];
       merged.push({
-        id: 'ext-' + (merged.length + 1),
+        id: 'ext-' + shortProvince,
         name: displayName,
         province: ext.province,
         city: meta.city || '',
@@ -79,7 +79,7 @@ async function loadAllVenues() {
         category: meta.category || '红色场馆',
         image: meta.image || 'assets/页面通用图片/暂无图片.png',
         summary: meta.summary || (ext.province + '代表性红色场馆，' +
-          (ext.officialVerificationStatus === '已核验' || ext.officialVerificationStatus === '已匹配'
+          (VERIFIED.includes(ext.officialVerificationStatus)
             ? '已核验官方信息' : '建议上线前进一步核验') + '。'),
         standardName: ext.standardName || ext.name,
         officialUrl: ext.officialUrl || '',
@@ -118,34 +118,30 @@ async function loadAliases() {
   return data;
 }
 
-async function loadExtMeta() {
-  if (_extMetaCache !== null) return _extMetaCache;
-  if (_extMetaPromise) return _extMetaPromise;
-  _extMetaPromise = loadJSON('data/extended-venues-meta.json');
-  const data = await _extMetaPromise;
-  // 注意：loadJSON 失败返回 []（typeof [] === 'object'），必须再校验非空，否则失败结果会被永久缓存
-  if (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length > 0) {
-    _extMetaCache = data;
-  } else {
-    _extMetaPromise = null; // 允许下次重试
-    console.warn('[RedData] extended-venues-meta 加载失败，扩展场馆将降级为占位数据');
+// 加载"以场馆名为键"的对象 JSON：带缓存 + 失败重试（消除 loadExtMeta/loadVenueDetails 的同构拷贝）
+function makeObjectLoader(url, warnMsg) {
+  let cache = null;
+  let promise = null;
+  async function load() {
+    if (cache !== null) return cache;
+    if (promise) return promise;
+    promise = loadJSON(url);
+    const data = await promise;
+    // 注意：loadJSON 失败返回 []（typeof [] === 'object'），必须再校验非空，否则失败结果会被永久缓存
+    if (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length > 0) {
+      cache = data;
+    } else {
+      promise = null; // 允许下次重试
+      console.warn(warnMsg);
+    }
+    return data;
   }
-  return data;
+  // 供同步读取缓存（如 getVenueDetail 在加载后直接查询）
+  load.getCache = () => cache;
+  return load;
 }
-
-async function loadVenueDetails() {
-  if (_venueDetailsCache !== null) return _venueDetailsCache;
-  if (_venueDetailsPromise) return _venueDetailsPromise;
-  _venueDetailsPromise = loadJSON('data/venue-details.json');
-  const data = await _venueDetailsPromise;
-  if (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length > 0) {
-    _venueDetailsCache = data;
-  } else {
-    _venueDetailsPromise = null; // 允许下次重试
-    console.warn('[RedData] venue-details 加载失败，详情页将仅显示基础信息');
-  }
-  return data;
-}
+const loadExtMeta = makeObjectLoader('data/extended-venues-meta.json', '[RedData] extended-venues-meta 加载失败，扩展场馆将降级为占位数据');
+const loadVenueDetails = makeObjectLoader('data/venue-details.json', '[RedData] venue-details 加载失败，详情页将仅显示基础信息');
 
 /* ---- 场馆特定详情查询 ---- */
 function getVenueDetail(name) {
@@ -155,8 +151,9 @@ function getVenueDetail(name) {
     '雨花台烈士纪念馆（纪念建筑）': '雨花台烈士纪念馆',
   };
   const lookupName = nameAlias[name] || name;
-  if (!_venueDetailsCache) return null;
-  return _venueDetailsCache[lookupName] || _venueDetailsCache[lookupName?.replace(/纪念馆$/, '')] || null;
+  const details = loadVenueDetails.getCache();
+  if (!details) return null;
+  return details[lookupName] || details[lookupName?.replace(/纪念馆$/, '')] || null;
 }
 
 /* ---- 纯数据查询（无 DOM 依赖） ---- */
@@ -165,6 +162,8 @@ function filterVenues(venues, { query, province, category } = {}) {
   return [...venues]
     .filter(v => !q ||
       (v.name || '').toLowerCase().includes(q) ||
+      // standardName 是官方规范名（如"中共一大纪念馆"），用户按规范名搜索必须能命中
+      (v.standardName || '').toLowerCase().includes(q) ||
       (v.province || '').toLowerCase().includes(q) ||
       (v.city || '').toLowerCase().includes(q) ||
       (v.category || '').toLowerCase().includes(q) ||
@@ -188,6 +187,17 @@ function findVenueByName(venues, name) {
     || venues.find(v => (v.name || '').includes(name.slice(0, 3)));
 }
 
+/* 场馆列表权威缓存的同步读取（供 venue-store 直读，消除双缓存分叉） */
+function getVenuesCache() {
+  return _venuesCache || [];
+}
+
+/* 实践成果按 id 查询（数据访问统一走 data 层，弹窗/渲染不再自取数据） */
+async function getPractice(id) {
+  const practices = await loadJSON('data/practices.json');
+  return practices.find((x) => String(x.id) === String(id)) || null;
+}
+
 /* ---- 公开 API ---- */
 export {
   loadJSON,
@@ -196,5 +206,7 @@ export {
   getProvinces,
   getCategories,
   findVenueByName,
-  getVenueDetail
+  getVenueDetail,
+  getVenuesCache,
+  getPractice
 };

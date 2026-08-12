@@ -39,6 +39,10 @@ jobs:
           # 契约测试与静态审计：任一失败即中止部署（node 在 ubuntu-latest 预装）
           node scripts/audit.js
           node --test tests/*.test.js
+      - name: Install Playwright
+        run: npm ci
+      - name: Run runtime smoke tests
+        run: npm run smoke
       - name: Stage deploy files
         shell: bash
         run: |

@@ -58,9 +58,7 @@ export function initEntranceAnimation() {
     mountainsEnd: 3.4,
     tiananmen: 3.4,
     titleCrack: 4.2,
-    titleReveal: 4.6,
     subtitle: 5.2,
-    sweep: 5.8,
     end: 6.4
   };
   let totalDuration = TL.end;
@@ -991,105 +989,103 @@ export function initEntranceAnimation() {
     if (t >= TL.titleCrack) {
       let titleY = H * 0.38;
       let titleSize = Math.min(W * 0.18, 150);
-      if (t >= TL.titleCrack) {
-        let revT = clamp((t - TL.titleCrack) / 1.2, 0, 1);
-        let revEase = easeOutExpo(revT);
-        let titleChars = ['赓', '续', '血', '脉'];
-        let charCount = titleChars.length;
-        let charDelay = 0.12;
+      let revT = clamp((t - TL.titleCrack) / 1.2, 0, 1);
+      let revEase = easeOutExpo(revT);
+      let titleChars = ['赓', '续', '血', '脉'];
+      let charCount = titleChars.length;
+      let charDelay = 0.12;
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let ci = 0; ci < charCount; ci++) {
+        let charStart = ci * charDelay;
+        let charProg = clamp((revT - charStart) / 0.4, 0, 1);
+        if (charProg <= 0) continue;
+        let charEase = easeOutExpo(charProg);
+        let charGap = titleSize * 1.00;
+        let charX = W * 0.5 - (charCount - 1) * charGap / 2 + ci * charGap;
+        let charY = titleY - (1 - charEase) * 15;
+        let scale = 0.3 + charEase * 0.7;
         ctx.save();
+        ctx.translate(charX, charY);
+        ctx.scale(scale, scale);
+        ctx.globalAlpha = charEase;
+        ctx.font = '900 ' + titleSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        for (let ci = 0; ci < charCount; ci++) {
-          let charStart = ci * charDelay;
-          let charProg = clamp((revT - charStart) / 0.4, 0, 1);
-          if (charProg <= 0) continue;
-          let charEase = easeOutExpo(charProg);
-          let charGap = titleSize * 1.00;
-          let charX = W * 0.5 - (charCount - 1) * charGap / 2 + ci * charGap;
-          let charY = titleY - (1 - charEase) * 15;
-          let scale = 0.3 + charEase * 0.7;
-          ctx.save();
-          ctx.translate(charX, charY);
-          ctx.scale(scale, scale);
-          ctx.globalAlpha = charEase;
-          ctx.font = '900 ' + titleSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.strokeStyle = '#3a0a0a';
-          ctx.lineWidth = Math.max(4, titleSize * 0.045);
-          ctx.lineJoin = 'round';
-          ctx.lineCap = 'round';
-          ctx.shadowColor = 'rgba(0,0,0,0.7)';
-          ctx.shadowBlur = titleSize * 0.12;
-          ctx.strokeText(titleChars[ci], 0, 0);
-          ctx.shadowBlur = 0;
-          let strokeGrad = ctx.createLinearGradient(0, -titleSize / 2, 0, titleSize / 2);
-          strokeGrad.addColorStop(0, '#d87a2a');
-          strokeGrad.addColorStop(0.5, '#b91c1c');
-          strokeGrad.addColorStop(1, '#7a1010');
-          ctx.strokeStyle = strokeGrad;
-          ctx.lineWidth = Math.max(2.5, titleSize * 0.025);
-          ctx.strokeText(titleChars[ci], 0, 0);
-          ctx.shadowColor = 'rgba(255,210,110,' + (charEase * 0.95) + ')';
-          ctx.shadowBlur = titleSize * 0.42;
-          let coreGrad2 = ctx.createLinearGradient(0, -titleSize / 2, 0, titleSize / 2);
-          coreGrad2.addColorStop(0, '#fff3c0');
-          coreGrad2.addColorStop(0.25, '#ffe27a');
-          coreGrad2.addColorStop(0.55, '#ffc93d');
-          coreGrad2.addColorStop(0.85, '#e08a18');
-          coreGrad2.addColorStop(1, '#a05410');
-          ctx.fillStyle = coreGrad2;
-          ctx.fillText(titleChars[ci], 0, 0);
-          ctx.shadowBlur = 0;
-          ctx.strokeStyle = 'rgba(255,250,220,' + (charEase * 0.9) + ')';
-          ctx.lineWidth = Math.max(0.8, titleSize * 0.008);
-          ctx.strokeText(titleChars[ci], 0, 0);
-          ctx.restore();
-        }
-
-        // ===== 副标题 =====
-        if (t >= TL.subtitle) {
-          let subT = clamp((t - TL.subtitle) / 0.8, 0, 1);
-          let subEase = easeOutExpo(subT);
-          ctx.globalAlpha = subEase;
-          let subSize = titleSize * 0.75;
-          ctx.font = '700 ' + subSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          let subY = titleY + titleSize * 1.15;
-          let subChars = '数绘红旅';
-          let subGap = subSize * 0.96;
-          for (let sci = 0; sci < subChars.length; sci++) {
-            let subChar = subChars.charAt(sci);
-            let subX = W * 0.5 - (subChars.length - 1) * subGap / 2 + sci * subGap;
-            ctx.strokeStyle = '#3a0a0a';
-            ctx.lineWidth = Math.max(3, subSize * 0.045);
-            ctx.lineJoin = 'round';
-            ctx.shadowColor = 'rgba(0,0,0,0.55)';
-            ctx.shadowBlur = subSize * 0.1;
-            ctx.strokeText(subChar, subX, subY);
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#9a1414';
-            ctx.lineWidth = Math.max(2, subSize * 0.022);
-            ctx.strokeText(subChar, subX, subY);
-            ctx.shadowColor = 'rgba(255,80,50,' + (subEase * 0.9) + ')';
-            ctx.shadowBlur = subSize * 0.35;
-            let subCoreGrad = ctx.createLinearGradient(0, subY - subSize / 2, 0, subY + subSize / 2);
-            subCoreGrad.addColorStop(0, '#ffe0c0');
-            subCoreGrad.addColorStop(0.3, '#ff7a5c');
-            subCoreGrad.addColorStop(0.65, '#e02020');
-            subCoreGrad.addColorStop(1, '#8b0a0a');
-            ctx.fillStyle = subCoreGrad;
-            ctx.fillText(subChar, subX, subY);
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = 'rgba(255,220,200,' + (subEase * 0.65) + ')';
-            ctx.lineWidth = Math.max(0.6, subSize * 0.006);
-            ctx.strokeText(subChar, subX, subY);
-          }
-        }
+        ctx.strokeStyle = '#3a0a0a';
+        ctx.lineWidth = Math.max(4, titleSize * 0.045);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = titleSize * 0.12;
+        ctx.strokeText(titleChars[ci], 0, 0);
+        ctx.shadowBlur = 0;
+        let strokeGrad = ctx.createLinearGradient(0, -titleSize / 2, 0, titleSize / 2);
+        strokeGrad.addColorStop(0, '#d87a2a');
+        strokeGrad.addColorStop(0.5, '#b91c1c');
+        strokeGrad.addColorStop(1, '#7a1010');
+        ctx.strokeStyle = strokeGrad;
+        ctx.lineWidth = Math.max(2.5, titleSize * 0.025);
+        ctx.strokeText(titleChars[ci], 0, 0);
+        ctx.shadowColor = 'rgba(255,210,110,' + (charEase * 0.95) + ')';
+        ctx.shadowBlur = titleSize * 0.42;
+        let coreGrad2 = ctx.createLinearGradient(0, -titleSize / 2, 0, titleSize / 2);
+        coreGrad2.addColorStop(0, '#fff3c0');
+        coreGrad2.addColorStop(0.25, '#ffe27a');
+        coreGrad2.addColorStop(0.55, '#ffc93d');
+        coreGrad2.addColorStop(0.85, '#e08a18');
+        coreGrad2.addColorStop(1, '#a05410');
+        ctx.fillStyle = coreGrad2;
+        ctx.fillText(titleChars[ci], 0, 0);
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,250,220,' + (charEase * 0.9) + ')';
+        ctx.lineWidth = Math.max(0.8, titleSize * 0.008);
+        ctx.strokeText(titleChars[ci], 0, 0);
         ctx.restore();
       }
+
+      // ===== 副标题 =====
+      if (t >= TL.subtitle) {
+        let subT = clamp((t - TL.subtitle) / 0.8, 0, 1);
+        let subEase = easeOutExpo(subT);
+        ctx.globalAlpha = subEase;
+        let subSize = titleSize * 0.75;
+        ctx.font = '700 ' + subSize + 'px "HongLeiZhuoShu","STZhongsong","SimSun",serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        let subY = titleY + titleSize * 1.15;
+        let subChars = '数绘红旅';
+        let subGap = subSize * 0.96;
+        for (let sci = 0; sci < subChars.length; sci++) {
+          let subChar = subChars.charAt(sci);
+          let subX = W * 0.5 - (subChars.length - 1) * subGap / 2 + sci * subGap;
+          ctx.strokeStyle = '#3a0a0a';
+          ctx.lineWidth = Math.max(3, subSize * 0.045);
+          ctx.lineJoin = 'round';
+          ctx.shadowColor = 'rgba(0,0,0,0.55)';
+          ctx.shadowBlur = subSize * 0.1;
+          ctx.strokeText(subChar, subX, subY);
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = '#9a1414';
+          ctx.lineWidth = Math.max(2, subSize * 0.022);
+          ctx.strokeText(subChar, subX, subY);
+          ctx.shadowColor = 'rgba(255,80,50,' + (subEase * 0.9) + ')';
+          ctx.shadowBlur = subSize * 0.35;
+          let subCoreGrad = ctx.createLinearGradient(0, subY - subSize / 2, 0, subY + subSize / 2);
+          subCoreGrad.addColorStop(0, '#ffe0c0');
+          subCoreGrad.addColorStop(0.3, '#ff7a5c');
+          subCoreGrad.addColorStop(0.65, '#e02020');
+          subCoreGrad.addColorStop(1, '#8b0a0a');
+          ctx.fillStyle = subCoreGrad;
+          ctx.fillText(subChar, subX, subY);
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = 'rgba(255,220,200,' + (subEase * 0.65) + ')';
+          ctx.lineWidth = Math.max(0.6, subSize * 0.006);
+          ctx.strokeText(subChar, subX, subY);
+        }
+      }
+      ctx.restore();
     }
 
     // 结束全局下移变换
@@ -1131,7 +1127,8 @@ export function initEntranceAnimation() {
       if (!overlay) return;
       overlay.classList.add('fade-out');
       document.documentElement.classList.remove('entrance-active');
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      // 'instant' 非标准枚举，个别旧引擎会抛错 → 回退 (0,0)，避免中断入场收尾链
+      try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
       setTimeout(function () { overlay.remove(); }, 800);
       markEntranceDone();
       finishEntrance();

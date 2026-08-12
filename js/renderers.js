@@ -4,15 +4,15 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
-import { isFavorite as checkFavorite } from './favorites.js?v=2026081008';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
 
-function renderVenueCard(venue, basePath) {
+// 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
+function renderVenueCard(venue, basePath, isFav = false) {
   const bp = basePath || getBasePath();
   const imgSrc = sanitizeUrl(resolveAssetPath(venue.image, bp));
   const fb = fallbackSrc();
-  const favActive = checkFavorite(venue.id);
+  const favActive = isFav;
   const favClass = favActive ? 'active' : '';
   const favIcon = icon('heart'); // 收藏态由 .fav-btn.active 的 CSS fill 区分，无需两个图标
   const esc = escapeHtml;
@@ -52,8 +52,6 @@ function renderPracticeCard(practice, basePath) {
   const bp = basePath || getBasePath();
   const imgSrc = sanitizeUrl(resolveAssetPath(practice.image, bp));
   const fb = fallbackSrc();
-  const hasVideo = practice.video && practice.video.trim();
-  const videoSrc = hasVideo ? sanitizeUrl(resolveAssetPath(practice.video, bp)) : '';
   const practiceLiked = isPracticeLiked(practice.id); // 已赞保持高亮
   const esc = escapeHtml;
   const attr = escapeAttr;
@@ -61,9 +59,6 @@ function renderPracticeCard(practice, basePath) {
       <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="${esc(practice.title || practice.name || '')}">
         <div class="practice-img">
           <img src="${attr(imgSrc)}" alt="${esc(practice.title)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
-          ${videoSrc ? `
-          <div class="has-video-badge">▶ 视频</div>
-          <button class="play-btn" type="button" data-action="play-video" data-src="${attr(videoSrc)}" aria-label="播放视频" title="播放视频">▶</button>` : ''}
         </div>
         <div class="practice-body">
           <h3>${esc(practice.title)}</h3>
@@ -72,7 +67,7 @@ function renderPracticeCard(practice, basePath) {
         </div>
         <div class="practice-footer">
           <span class="practice-date"><span class="pd-year">${(practice.createdAt || '----').slice(0, 4)}</span><span class="pd-month">${parseInt((practice.createdAt || '--').slice(5, 7), 10) || '--'}</span><span class="pd-day">${parseInt((practice.createdAt || '--').slice(8, 10), 10) || '--'}</span></span>
-          <span class="practice-likes${practiceLiked ? ' active' : ''}" data-action="like-practice" data-id="${esc(practice.id)}">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
+          <span class="practice-likes${practiceLiked ? ' active' : ''}" data-action="like-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="点赞">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
         </div>
       </div>
     `;
@@ -114,6 +109,8 @@ function renderMessageCard(msg) {
   const rotation = ((Math.abs(rotHash) % 51) - 25) / 10; // -2.5° ~ 2.5°
   // 留言作者/标题/内容来自用户提交（sessionStorage），必须转义防存储型 XSS
   const esc = escapeHtml;
+  // 预置演示留言明确标注，避免被当作真实学生提交
+  const demoBadge = msg.isDemo ? '<span class="msg-demo">演示</span>' : '';
   return `
       <div class="message-card" data-rotation="${rotation}">
         <div class="msg-pin" data-bg="${escapeAttr(pinColor)}"></div>
@@ -127,6 +124,7 @@ function renderMessageCard(msg) {
         <div class="msg-title">${esc(msg.title || '')}</div>
         <div class="msg-content">${esc(msg.content || '')}</div>
         <div class="msg-footer">
+          ${demoBadge}
           <span>学号: ${esc(msg.studentId || '***')}</span>
           <span class="msg-status ${esc(msg.status) || 'pending'}">${esc(statusMap[msg.status]) || esc(msg.status) || ''}</span>
         </div>

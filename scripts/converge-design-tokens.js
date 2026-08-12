@@ -59,6 +59,20 @@ for (const f of files) {
   let css = fs.readFileSync(file, 'utf8');
   const before = css;
 
+  /* 保护 delay：transition-delay/animation-delay 长写属性，以及
+     animation:/transition: 简写中以"时间值结尾"的声明（末尾时间位即 delay，
+     收敛为复合令牌如 var(--transition) 含 ease，作 delay 计算值非法会整条失效）。
+     先把它们的值整体替换为占位符，时长映射跑完后还原。 */
+  const delayProps = [];
+  css = css.replace(/(?:transition-delay|animation-delay)\s*:\s*[^;]+;|(?:animation|transition)\s*:\s*[^;]+;/g, (m) => {
+    const isShorthand = /(?:animation|transition)\s*:/.test(m);
+    const endsWithTime = /\.?\d+s\s*;?\s*$/.test(m);
+    // 简写不以时间值结尾 → 纯时长/多属性列表，可安全收敛，不保护
+    if (isShorthand && !endsWithTime) return m;
+    delayProps.push(m);
+    return '@@PROTECTDELAY' + (delayProps.length - 1) + '@@';
+  });
+
   for (const [from, to] of RADIUS_MAP) {
     while (css.includes(from)) { css = css.replace(from, to); total++; }
   }
@@ -80,6 +94,9 @@ for (const f of files) {
     const hits = css.match(re);
     if (hits) { css = css.replace(re, `$1${to}px`); total += hits.length; }
   }
+
+  /* 还原被保护的 delay 声明 */
+  css = css.replace(/@@PROTECTDELAY(\d+)@@/g, (_, i) => delayProps[Number(i)]);
 
   if (css !== before) {
     fs.writeFileSync(file, css);

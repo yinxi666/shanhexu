@@ -2,12 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081008';
-import { showToast } from './ui.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081008';
-
-const $ = (s, c) => (c || document).querySelector(s);
+import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081016';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081016';
 
 /* ---- 可选数据 ---- */
 const SPIRITS = ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];
@@ -355,12 +353,14 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([bytes], { type: mime });
 }
 
-function download() {
-  if (!lastCardDataUrl) return;
-  const blob = dataUrlToBlob(lastCardDataUrl);
+/* 下载/分享公共能力：供 cardgen 与 longmarch 纪念卡复用，消除两份同构实现 */
+function downloadDataUrl(dataUrl, filename) {
+  if (!dataUrl) return;
+  const blob = dataUrlToBlob(dataUrl);
+  if (!blob) return;
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.download = '红色纪念卡' + (currentVenueName ? '_' + currentVenueName : '') + '_' + Date.now() + '.png';
+  a.download = filename;
   a.href = url;
   document.body.appendChild(a);
   // 阻止点击冒泡到 document，避免被帷幕导航拦截器当成页面跳转而取消下载
@@ -370,17 +370,26 @@ function download() {
   setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
 }
 
-function share() {
-  if (!lastCardDataUrl) return;
-  const blob = dataUrlToBlob(lastCardDataUrl);
+function shareDataUrl(dataUrl, filename, shareTitle, shareText) {
+  if (!dataUrl) return;
+  const blob = dataUrlToBlob(dataUrl);
+  if (!blob) return;
   if (navigator.share && navigator.canShare) {
-    const file = new File([blob], '红色纪念卡.png', { type: 'image/png' });
+    const file = new File([blob], filename, { type: 'image/png' });
     if (navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: '红色纪念卡', text: '我在「数绘红旅」生成了我的红色纪念卡' }).catch(function () { });
+      navigator.share({ files: [file], title: shareTitle, text: shareText }).catch(function () { });
       return;
     }
   }
-  download();
+  downloadDataUrl(dataUrl, filename);
+}
+
+function download() {
+  downloadDataUrl(lastCardDataUrl, '红色纪念卡' + (currentVenueName ? '_' + currentVenueName : '') + '_' + Date.now() + '.png');
+}
+
+function share() {
+  shareDataUrl(lastCardDataUrl, '红色纪念卡.png', '红色纪念卡', '我在「数绘红旅」生成了我的红色纪念卡');
 }
 
 
@@ -433,7 +442,7 @@ function buildModal() {
   document.body.appendChild(overlay);
 
   overlay.querySelector('.cardgen-close').addEventListener('click', close);
-  overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+  onOverlayClick(overlay, close);
 
   overlay.querySelectorAll('.cardgen-chip').forEach(function (ch) {
     ch.addEventListener('click', function () {
@@ -465,8 +474,9 @@ function getBgList() {
 function renderBgSelector() {
   const grid = $('#cardgen-bgs');
   if (!grid) return;
-  selectedBg = 0; // 有场馆图时默认选中「本场馆」，否则默认第一张
   const list = getBgList();
+  // 保留用户已选背景；仅当选择越界（如换场馆后列表变化）才落回默认（0 = 有场馆图时「本场馆」，否则第一张）
+  if (!Number.isInteger(selectedBg) || selectedBg < 0 || selectedBg >= list.length) selectedBg = 0;
   grid.innerHTML = list.map((b, i) =>
     `<div class="cardgen-bg${i === 0 ? ' selected' : ''}" data-i="${i}" data-src="${escapeAttr(resolveAssetPath(b.src))}"><span>${b.label}</span></div>`
   ).join('');
@@ -515,5 +525,5 @@ function init() {
   if (!overlay) buildModal();
 }
 
-// 暴露 renderCard/dataUrlToBlob/SPIRITS：供长征纪念卡专用弹窗等复用
-export { init, open, renderCard, dataUrlToBlob, SPIRITS };
+// 暴露 renderCard/downloadDataUrl/shareDataUrl/SPIRITS：供长征纪念卡专用弹窗等复用
+export { init, open, renderCard, downloadDataUrl, shareDataUrl, SPIRITS };

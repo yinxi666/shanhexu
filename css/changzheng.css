@@ -332,7 +332,7 @@
   height: 76px;
   transform: translate(-50%, -50%);
   z-index: 4;
-  transition: transform var(--duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+  transition: transform var(--duration-normal) var(--ease-cinematic),
     filter var(--duration-normal) ease,
     opacity var(--duration-normal) ease;
   cursor: pointer;
@@ -413,7 +413,7 @@
   opacity: 0;
   transform: translate(0, -120vh) rotate(-12deg) scale(0.9);
   transition:
-    transform var(--duration-normal) cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--duration-normal) var(--ease-cinematic),
     opacity var(--duration-normal) ease;
   z-index: 5;
   pointer-events: none;
@@ -536,7 +536,7 @@
   border-radius: var(--radius-xs);
   text-decoration: none;
   background: rgba(255, 246, 216, 0.7);
-  transition: all 0.25s ease;
+  transition: all var(--transition);
   pointer-events: auto;
 }
 
@@ -597,7 +597,7 @@
   width: 32px;
   height: 32px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
-  transition: transform 0.3s ease;
+  transition: transform var(--duration-fast) ease;
 }
 
 .cz-note-relic:hover .cz-note-relic-icon {
@@ -619,7 +619,7 @@
   opacity: 0;
   visibility: hidden;
   transform: translateY(6px);
-  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
   pointer-events: none;
   z-index: 99;
@@ -666,7 +666,7 @@
   letter-spacing: 0.04em;
   opacity: 0;
   transform: translateY(2px);
-  transition: opacity .25s ease, transform .25s ease;
+  transition: opacity var(--transition), transform var(--transition);
   pointer-events: none;
   white-space: nowrap;
 }
@@ -784,7 +784,7 @@
   opacity: 0;
   pointer-events: none;
   visibility: hidden; /* 关闭态移出 Tab 序与无障碍树，避免 aria-hidden 元素内仍有可聚焦后代 */
-  transition: opacity .3s ease, visibility .3s ease;
+  transition: opacity var(--duration-fast) ease, visibility var(--duration-fast) ease;
 }
 .cz-relic-modal.show {
   opacity: 1;
@@ -864,7 +864,7 @@
   background-position: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .6s ease;
+  transition: opacity var(--duration-normal) ease;
 }
 .cz-complete.show {
   opacity: 1;
@@ -883,7 +883,7 @@
   overflow: hidden;
   border: 4px solid var(--cz-gold);
   box-shadow: 0 0 36px rgba(255, 200, 90, 0.5), 0 0 70px rgba(255, 120, 60, 0.32);
-  animation: cz-complete-ignite 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cz-complete-ignite 1.1s var(--ease-cinematic) both;
 }
 .cz-complete-portrait::before {
   content: '';
@@ -916,7 +916,7 @@
   color: var(--cz-gold);
   letter-spacing: 0.16em;
   text-shadow: 0 0 30px rgba(255, 200, 90, 0.55), 0 4px 18px rgba(0, 0, 0, 0.7);
-  animation: cz-complete-rise .8s ease both var(--transition);
+  animation: cz-complete-rise .8s ease both 0.25s;
 }
 .cz-complete-sub {
   font-size: clamp(17px, 3vw, 26px);
@@ -1397,27 +1397,11 @@
   pointer-events: none;
 }
 
-/* 迷你地图站点圆点（只操作核心圆，不碰外层 halo 圈） */
-.cz-route-dot .cz-route-dot-core {
-  cursor: pointer;
-  transition: r 0.25s ease, fill 0.25s ease, stroke-width 0.25s ease;
-}
-
-.cz-route-dot:hover .cz-route-dot-core {
-  r: 7;
-  stroke: #fff3c2;
-}
-
-.cz-route-dot.active .cz-route-dot-core {
-  fill: #ff3b30;
-  stroke: var(--cz-gold);
-  stroke-width: 2.2;
-  r: 8;
-  filter: drop-shadow(0 0 6px rgba(255, 100, 60, 0.9));
-}
-
-/* halo 圈（外层环）：active 时发光 */
-.cz-route-dot.active circle:first-child {
+/* 迷你地图站点圆点：核心圆的 active/hover 样式由 #cz-route-dots（更高 ID 特异性）统一定义，
+   此处仅保留 halo 外层环发光与站点名样式，避免两套冲突声明并存 */
+/* halo 圈（外层环，class cz-route-dot-halo）：active 时发光。
+   注意不能用 circle:first-child——JS 先插入 <title> 作首子元素，circle 永不命中 */
+.cz-route-dot.active .cz-route-dot-halo {
   stroke: rgba(255, 215, 110, 0.85);
   stroke-width: 2;
   filter: drop-shadow(0 0 10px rgba(255, 180, 80, 0.55));
@@ -1425,7 +1409,7 @@
 
 /* 站点名：active 时变亮放大 */
 .cz-route-dot text {
-  transition: fill 0.25s ease, font-size 0.25s ease, opacity 0.25s ease;
+  transition: fill var(--transition), font-size var(--transition), opacity var(--transition);
 }
 
 .cz-route-dot.active text {
@@ -1482,10 +1466,10 @@
   /* 印章 SVG 四周留有透明边距，不能用白底——否则露出白色边框；透明让印章直接盖在宣纸上 */
 }
 
+/* 5 种 mood 的径向渐变在下方 .cz-bg-mood-*/active 中定义；此处不可清 background-image，
+   否则 !important 会把所有站点氛围色叠加层压成透明 */
 .cz-bg-mood.active {
   opacity: 0.5;
-  background-image: none !important;
-  /* 降级为纯色 */
 }
 
 .cz-bg-mood-ember.active {
@@ -1636,7 +1620,7 @@
 }
 
 #cz-route-dots .cz-route-dot-core {
-  transition: fill var(--duration-normal) ease, r 0.3s ease, filter 0.3s ease, stroke-width 0.3s ease;
+  transition: fill var(--duration-normal) ease, r var(--duration-fast) ease, filter var(--duration-fast) ease, stroke-width var(--duration-fast) ease;
 }
 
 /* 已走过的站：金色实心 */
@@ -1655,7 +1639,7 @@
 }
 
 #cz-route-dots .cz-route-dot.active .cz-route-dot-halo {
-  animation: cz-route-pulse 1.6s ease-out infinite;
+  animation: cz-route-pulse 1var(--duration-normal) ease-out infinite;
   transform-box: fill-box;
   transform-origin: center;
 }
@@ -1672,7 +1656,7 @@
 }
 
 #cz-route-marker {
-  transition: transform var(--duration-fast) cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-fast) var(--ease-cinematic);
   filter: drop-shadow(0 0 8px rgba(255, 80, 50, 0.9));
 }
 

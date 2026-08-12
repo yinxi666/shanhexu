@@ -5,30 +5,30 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026081008';
-import * as RedRenderers from './renderers.js?v=2026081008';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026081008';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081008';
-import { initBgMusic } from './music.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
-import { initHomeHeatmap } from './heatmap.js?v=2026081008';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081016';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081016';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, isPracticeLiked } from './utils.js?v=2026081016';
+import { $, $$, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081016';
+import { initBgMusic } from './music.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
+import { initHomeHeatmap } from './heatmap.js?v=2026081016';
+import { createGuideMap } from './guide-map.js?v=2026081016';
+import { initCarousel } from './carousel.js?v=2026081016';
+import { isFavorite } from './favorites.js?v=2026081016';
 
-const $ = (sel, ctx) => (ctx || document).querySelector(sel);
-const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
-
-/* ---------- 数据层引用（委托给 RedData 纯数据模块） ---------- */
-const loadJSON = (...a) => RedData.loadJSON(...a);
-const loadAllVenues = (...a) => RedData.loadAllVenues(...a);
-const filterVenues = (...a) => RedData.filterVenues(...a);
-const getProvinces = (...a) => RedData.getProvinces(...a);
-const getCategories = (...a) => RedData.getCategories(...a);
-
-/* ---------- 渲染函数（委托给 RedRenderers 模块） ---------- */
-const renderVenueCard = (venue, bp) => RedRenderers.renderVenueCard(venue, bp);
-const renderPracticeCard = (practice, bp) => RedRenderers.renderPracticeCard(practice, bp);
-const renderMessageCard = (msg) => RedRenderers.renderMessageCard(msg);
-const renderPagination = (total, size, page, selector, fn) => RedRenderers.renderPagination(total, size, page, selector, fn);
-const renderSkeletonGrid = (count, id) => RedRenderers.renderSkeletonGrid(count, id);
+/* ---------- 分页公共助手（四个页面控制器复用，消除页码解析与跳转回调的四处拷贝） ---------- */
+function normalizePage(raw, totalPages) {
+  let page = parseInt(raw, 10);
+  if (!Number.isFinite(page) || page < 1) page = 1;
+  return Math.min(page, totalPages || 1);
+}
+function navigateToPage(paramName) {
+  return (newPage) => {
+    const url = new URL(location.href);
+    url.searchParams.set(paramName, newPage);
+    location.href = url.toString();
+  };
+}
 
 /* ---------- 点赞（统一 key：redguide_likes_<id> 存计数；旧 redguide_likecount_<id> 仅作迁移兼容） ---------- */
 function likePractice(el, id) {
@@ -36,16 +36,13 @@ function likePractice(el, id) {
   if (!countEl) return;
   const key = 'redguide_likes_' + id;
   const legacyKey = 'redguide_likecount_' + id;
-  try {
-    const liked = sessionStorage.getItem(key) != null || sessionStorage.getItem(legacyKey) != null;
-    if (liked) {
-      // 已赞过：确保高亮态存在（防弹窗新渲染的副本未带 active）
-      el.classList.add('active');
-      el.style.transform = 'scale(0.9)';
-      setTimeout(() => el.style.transform = '', 150);
-      return;
-    }
-  } catch (e) { }
+  if (isPracticeLiked(id)) {
+    // 已赞过：确保高亮态存在（防弹窗新渲染的副本未带 active）
+    el.classList.add('active');
+    el.style.transform = 'scale(0.9)';
+    setTimeout(() => el.style.transform = '', 150);
+    return;
+  }
   const newCount = parseInt(countEl.textContent) + 1;
   countEl.textContent = newCount;
   // 已赞保持高亮：红心填充 + 红色药丸
@@ -66,66 +63,21 @@ function likePractice(el, id) {
   setTimeout(() => el.style.transform = '', 200);
 }
 
-/* ---------- 图片轮播（详情页内部使用） ---------- */
-function initCarousel(total) {
-  const carouselEl = $('.detail-carousel');
-  const track = $('.carousel-track', carouselEl);
-  const prevBtn = $('.carousel-prev', carouselEl);
-  const nextBtn = $('.carousel-next', carouselEl);
-  // 限定在当前轮播内部，避免将来页面新增轮播时串扰
-  const dots = $$('.carousel-dot', carouselEl);
-  const counter = $('.carousel-counter', carouselEl);
-  if (!track || !prevBtn || !nextBtn) return;
-
-  let current = 0;
-  let autoplayTimer = null;
-
-  function showSlide(index) {
-    current = (index + total) % total;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
-    if (counter) counter.textContent = `${current + 1} / ${total}`;
-  }
-
-  function next() { showSlide(current + 1); }
-  function prev() { showSlide(current - 1); }
-
-  prevBtn.addEventListener('click', prev);
-  nextBtn.addEventListener('click', next);
-  const dotHandlers = dots.map(dot => {
-    const handler = () => showSlide(parseInt(dot.dataset.index));
-    dot.addEventListener('click', handler);
-    return { dot, handler };
-  });
-
-  function startAutoplay() {
-    autoplayTimer = setInterval(next, 5000);
-  }
-  function stopAutoplay() {
-    if (autoplayTimer) {
-      clearInterval(autoplayTimer);
-      autoplayTimer = null;
-    }
-  }
-
-  track.addEventListener('mouseenter', stopAutoplay);
-  track.addEventListener('mouseleave', startAutoplay);
-  prevBtn.addEventListener('mouseenter', stopAutoplay);
-  nextBtn.addEventListener('mouseenter', stopAutoplay);
-
-  startAutoplay();
-
-  // 返回清理函数，供页面卸载时调用
-  return function destroy() {
-    stopAutoplay();
-    prevBtn.removeEventListener('click', prev);
-    nextBtn.removeEventListener('click', next);
-    dotHandlers.forEach(({ dot, handler }) => dot.removeEventListener('click', handler));
-    track.removeEventListener('mouseenter', stopAutoplay);
-    track.removeEventListener('mouseleave', startAutoplay);
-    prevBtn.removeEventListener('mouseenter', stopAutoplay);
-    nextBtn.removeEventListener('mouseenter', stopAutoplay);
-  };
+/* ---------- 页面私有动作（归属页面控制器，action-delegate 只做派发不碰页面 DOM） ---------- */
+// 详情页"复制分享链接"：读 #detail-name（详情页私有标题）
+function copyShareLinkFromDetail() {
+  copyShareLink($('#detail-name')?.textContent || '');
+}
+// 留言页"重置表单"：读写 #message-form-card/#msg-form（留言页私有 DOM）
+function resetMessageForm() {
+  const fc = document.getElementById('message-form-card');
+  if (!fc) return;
+  const body = fc.querySelector('.form-body');
+  const success = fc.querySelector('.form-success');
+  const form = document.getElementById('msg-form');
+  if (body) body.classList.remove('is-hidden');
+  if (success) success.classList.remove('show');
+  if (form) form.reset();
 }
 
 /* ---------- 留言表单 ---------- */
@@ -214,9 +166,7 @@ async function refreshMessageList() {
   let html = '';
   const pageSize = 4;
   const totalPages = Math.ceil(all.length / pageSize);
-  let currentPage = parseInt(new URLSearchParams(location.search).get('msg_page') || '1', 10);
-  if (!Number.isFinite(currentPage) || currentPage < 1) currentPage = 1;
-  if (currentPage > (totalPages || 1)) currentPage = totalPages || 1;
+  const currentPage = normalizePage(new URLSearchParams(location.search).get('msg_page') || '1', totalPages);
 
   const start = (currentPage - 1) * pageSize;
   const pageItems = all.slice(start, start + pageSize);
@@ -225,15 +175,11 @@ async function refreshMessageList() {
     html = '<div class="empty-state"><div class="empty-icon">' + icon('chat') + '</div><h3>暂无留言</h3><p>快来写下你的学习感悟吧！</p></div>';
   } else {
     html = pageItems.map(m => renderMessageCard(m)).join('');
-    html += renderPagination(all.length, pageSize, currentPage, '.message-list', (page) => {
-      const url = new URL(location.href);
-      url.searchParams.set('msg_page', page);
-      location.href = url.toString();
-    });
+    html += renderPagination(all.length, pageSize, currentPage, '.message-list', navigateToPage('msg_page'));
   }
 
   container.innerHTML = html;
-  RedRenderers.applyMessageCardStyles(container);
+  applyMessageCardStyles(container);
 }
 
 /* ---------- 公共 UI 装配 ---------- */
@@ -332,115 +278,59 @@ async function initGuidePage() {
   if (searchInput && initSearch) searchInput.value = initSearch;
 
   // ---- 地图功能 ----
-  let leafletMap = null;
-  let venueMarkerMap = {}; // venue.id → marker 映射
+  const guideMapCtrl = createGuideMap(mapContainer);
   const toggleBtn = $('#toggle-view-btn');
-  const guideMap = document.querySelector('.guide-map');
+  const guideMapEl = document.querySelector('.guide-map');
   const guideList = document.querySelector('.guide-list');
-  const isMobile = window.matchMedia('(max-width: 860px)').matches;
+  let isMobile = window.matchMedia('(max-width: 860px)').matches;
   let mapVisible = !isMobile;
 
   // 移动端初始隐藏地图列
-  if (isMobile && guideMap) {
-    guideMap.classList.add('is-hidden');
+  if (isMobile && guideMapEl) {
+    guideMapEl.classList.add('is-hidden');
     if (toggleBtn) toggleBtn.classList.remove('is-hidden');
   }
 
-  async function initMap() {
-    if (leafletMap) return;
-    // guide.html 已通过 <script defer> 静态加载 Leaflet（同一 CDN），此处无需再动态注入兜底
-    if (!window.L || !mapContainer) return;
-    leafletMap = L.map(mapContainer, {
-      center: [35, 110],
-      zoom: 3.4,
-      minZoom: 3.4,
-      maxBounds: [[10, 60], [55, 155]],
-      maxBoundsViscosity: 0.8
-    });
-    L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
-      subdomains: ['1', '2', '3', '4'],
-      maxZoom: 18,
-      attribution: '© 高德地图'
-    }).addTo(leafletMap);
-  }
-
-  // 默认五角星 marker
-  function makeDefaultIcon() {
-    return L.divIcon({
-      className: 'red-star-marker',
-      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="#b91c1c" stroke="#7f1d1d" stroke-width="0.5"/></svg><div class="rsm-shadow"></div></div>',
-      iconSize: [32, 38],
-      iconAnchor: [16, 36],
-      popupAnchor: [0, -38]
-    });
-  }
-
-  // 金色高亮 marker
-  function makeHighlightIcon() {
-    return L.divIcon({
-      className: 'red-star-marker marker-highlight',
-      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="#e8a820" stroke="#b91c1c" stroke-width="0.8"/></svg><div class="rsm-shadow"></div></div>',
-      iconSize: [38, 45],
-      iconAnchor: [19, 43],
-      popupAnchor: [0, -43]
-    });
-  }
-
-  function plotVenuesOnMap(filteredVenues) {
-    if (!leafletMap) return;
-    // 先收集再移除，避免在 eachLayer 迭代过程中修改 _layers 集合导致部分 marker 残留
-    const staleMarkers = [];
-    leafletMap.eachLayer(layer => {
-      if (layer instanceof L.Marker) staleMarkers.push(layer);
-    });
-    staleMarkers.forEach(layer => leafletMap.removeLayer(layer));
-    venueMarkerMap = {};
-    const withCoords = filteredVenues.filter(function (v) { return v.coordinates && v.coordinates.lat && v.coordinates.lng; });
-    if (withCoords.length === 0) return;
-
-    const defIcon = makeDefaultIcon();
-    const hlIcon = makeHighlightIcon();
-
-    withCoords.forEach(function (v) {
-      const marker = L.marker([v.coordinates.lat, v.coordinates.lng], { icon: defIcon })
-        .bindPopup('<b>' + escapeHtml(v.name) + '</b><br>' + escapeHtml(v.province) + ' ' + escapeHtml(v.city || '') + '<br><a href="' + escapeAttr(getBasePath() + 'pages/detail.html?id=' + encodeURIComponent(v.id)) + '">查看详情 →</a>');
-      marker.addTo(leafletMap);
-      venueMarkerMap[String(v.id)] = { marker: marker, def: defIcon, hl: hlIcon };
-    });
-
-    const allMarkers = Object.values(venueMarkerMap).map(function (m) { return m.marker; });
-    if (allMarkers.length > 0) {
-      const group = L.featureGroup(allMarkers);
-      leafletMap.fitBounds(group.getBounds().pad(0.15), { maxZoom: 6 });
-    }
-  }
-
-  function highlightMarker(venueId) {
-    Object.keys(venueMarkerMap).forEach(function (k) {
-      venueMarkerMap[k].marker.setIcon(venueMarkerMap[k].def);
-      venueMarkerMap[k].marker.setZIndexOffset(0);
-    });
-    const entry = venueMarkerMap[String(venueId)];
-    if (entry) {
-      entry.marker.setIcon(entry.hl);
-      entry.marker.setZIndexOffset(1000);
-    }
-  }
+  // 跨 860px 断点响应：避免"加载时一次性判定"导致 resize 后布局与地图初始化状态永久错配
+  let _respTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(_respTimer);
+    _respTimer = setTimeout(() => {
+      const nowMobile = window.matchMedia('(max-width: 860px)').matches;
+      if (nowMobile === isMobile) return;
+      isMobile = nowMobile;
+      if (isMobile) {
+        // 桌面→移动：回列表视图，隐藏地图列，显示切换按钮
+        mapVisible = false;
+        if (guideMapEl) guideMapEl.classList.add('is-hidden');
+        if (guideList) guideList.classList.remove('is-hidden');
+        if (toggleBtn) {
+          toggleBtn.classList.remove('is-hidden');
+          toggleBtn.classList.remove('map-active');
+          toggleBtn.innerHTML = icon('map') + ' 地图视图';
+        }
+      } else {
+        // 移动→桌面：地图视图，隐藏切换按钮，确保地图已初始化
+        mapVisible = true;
+        if (guideMapEl) guideMapEl.classList.remove('is-hidden');
+        if (guideList) guideList.classList.add('is-hidden');
+        if (toggleBtn) toggleBtn.classList.add('is-hidden');
+        guideMapCtrl.initMap();
+      }
+    }, 150);
+  });
 
   // 卡片 hover → marker 联动
   container.addEventListener('mouseover', function (e) {
     const card = e.target.closest('.venue-card');
     if (!card) return;
     const id = card.dataset.id;
-    if (id) highlightMarker(id);
+    if (id) guideMapCtrl.highlightMarker(id);
   });
   container.addEventListener('mouseleave', function (e) {
     const card = e.target.closest('.venue-card');
     if (!card || !e.relatedTarget || !e.relatedTarget.closest('.venue-card')) {
-      Object.keys(venueMarkerMap).forEach(function (k) {
-        venueMarkerMap[k].marker.setIcon(venueMarkerMap[k].def);
-        venueMarkerMap[k].marker.setZIndexOffset(0);
-      });
+      guideMapCtrl.highlightMarker(null); // null → 全部复位默认图标
     }
   });
 
@@ -450,12 +340,12 @@ async function initGuidePage() {
       mapVisible = !mapVisible;
       toggleBtn.innerHTML = mapVisible ? icon('list') + ' 列表视图' : icon('map') + ' 地图视图';
       toggleBtn.classList.toggle('map-active', mapVisible);
-      if (guideMap) guideMap.classList.toggle('is-hidden', !mapVisible);
+      if (guideMapEl) guideMapEl.classList.toggle('is-hidden', !mapVisible);
       if (guideList) guideList.classList.toggle('is-hidden', mapVisible);
       const pagContainer = document.getElementById('pagination-container');
       if (pagContainer) pagContainer.classList.toggle('is-hidden', mapVisible);
       if (mapVisible) {
-        await initMap();
+        await guideMapCtrl.initMap();
         doRender(false, true);
       }
     });
@@ -479,17 +369,15 @@ async function initGuidePage() {
     const filtered = filterVenues(venues, { query: query, province: province, category: category });
 
     // 地图始终更新（桌面端）
-    if (leafletMap) {
-      plotVenuesOnMap(filtered);
+    if (guideMapCtrl.isReady()) {
+      guideMapCtrl.plotVenuesOnMap(filtered);
       if (mapOnly) return;
     }
 
     // URL 同步
     const pageSize = 9;
-    const rawPage = resetPage ? 1 : parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
-    const currentPage = (Number.isFinite(rawPage) && rawPage > 0) ? rawPage : 1;
     const totalPages = Math.ceil(filtered.length / pageSize);
-    const page = Math.min(currentPage, totalPages || 1);
+    const page = normalizePage(resetPage ? 1 : (new URLSearchParams(location.search).get('page') || '1'), totalPages);
     syncURL(query, province, category, page);
 
     const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -499,17 +387,13 @@ async function initGuidePage() {
     if (pageItems.length === 0) {
       container.innerHTML = '<div class="empty-state"><div class="empty-icon">' + icon('search') + '</div><h3>未找到匹配的场馆</h3><p>请尝试调整搜索条件或筛选选项</p></div>';
     } else {
-      container.innerHTML = pageItems.map(function (v) { return renderVenueCard(v); }).join('');
+      container.innerHTML = pageItems.map(function (v) { return renderVenueCard(v, undefined, isFavorite(v.id)); }).join('');
       bindImageFallbacks(container);
     }
 
     const pagContainer = $('#pagination-container');
     if (pagContainer) {
-      pagContainer.innerHTML = renderPagination(filtered.length, pageSize, page, '#pagination-container', function (newPage) {
-        const url = new URL(location.href);
-        url.searchParams.set('page', newPage);
-        location.href = url.toString();
-      });
+      pagContainer.innerHTML = renderPagination(filtered.length, pageSize, page, '#pagination-container', navigateToPage('page'));
     }
   }
 
@@ -530,7 +414,7 @@ async function initGuidePage() {
 
   // 桌面端立即加载地图，移动端按需加载
   if (!isMobile) {
-    await initMap();
+    await guideMapCtrl.initMap();
   }
   render();
 }
@@ -565,7 +449,7 @@ async function initDetailPage() {
   const bp = getBasePath();
   const imgSrc = resolveAssetPath(venue.image, bp);
   const fb = fallbackSrc();
-  const detail = RedData.getVenueDetail(venue.name);
+  const detail = getVenueDetail(venue.name);
 
   // 生成详细描述
   const detailedDesc = venue.summary
@@ -712,9 +596,7 @@ async function initPolicyPage() {
   // 分页：5条/页
   const pageSize = 5;
   const totalPages = Math.ceil(policies.length / pageSize);
-  let currentPage = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
-  if (!Number.isFinite(currentPage) || currentPage < 1) currentPage = 1;
-  const page = Math.min(currentPage, totalPages || 1);
+  const page = normalizePage(new URLSearchParams(location.search).get('page') || '1', totalPages);
   const pageItems = policies.slice((page - 1) * pageSize, page * pageSize);
 
   const html = pageItems.map(function (p) {
@@ -752,11 +634,7 @@ async function initPolicyPage() {
 
   // 分页
   if (totalPages > 1) {
-    container.innerHTML += renderPagination(policies.length, pageSize, page, '.policy-list', function (newPage) {
-      const url = new URL(location.href);
-      url.searchParams.set('page', newPage);
-      location.href = url.toString();
-    });
+    container.innerHTML += renderPagination(policies.length, pageSize, page, '.policy-list', navigateToPage('page'));
   }
 }
 
@@ -772,10 +650,8 @@ async function initPracticePage() {
   const bp = getBasePath();
   const pageSize = 6;
   const params = new URLSearchParams(location.search);
-  let currentPage = parseInt(params.get('page') || '1', 10);
-  if (!Number.isFinite(currentPage) || currentPage < 1) currentPage = 1;
   const totalPages = Math.ceil(practices.length / pageSize);
-  const page = Math.min(currentPage, totalPages || 1);
+  const page = normalizePage(params.get('page') || '1', totalPages);
   const pageItems = practices.slice((page - 1) * pageSize, page * pageSize);
 
   container.innerHTML = pageItems.map(p => renderPracticeCard(p, bp)).join('');
@@ -783,11 +659,7 @@ async function initPracticePage() {
 
   const pagContainer = $('#pagination-container');
   if (pagContainer && totalPages > 1) {
-    pagContainer.innerHTML = renderPagination(practices.length, pageSize, page, '#pagination-container', (newPage) => {
-      const url = new URL(location.href);
-      url.searchParams.set('page', newPage);
-      location.href = url.toString();
-    });
+    pagContainer.innerHTML = renderPagination(practices.length, pageSize, page, '#pagination-container', navigateToPage('page'));
   }
 }
 
@@ -819,4 +691,4 @@ async function autoInit() {
   }
 }
 
-export { autoInit, likePractice };
+export { autoInit, likePractice, copyShareLinkFromDetail, resetMessageForm };

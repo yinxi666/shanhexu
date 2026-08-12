@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks } from './ui.js?v=2026081008';
-import { icon } from './icons.js?v=2026081008';
+import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081016';
+import { icon } from './icons.js?v=2026081016';
 import {
   getBasePath,
   resolveAssetPath,
@@ -16,64 +16,16 @@ import {
   escapeAttr,
   getLikeCount,
   isPracticeLiked
-} from './utils.js?v=2026081008';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081008';
-import { loadJSON } from './data.js?v=2026081008';
-
-// 视频弹窗
-function openVideo(src) {
-  let overlay = document.querySelector('.video-modal-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.className = 'video-modal-overlay';
-    overlay.innerHTML = `
-        <div class="video-modal" role="dialog" aria-modal="true" aria-label="视频播放">
-          <button class="video-close" aria-label="关闭视频">✕</button>
-          <video controls autoplay src=""></video>
-        </div>
-      `;
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay || e.target.classList.contains('video-close')) {
-        closeVideo();
-      }
-    });
-  }
-  // 已打开则直接返回，避免重复 lockBodyScroll 使计数失衡
-  if (overlay.classList.contains('open')) return;
-  const video = overlay.querySelector('video');
-  const closeBtn = overlay.querySelector('.video-close');
-  video.src = src;
-  video.onerror = function () {
-    closeVideo();
-    showToast('视频加载失败');
-  };
-  overlay.classList.add('open');
-  lockBodyScroll();
-  trapFocus(overlay.querySelector('.video-modal'), {
-    initialFocus: closeBtn,
-    onClose: closeVideo
-  });
-
-  function closeVideo() {
-    // 仅当视频弹窗确实打开时才释放滚动锁，避免 Escape 误触清掉其他弹窗的锁
-    if (!overlay.classList.contains('open')) return;
-    overlay.classList.remove('open');
-    video.pause();
-    video.src = '';
-    video.onerror = null;
-    unlockBodyScroll();
-    releaseFocus();
-  }
-}
+} from './utils.js?v=2026081016';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081016';
+import { getPractice } from './data.js?v=2026081016';
 
 // 实践成果详情弹窗
 async function openPracticeDetail(id) {
   // 已打开则直接返回，避免异步窗口内重复触发生成双弹窗、锁计数失衡
   if (document.getElementById('practice-detail-overlay')) return;
-  let practices;
-  try { practices = await loadJSON('data/practices.json'); } catch (e) { practices = []; }
-  const p = practices.find(x => String(x.id) === String(id));
+  // 数据访问统一走 data.js，弹窗层不再自取 JSON
+  const p = await getPractice(id);
   if (!p) { showToast('未找到该实践成果'); return; }
 
   const bp = getBasePath();
@@ -91,9 +43,7 @@ async function openPracticeDetail(id) {
       '</div>';
   }
 
-  const videoSrc = p.video ? sanitizeUrl(resolveAssetPath(p.video, bp)) : '';
-
-  // 独立类名，避免与视频弹窗 .video-modal-overlay 混淆（此前 openVideo 会误命中本弹窗导致崩溃）
+  // 独立类名，避免与其他弹窗 .video-modal-overlay 混淆
   let overlay = document.createElement('div');
   overlay.className = 'practice-modal-overlay';
   overlay.id = 'practice-detail-overlay';
@@ -106,10 +56,6 @@ async function openPracticeDetail(id) {
           <p class="practice-detail-team">${icon('users')} ${escapeHtml(p.team || '实践团队')}</p>
           <p class="practice-detail-summary">${escapeHtml(p.summary || '')}</p>
           ${galleryHtml}
-          ${videoSrc ? `
-          <div class="practice-detail-section">
-            <button class="btn primary small" data-action="play-video" data-src="${escapeAttr(videoSrc)}">▶ 播放视频</button>
-          </div>` : ''}
           <div class="practice-detail-actions">
             <span>${icon('calendar')} ${escapeHtml(p.createdAt || '')}</span>
             <span class="practice-detail-likes${isPracticeLiked(p.id) ? ' active' : ''}" data-action="like-practice" data-id="${p.id}">${icon('heart')} <span class="like-count">${getLikeCount(p.id, p.likes || 0)}</span> 赞</span>
@@ -124,11 +70,7 @@ async function openPracticeDetail(id) {
   const modal = overlay.querySelector('.quiz-modal');
   const closeBtn = overlay.querySelector('.quiz-close');
   trapFocus(modal, { initialFocus: closeBtn, onClose: closePracticeDetail });
-  overlay.addEventListener('click', function (e) {
-    if (e.target === overlay) {
-      closePracticeDetail();
-    }
-  });
+  onOverlayClick(overlay, closePracticeDetail);
 }
 
 // 实践详情关闭（模块级独立函数：供弹窗内部与 action-delegate 的 close-practice-detail 共用，消除重复逻辑）
@@ -151,16 +93,20 @@ function openLightbox(src) {
   lb.setAttribute('aria-modal', 'true');
   lb.setAttribute('aria-label', '图片预览');
   lb.innerHTML = `<img src="${escapeAttr(safeSrc)}" class="lightbox-content" alt="" loading="lazy" decoding="async"><button class="lightbox-close" data-action="close-lightbox">✕</button>`;
-  lb.dataset.action = 'close-lightbox';
   document.body.appendChild(lb);
   const closeBtn = lb.querySelector('.lightbox-close');
+  // 点遮罩关闭走统一 onOverlayClick（e.target===overlay），点图片/内容不关闭，与其余 7 个遮罩语义一致；
+  // ✕ 按钮仍经 data-action=close-lightbox 由 action-delegate 处理
+  onOverlayClick(lb, closeLightbox);
   trapFocus(lb, { initialFocus: closeBtn, onClose: closeLightbox });
-
-  function closeLightbox() {
-    if (!lb.parentNode) return;
-    lb.remove();
-    releaseFocus();
-  }
 }
 
-export { openVideo, openPracticeDetail, openLightbox, closePracticeDetail };
+// 图片灯箱关闭（模块级独立函数：供 trapFocus onClose 与 action-delegate 的 close-lightbox 共用，消除关闭路径重复）
+function closeLightbox() {
+  const lb = document.querySelector('.lightbox-overlay');
+  if (!lb || !lb.parentNode) return;
+  lb.remove();
+  releaseFocus();
+}
+
+export { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox };

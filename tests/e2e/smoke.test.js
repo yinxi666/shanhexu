@@ -15,7 +15,6 @@ const net = require('net');
 const path = require('path');
 const { chromium } = require('playwright');
 
-const PORT = 9876;
 const ROOT = path.resolve(__dirname, '..', '..');
 
 function waitPort(host, port, timeoutMs) {
@@ -33,14 +32,25 @@ function waitPort(host, port, timeoutMs) {
 }
 
 async function startServer() {
-  // 若已有服务在跑(用户本地开着)则直接复用
+  // 自起独立端口的全新服务：避免复用已在 9876 运行的他人/过期实例
+  const port = 20000 + Math.floor(Math.random() * 20000);
+  const child = spawn(process.execPath, ['server.js'], {
+    cwd: ROOT,
+    stdio: ['ignore', 'ignore', 'pipe'], // 捕获 stderr，启动失败可诊断
+    env: { ...process.env, PORT: String(port) }
+  });
+  let bootErr = '';
+  child.stderr.on('data', (d) => { bootErr += d; });
   try {
-    await waitPort('127.0.0.1', PORT, 800);
-    return { url: 'http://localhost:' + PORT, close: () => { } };
-  } catch (e) { /* 未运行，启动新服务 */ }
-  const child = spawn(process.execPath, ['server.js'], { cwd: ROOT, stdio: 'ignore' });
-  await waitPort('127.0.0.1', PORT, 8000);
-  return { url: 'http://localhost:' + PORT, close: () => child.kill() };
+    await waitPort('127.0.0.1', port, 8000);
+  } catch (e) {
+    child.kill();
+    throw new Error('server.js 启动失败: ' + (bootErr || e.message));
+  }
+  if (child.exitCode !== null) {
+    throw new Error('server.js 提前退出: ' + bootErr);
+  }
+  return { url: 'http://127.0.0.1:' + port, close: () => child.kill() };
 }
 
 test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 404', async () => {
@@ -56,6 +66,8 @@ test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 4
     page.on('console', (m) => { if (m.type() === 'error') errors.push('[console错误] ' + m.text()); });
     page.on('requestfailed', (r) => {
       const u = r.url();
+      // 只记录同源资源失败（ES 模块 404 / 本站资源缺失）；
+      // 外部 CDN（echarts/leaflet/字体）失败属可降级场景，首页会回退 SVG，不计为错误
       if (u.startsWith(url)) errors.push('[资源失败] ' + u.replace(url, '') + ' ' + (r.failure() && r.failure().errorText));
     });
 
@@ -70,9 +82,11 @@ test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 4
     ];
 
     for (const [name, p] of pages) {
-      const resp = await page.goto(url + p, { waitUntil: 'networkidle' });
+      // domcontentloaded 而非 networkidle：外部 CDN 慢/被墙时 networkidle 可能永不空闲导致超时，
+      // 而本站 ES 模块在 DOMContentLoaded 前即求值，足以捕获模块加载/初始化错误
+      const resp = await page.goto(url + p, { waitUntil: 'domcontentloaded' });
       assert.ok(resp && resp.ok(), name + ' 应返回 200，实际 ' + (resp && resp.status()));
-      // 留出 JS 初始化时间(数据加载/地图/入场动画)
+      // 留出异步初始化时间(数据加载/地图/入场动画)
       await page.waitForTimeout(p === '/pages/changzheng.html' ? 1500 : 1000);
     }
 
