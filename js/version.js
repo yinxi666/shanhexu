@@ -3,4 +3,4 @@
    修改此处后，运行 scripts/bump-version.js 同步到所有 HTML
    ============================================================ */
 
-export const ASSET_VERSION = '2026081315';
+export const ASSET_VERSION = '2026081316';
