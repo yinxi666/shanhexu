@@ -149,12 +149,12 @@
 }
 
 .detail-sidebar .sidebar-card .official-link:hover {
-  background: #fde8e8;
+  background: var(--light-red);
 }
 
 .detail-sidebar .sidebar-card .map-placeholder {
   height: 180px;
-  background: #f3f4f6;
+  background: var(--img-placeholder);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -1002,18 +1002,18 @@
 }
 
 .msg-status.approved {
-  background: #ecfdf5;
-  color: #065f46;
+  background: var(--status-ok-bg);
+  color: var(--status-ok-fg);
 }
 
 .msg-status.pending {
-  background: #fffbeb;
-  color: #92400e;
+  background: var(--status-warn-bg);
+  color: var(--status-warn-fg);
 }
 
 .msg-status.rejected {
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--status-err-bg);
+  color: var(--status-err-fg);
 }
 
 /* Message Form — 软木板下方表单 */
@@ -1194,7 +1194,7 @@
 }
 
 .form-success h4 {
-  color: #065f46;
+  color: var(--status-ok-fg);
   font-size: 18px;
   margin-bottom: 8px;
 }

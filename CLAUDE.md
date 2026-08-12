@@ -21,7 +21,7 @@
 |---|---|
 | `npm start` | 本地静态服务 http://localhost:9876（PORT 可覆盖）。**必须 HTTP，file:// 下 ES Module/fetch 全挂** |
 | `npm test` | 40 项零依赖契约测试（node --test tests/*.test.js，零网络，~200ms） |
-| `npm run smoke` | Playwright + 系统 Chrome 无头开 7 页（需 npm ci + 本机 Chrome/Edge；自起随机端口 20000-39999；只计同源资源失败，外部 CDN 容错） |
+| `npm run smoke` | Playwright + 系统 Chrome：7 页加载冒烟 + 6 项交互行为测试（点赞/收藏/聊天跨页/答题断点/留言/地图 resize；需 npm ci + 本机 Chrome/Edge；自起随机端口，顺序执行避免 _site 构建竞态） |
 | `npm run audit` | 提交前体检：版本一致性 / import 完整 / 死引用 / 资源存在性（硬失败 exit 1） |
 | `npm run bump` | 同步缓存版本号到所有 HTML `?v=` 与 js/ 相对 import（见缓存破击） |
 | `npm run converge` | CSS 魔法值→令牌幂等收敛（保护 transition/animation 的 delay 位） |

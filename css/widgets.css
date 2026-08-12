@@ -354,7 +354,7 @@
   justify-content: space-between;
   padding: 16px 16px;
   background: var(--chat-header-grad);
-  color: #fff;
+  color: var(--on-primary);
   flex-shrink: 0;
   position: relative;
   overflow: hidden;

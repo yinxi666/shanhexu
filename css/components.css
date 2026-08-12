@@ -602,7 +602,7 @@
 }
 
 .amap-static-map {
-  background: #f3f4f6;
+  background: var(--img-placeholder);
   height: 160px;
   display: flex;
   align-items: center;

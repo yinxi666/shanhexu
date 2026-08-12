@@ -34,6 +34,15 @@ html.dark {
   --status-ok: #4ade80;
   --status-ok-border: #22c55e;
   --status-err: #ef4444;
+  --status-ok-bg: #064e3b;
+  --status-ok-fg: #6ee7b7;
+  --status-warn-bg: #3b2f00;
+  --status-warn-fg: #fcd34d;
+  --status-err-bg: #3b1010;
+  --status-err-fg: #fca5a5;
+  --scrollbar-thumb: linear-gradient(180deg, #475569, #334155, #1e293b);
+  --scrollbar-thumb-hover: linear-gradient(180deg, #64748b, #475569, #334155);
+  --scrollbar-thumb-color: #475569;
 
   /* 长征手卷页：暖金黎明叙事在暗色下收敛，融入全站暗色视觉 */
   --cz-gold: #eec55e;
@@ -93,8 +102,8 @@ html.dark input,
 html.dark select,
 html.dark textarea {
   /* 用 background-color 而非 background 简写：保留 .search-toolbar select 的自绘箭头 background-image */
-  background-color: #1e293b;
-  color: #e2e8f0;
+  background-color: var(--card-bg);
+  color: var(--ink);
   border-color: #475569;
 }
 
@@ -113,17 +122,17 @@ html.dark .message-form-card h3 {
 html.dark .venue-card .card-img,
 html.dark .policy-card .policy-img,
 html.dark .practice-card .practice-img {
-  background: #1e293b;
+  background: var(--card-bg);
 }
 html.dark #map-container {
-  background: #0f172a;
+  background: var(--bg);
 }
 html.dark .mini-map-svg {
-  background: #1e293b;
+  background: var(--card-bg);
 }
 html.dark .heatmap-zoom-bar .hm-zoom-btn,
 html.dark .heatmap-zoom-bar .hm-zoom-reset {
-  background: #1e293b;
+  background: var(--card-bg);
   border-color: #475569;
   color: var(--ink);
 }
@@ -137,22 +146,22 @@ html.dark .message-card {
 }
 
 html.dark .sidebar-card .official-link {
-  background: #2d1010;
+  background: var(--soft-red);
 }
 
 html.dark .msg-status.approved {
-  background: #064e3b;
-  color: #6ee7b7;
+  background: var(--status-ok-bg);
+  color: var(--status-ok-fg);
 }
 
 html.dark .msg-status.pending {
-  background: #3b2f00;
-  color: #fcd34d;
+  background: var(--status-warn-bg);
+  color: var(--status-warn-fg);
 }
 
 html.dark .msg-status.rejected {
-  background: #3b1010;
-  color: #fca5a5;
+  background: var(--status-err-bg);
+  color: var(--status-err-fg);
 }
 
 /* ============================================================

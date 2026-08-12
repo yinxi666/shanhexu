@@ -95,6 +95,17 @@
   --status-ok: #16a34a;
   --status-ok-border: #22c55e;
   --status-err: #ef4444;
+  /* 留言状态徽章（msg-status）浅色底 + 深字（dark 下反转为深底亮字） */
+  --status-ok-bg: #ecfdf5;
+  --status-ok-fg: #065f46;
+  --status-warn-bg: #fffbeb;
+  --status-warn-fg: #92400e;
+  --status-err-bg: #fef2f2;
+  --status-err-fg: #991b1b;
+  /* 滚动条（保留渐变质感；Firefox scrollbar-color 用单一色值） */
+  --scrollbar-thumb: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
+  --scrollbar-thumb-hover: linear-gradient(180deg, #b0b7c3, #7c8794, #5c6670);
+  --scrollbar-thumb-color: #6b7280;
 
   --stat-label: #64748b;
 
@@ -130,18 +141,18 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
+  background: var(--scrollbar-thumb);
   border-radius: var(--radius);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #b0b7c3, #7c8794, #5c6670);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #6b7280 transparent;
+  scrollbar-color: var(--scrollbar-thumb-color) transparent;
 }
 
 body {
