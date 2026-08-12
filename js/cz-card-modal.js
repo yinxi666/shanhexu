@@ -4,12 +4,12 @@
    依赖：utils/ui/icons/cardgen/focus-trap/cz-content
    ============================================================ */
 
-import { getBasePath, escapeAttr, isTouchDevice } from './utils.js?v=2026081035';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl } from './cardgen.js?v=2026081035';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081035';
-import { CZ_CARD_BGS } from './cz-content.js?v=2026081035';
+import { getBasePath, isTouchDevice } from './utils.js?v=2026081304';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081304';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081304';
+import { CZ_CARD_BGS } from './cz-content.js?v=2026081304';
 
 // 精神词列表复用 cardgen 的 SPIRITS（静态 import 恒为数组，无需兜底副本）
 const CZ_CARD_SPIRITS = CZ_SPIRITS;
@@ -27,33 +27,31 @@ let _czCardGenTimer = null;  // 生成中的背景图超时句柄（弹窗关闭
 
 function buildCardModal() {
   if (!czCardBgs || !czCardSpirits) return;
-  if (czCardBgs.children.length > 0) {
-    // 已构建过：保留用户已选的背景/精神高亮
-    czCardBgs.querySelectorAll('.cz-card-bg').forEach(x => x.classList.toggle('selected', parseInt(x.dataset.i, 10) === _czCardBg));
-    czCardSpirits.querySelectorAll('.cz-card-chip').forEach(x => x.classList.toggle('selected', parseInt(x.dataset.i, 10) === _czCardSpirit));
-    return;
+  // 背景网格：复用 cardgen 的 buildBgGrid（单实现 + 选中高亮恢复 + role/tabindex 键盘可达）。
+  // 每次重建恢复 _czCardBg 高亮，修复此前"重建后高亮恒在第 0 格"的问题
+  buildBgGrid(czCardBgs, CZ_CARD_BGS, _czCardBg, (i) => {
+    _czCardBg = i;
+    buildCardModal();
+  }, 'cz-card-bg');
+  // 精神 chips：首次构建后缓存；再次打开只恢复高亮（真实 <button>，键盘天然可达）
+  if (czCardSpirits.children.length === 0) {
+    czCardSpirits.innerHTML = CZ_CARD_SPIRITS.map((s, i) =>
+      `<button type="button" class="cz-card-chip${i === 0 ? ' selected' : ''}" data-i="${i}" aria-pressed="${i === 0}">${s}</button>`
+    ).join('');
+    czCardSpirits.querySelectorAll('.cz-card-chip').forEach(el => {
+      el.addEventListener('click', () => {
+        _czCardSpirit = parseInt(el.dataset.i, 10);
+        czCardSpirits.querySelectorAll('.cz-card-chip').forEach(x => {
+          const sel = x === el;
+          x.classList.toggle('selected', sel);
+          x.setAttribute('aria-pressed', String(sel));
+        });
+      });
+    });
+  } else {
+    czCardSpirits.querySelectorAll('.cz-card-chip').forEach(x =>
+      x.classList.toggle('selected', parseInt(x.dataset.i, 10) === _czCardSpirit));
   }
-  const bp = getBasePath();
-  czCardBgs.innerHTML = CZ_CARD_BGS.map((b, i) =>
-    `<div class="cz-card-bg${i === 0 ? ' selected' : ''}" data-i="${i}" data-src="${escapeAttr(bp + b.src)}"><span>${b.label}</span></div>`
-  ).join('');
-  czCardBgs.querySelectorAll('.cz-card-bg').forEach(el => {
-    const src = el.dataset.src;
-    if (src) el.style.backgroundImage = 'url(' + src + ')';
-    el.addEventListener('click', () => {
-      _czCardBg = parseInt(el.dataset.i, 10);
-      czCardBgs.querySelectorAll('.cz-card-bg').forEach(x => x.classList.toggle('selected', x === el));
-    });
-  });
-  czCardSpirits.innerHTML = CZ_CARD_SPIRITS.map((s, i) =>
-    `<button type="button" class="cz-card-chip${i === 0 ? ' selected' : ''}" data-i="${i}">${s}</button>`
-  ).join('');
-  czCardSpirits.querySelectorAll('.cz-card-chip').forEach(el => {
-    el.addEventListener('click', () => {
-      _czCardSpirit = parseInt(el.dataset.i, 10);
-      czCardSpirits.querySelectorAll('.cz-card-chip').forEach(x => x.classList.toggle('selected', x === el));
-    });
-  });
 }
 
 export function openCardModal() {

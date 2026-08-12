@@ -11,6 +11,8 @@ html.dark {
   --red: #ef4444;
   --gold: #fbbf24;
   --light-gold: #3d3000;
+  --gold-deep: #b45309;
+  --gold-light: #b8860b;
   --ink: #f1f5f9;
   --muted: #94a3b8;
   --light-muted: #64748b;
@@ -202,7 +204,6 @@ html.dark .music-toggle {
 }
 
 /* 深色下搜索筛选下拉框聚焦白底浅字不可读 */
-html.dark .search-toolbar select:focus { background: var(--white); color: var(--ink); }
 /* 深色下官方链接 hover 硬编码浅粉块 */
 html.dark .sidebar-card .official-link:hover { background: #2d1010; }
 /* 深色下高德静态卡片亮灰方框 */

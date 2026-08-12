@@ -15,18 +15,18 @@
   <meta property="og:url" content="https://yinxi666.github.io/shanhexu/">
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/">
-  <link rel="icon" type="image/png" href="favicon.png?v=2026081035">
+  <link rel="icon" type="image/png" href="favicon.png?v=2026081304">
   <link rel="manifest" href="manifest.json">
   <!-- 首图已在 DOM 中（.hero-bg-active），无需单独 preload；轮播图清单见 .cinematic-hero[data-hero-images] -->
   <title>赓续血脉・数绘红旅 — 红色文旅数字导览</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="css/base.css?v=2026081035">
-  <link rel="stylesheet" href="css/home.css?v=2026081035">
-  <link rel="stylesheet" href="css/components.css?v=2026081035">
-  <link rel="stylesheet" href="css/pages.css?v=2026081035">
-  <link rel="stylesheet" href="css/widgets.css?v=2026081035">
-  <link rel="stylesheet" href="css/effects.css?v=2026081035">
-  <link rel="stylesheet" href="css/dark.css?v=2026081035">
+  <link rel="stylesheet" href="css/base.css?v=2026081304">
+  <link rel="stylesheet" href="css/home.css?v=2026081304">
+  <link rel="stylesheet" href="css/components.css?v=2026081304">
+  <link rel="stylesheet" href="css/pages.css?v=2026081304">
+  <link rel="stylesheet" href="css/widgets.css?v=2026081304">
+  <link rel="stylesheet" href="css/effects.css?v=2026081304">
+  <link rel="stylesheet" href="css/dark.css?v=2026081304">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     html.entrance-active,
@@ -103,8 +103,11 @@
 <body>
   <div id="entrance-overlay">
     <canvas id="entrance-canvas"></canvas>
-    <button id="skip">跳过→</button>
+    <!-- autofocus：键盘/读屏用户聚焦到跳过按钮，避免焦点悬在遮罩后的页面链接上 -->
+    <button id="skip" autofocus>跳过→</button>
   </div>
+  <!-- 回访用户（已看过入场）立即隐藏遮罩，避免 app.js 启动前整页闪黑；防 FOUC 同款内联守卫 -->
+  <script>(function () { try { if (sessionStorage.getItem('entrance_done_v2')) { var o = document.getElementById('entrance-overlay'); if (o) o.style.display = 'none'; document.documentElement.classList.remove('entrance-active'); } } catch (e) { } })();</script>
   <!-- ===== 导航栏（由 js/layout-loader.js 注入共享模板） ===== -->
   <div id="site-header"></div>
 
@@ -137,11 +140,11 @@
           <div class="stat-label">覆盖省区市</div>
         </div>
         <div class="stat-item scroll-animate scroll-animate-delay-2">
-          <div class="stat-num" id="stat-categories">6</div>
+          <div class="stat-num" id="stat-categories">8</div>
           <div class="stat-label">场馆类别</div>
         </div>
         <div class="stat-item scroll-animate scroll-animate-delay-3">
-          <div class="stat-num" id="stat-practices">20+</div>
+          <div class="stat-num" id="stat-practices">18+</div>
           <div class="stat-label">实践成果</div>
         </div>
         <div class="stat-item scroll-animate scroll-animate-delay-4">
@@ -303,7 +306,7 @@
 
   <!-- Hero背景轮播（ES Module，由 app.js 引入） -->
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <script type="module" src="js/app.js?v=2026081035"></script>
+  <script type="module" src="js/app.js?v=2026081304"></script>
 </body>
 
 </html>

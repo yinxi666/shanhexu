@@ -127,7 +127,9 @@ textarea:focus-visible,
   }
 }
 
-main {
+/* 长征页 <main id="cz-main"> 内含 position:fixed 沉浸层，动画 transform 会让它们
+   短暂以 main 为包含块而错位 → 对 #cz-main 排除该动画 */
+main:not(#cz-main) {
   animation: pageFadeIn var(--duration-normal) cubic-bezier(0.2, 0, 0.0, 1);
 }
 
@@ -320,7 +322,7 @@ main {
 
 .tl-venue-link:hover {
   background: var(--red);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .tl-venue-link.is-muted {
@@ -438,7 +440,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 /* ============================================================
    详情页主图 (Detail Hero Image) — 恒为单图，无需轮播
    ============================================================ */
-.detail-carousel {
+.detail-photo {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius);
@@ -446,7 +448,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   aspect-ratio: 16/10;
 }
 
-.detail-carousel .detail-carousel-img {
+.detail-photo .detail-photo-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -454,7 +456,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 }
 
 @media (max-width: 640px) {
-  .detail-carousel {
+  .detail-photo {
     aspect-ratio: 4/3;
   }
 }
@@ -462,6 +464,19 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 /* ============================================================
    图片画廊和 Lightbox
    ============================================================ */
+/* 灯箱遮罩样式收进 CSS（此前内联 cssText 用裸 rgba/px 绕过令牌体系；
+   同实例守卫 + body 滚动锁在 js/modals.js openLightbox 内） */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .lightbox-content {
   max-width: 90vw;
   max-height: 90vh;
@@ -477,7 +492,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   height: 40px;
   border: none;
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--on-primary);
   font-size: 24px;
   border-radius: 50%;
   cursor: pointer;
@@ -536,6 +551,11 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 
 .red-star-marker.marker-highlight .rsm-inner {
   animation: marker-pulse 1s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 180, 50, 0.9)) drop-shadow(0 3px 6px rgba(185, 28, 28, 0.7));
+}
+/* 高亮 marker 悬停时增强光晕（更高特异性，避免被上面默认高亮滤镜覆盖而"悬停不变亮"） */
+.red-star-marker.marker-highlight:hover .rsm-inner {
+  filter: drop-shadow(0 0 10px rgba(255, 200, 80, 1)) drop-shadow(0 3px 8px rgba(185, 28, 28, 0.85));
 }
 
 @keyframes marker-pulse {
@@ -643,7 +663,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   bottom: 0;
   padding: 4px 0;
   background: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 12px;
   text-align: center;
 }
@@ -672,7 +692,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 .cardgen-chip.selected {
   background: var(--red);
   border-color: var(--red);
-  color: #fff;
+  color: var(--on-primary);
 }
 
 .cardgen-actions {
@@ -840,6 +860,3 @@ html[data-vt-dir="back"]::view-transition-new(root) {
   display: none !important;
 }
 
-.red-star-marker.marker-highlight .rsm-inner {
-  filter: drop-shadow(0 0 8px rgba(255, 180, 50, 0.9)) drop-shadow(0 3px 6px rgba(185, 28, 28, 0.7));
-}

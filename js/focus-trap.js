@@ -12,7 +12,14 @@ const FOCUSABLE_SELECTORS = [
   '[tabindex]:not([tabindex="-1"])'
 ].join(', ');
 
-let _activeTrap = null;
+// 焦点陷阱栈：嵌套弹窗（如实践详情内打开灯箱、长征完成弹窗内打开纪念卡）时，
+// 新 trap 压栈、旧 trap 保留；关闭时弹栈并恢复下层 trap 的 Tab 圈禁与 aria-modal。
+// 此前单 trap 模型 trapFocus 先 releaseFocus，下层弹窗关闭时焦点陷阱永久丢失、Tab 漫游整页
+let _traps = [];
+
+function _topTrap() {
+  return _traps[_traps.length - 1] || null;
+}
 
 function _getFocusable(modal) {
   // 用 getClientRects 判断可见性：offsetParent 为 null 会把 position:fixed 元素（如吸底操作条）误排除
@@ -34,9 +41,20 @@ function unlockBodyScroll() {
   if (_bodyLockCount === 0) document.body.style.overflow = '';
 }
 
+/* 弹窗关闭公共序列：释放焦点陷阱 + 移除展示类 + 复位 aria-hidden + 释放滚动锁。
+   activeClass 做幂等守卫（仅当确实打开才执行），供多个弹窗 close 复用 */
+function closeModal(el, activeClass) {
+  if (!el || !el.classList.contains(activeClass)) return;
+  releaseFocus();
+  el.classList.remove(activeClass);
+  el.setAttribute('aria-hidden', 'true');
+  unlockBodyScroll();
+}
+
 function _handleKeyDown(e) {
-  if (!_activeTrap) return;
-  const { modal, onClose } = _activeTrap;
+  const trap = _topTrap();
+  if (!trap) return;
+  const { modal, onClose } = trap;
 
   if (e.key === 'Escape') {
     e.preventDefault();
@@ -80,16 +98,18 @@ function _handleKeyDown(e) {
  */
 function trapFocus(modal, options = {}) {
   if (!modal) return;
-  releaseFocus();
 
-  _activeTrap = {
+  // 新弹窗接管 aria-modal 语义（仅最上层保持 modal），下层 trap 留在栈中待恢复
+  const prev = _topTrap();
+  if (prev) prev.modal.removeAttribute('aria-modal');
+  _traps.push({
     modal,
     returnFocus: options.returnFocus || document.activeElement,
     onClose: options.onClose
-  };
-
+  });
   modal.setAttribute('aria-modal', 'true');
-  document.addEventListener('keydown', _handleKeyDown);
+  // 栈从空到非空时才挂全局监听，避免多次 trapFocus 叠加多个监听器
+  if (_traps.length === 1) document.addEventListener('keydown', _handleKeyDown);
 
   // 延迟一帧，确保弹窗已渲染再聚焦
   requestAnimationFrame(() => {
@@ -101,19 +121,24 @@ function trapFocus(modal, options = {}) {
   });
 }
 
-/** 释放焦点陷阱，并把焦点还给触发元素 */
+/** 弹出顶层焦点陷阱，并把焦点还给其触发元素；若下层还有弹窗，恢复其 Tab 圈禁与 aria-modal */
 function releaseFocus() {
-  if (!_activeTrap) return;
+  const trap = _traps.pop();
+  if (!trap) return;
 
-  const { modal, returnFocus } = _activeTrap;
-  document.removeEventListener('keydown', _handleKeyDown);
+  const { modal, returnFocus } = trap;
   if (modal) modal.removeAttribute('aria-modal');
 
-  _activeTrap = null;
+  const next = _topTrap();
+  if (next) {
+    next.modal.setAttribute('aria-modal', 'true');
+  } else {
+    document.removeEventListener('keydown', _handleKeyDown);
+  }
 
   if (returnFocus && document.contains(returnFocus) && typeof returnFocus.focus === 'function') {
     returnFocus.focus({ preventScroll: true });
   }
 }
 
-export { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll };
+export { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll, closeModal };

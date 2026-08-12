@@ -64,11 +64,13 @@ export function initHeroCarousel() {
   }
 
   // bfcache 修复：pagehide 只停定时器、不拆监听；后退导航从 bfcache 恢复时
-  // pageshow(persisted) 负责重启轮播，否则恢复后首屏背景永久静止
+  // pageshow(persisted) 负责重启轮播，否则恢复后首屏背景永久静止。
+  // 注意 pageshow 在初始加载（persisted=false）也会触发——此时不得抢跑入场 gating
+  //（首页入场遮罩还在时就开始轮播，会先切到第二张）；只有已启动过的轮播才在此重启
   document.addEventListener('visibilitychange', onVisibilityChange);
   window.addEventListener('pagehide', stopCarousel);
   window.addEventListener('pageshow', function (e) {
-    if (e.persisted || document.visibilityState !== 'hidden') startCarousel();
+    if (e.persisted && started) startCarousel();
   });
 
   // 如果开场动画已结束或不存在，立即启动；否则等 entranceFinished 事件

@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": "reflection-1",
     "title": "数智赋能红色传承：一次从参观者到建设者的转变",
     "author": "测试学生01",
     "className": "计算机2026级01班",
@@ -11,7 +11,7 @@
     "isDemo": true
   },
   {
-    "id": 2,
+    "id": "reflection-2",
     "title": "在西昌红色展馆中读懂信仰的力量",
     "author": "测试学生02",
     "className": "计算机2026级02班",
@@ -22,7 +22,7 @@
     "isDemo": true
   },
   {
-    "id": 3,
+    "id": "reflection-3",
     "title": "红军洞现场调研后的思考",
     "author": "测试学生03",
     "className": "计算机2026级03班",
@@ -33,7 +33,7 @@
     "isDemo": true
   },
   {
-    "id": 4,
+    "id": "reflection-4",
     "title": "学习黄继光精神：把担当落实到行动",
     "author": "测试学生04",
     "className": "计算机2026级01班",
@@ -44,7 +44,7 @@
     "isDemo": true
   },
   {
-    "id": 5,
+    "id": "reflection-5",
     "title": "从三五九旅屯垦历史中理解劳动与奋斗",
     "author": "测试学生05",
     "className": "计算机2026级02班",
@@ -55,7 +55,7 @@
     "isDemo": true
   },
   {
-    "id": 6,
+    "id": "reflection-6",
     "title": "伟人故里的家风课堂带给我的启发",
     "author": "测试学生06",
     "className": "计算机2026级03班",
@@ -66,7 +66,7 @@
     "isDemo": true
   },
   {
-    "id": 7,
+    "id": "reflection-7",
     "title": "百丈关纪念地参访心得",
     "author": "测试学生07",
     "className": "计算机2026级01班",
@@ -77,7 +77,7 @@
     "isDemo": true
   },
   {
-    "id": 8,
+    "id": "reflection-8",
     "title": "茶香与红色记忆：文化传播可以更贴近生活",
     "author": "测试学生08",
     "className": "计算机2026级02班",
@@ -88,7 +88,7 @@
     "isDemo": true
   },
   {
-    "id": 9,
+    "id": "reflection-9",
     "title": "入户调研让我学会先倾听再表达",
     "author": "测试学生09",
     "className": "计算机2026级03班",
@@ -99,7 +99,7 @@
     "isDemo": true
   },
   {
-    "id": 10,
+    "id": "reflection-10",
     "title": "志愿服务中的共同成长",
     "author": "测试学生10",
     "className": "计算机2026级01班",
@@ -110,7 +110,7 @@
     "isDemo": true
   },
   {
-    "id": 11,
+    "id": "reflection-11",
     "title": "在红色场馆中感受科技赋能文化的力量",
     "author": "测试学生11",
     "className": "大数据2026级01班",
@@ -121,7 +121,7 @@
     "isDemo": true
   },
   {
-    "id": 12,
+    "id": "reflection-12",
     "title": "走访革命老区对专业学习的启示",
     "author": "测试学生12",
     "className": "物联网2026级01班",
@@ -132,7 +132,7 @@
     "isDemo": true
   },
   {
-    "id": 13,
+    "id": "reflection-13",
     "title": "家风课堂让我重新理解红色文化的温度",
     "author": "测试学生13",
     "className": "计算机2026级01班",
@@ -143,7 +143,7 @@
     "isDemo": true
   },
   {
-    "id": 14,
+    "id": "reflection-14",
     "title": "从场馆保护看数字档案的重要性",
     "author": "测试学生14",
     "className": "计算机2026级02班",
@@ -154,7 +154,7 @@
     "isDemo": true
   },
   {
-    "id": 15,
+    "id": "reflection-15",
     "title": "信息可视化让红色历史更直观",
     "author": "测试学生15",
     "className": "计算机2026级03班",

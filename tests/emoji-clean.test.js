@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const SKIP = new Set(['node_modules', '.git', 'docs', '.claude', 'tests', 'scripts']);
+const SKIP = new Set(['node_modules', '.git', 'docs', '.claude', 'tests', 'scripts', '_site']);
 
 /* emoji 区段全集，扣除保留文本符号 ★(2605) ☰(2630) ✕(2715) ✦(2726) ➤(27A4) */
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{2604}\u{2606}-\u{262F}\u{2631}-\u{26FF}\u{2700}-\u{2714}\u{2716}-\u{2725}\u{2727}-\u{27A3}\u{27A5}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;

@@ -2,10 +2,10 @@
    guide-map — 全国导览页 Leaflet 地图子系统（自包含工厂）
    职责：高德瓦片地图初始化、五角星 marker 绘制、卡片 hover 高亮联动
    依赖：utils(escapeHtml/escapeAttr/getBasePath)；Leaflet 由 guide.html
-         以 <script defer> 静态加载（window.L）
+         以 <script defer> 静态加载（自托管 assets/leaflet/，window.L）
    ============================================================ */
 
-import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081035';
+import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081304';
 
 export function createGuideMap(mapContainer) {
   let leafletMap = null;

@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath, stripProvinceSuffix } from './utils.js?v=2026081035';
-import { ASSET_VERSION } from './version.js?v=2026081035';
+import { getBasePath, stripProvinceSuffix, FALLBACK_IMAGE } from './utils.js?v=2026081304';
+import { ASSET_VERSION } from './version.js?v=2026081304';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
@@ -31,6 +31,7 @@ let _venuesPromise = null;          // 重新加载时可重置
 let _venuesCache = null;            // 重新加载时可重置
 let _aliasesPromise = null;
 let _aliasesCache = null;
+let _lastMerged = null;          // 最近一次合并结果（含子源降级的首屏数据），供消费方保持一致
 
 async function loadAllVenues() {
   // 使用 !== null 判断，避免空数组 [] 被视为"已缓存"
@@ -55,6 +56,9 @@ async function loadAllVenues() {
 
     // 子数据是否全部成功（loadJSON 失败返回 []，makeObjectLoader 失败返回 [] 且已重置自身 promise）
     const extMetaOk = extMeta && typeof extMeta === 'object' && !Array.isArray(extMeta) && Object.keys(extMeta).length > 0;
+    // province-candidates.json 失败时 loadJSON 返回 []；它必有 22 条候选，空即失败，须纳入门禁
+    //（否则该文件瞬时 404 会让 17 个扩展场馆静默消失，且因其余子源都成功而被固化为截断缓存）
+    const extendedOk = Array.isArray(extended) && extended.length > 0;
     const aliasesOk = Boolean(aliasesData && aliasesData.aliases);
     const detailsOk = detailsData && typeof detailsData === 'object' && !Array.isArray(detailsData) && Object.keys(detailsData).length > 0;
 
@@ -82,7 +86,7 @@ async function loadAllVenues() {
         city: meta.city || '',
         district: meta.district || '',
         category: meta.category || '红色场馆',
-        image: meta.image || 'assets/页面通用图片/暂无图片.png',
+        image: meta.image || FALLBACK_IMAGE,
         summary: meta.summary || (ext.province + '代表性红色场馆，' +
           (VERIFIED.includes(ext.officialVerificationStatus)
             ? '已核验官方信息' : '建议上线前进一步核验') + '。'),
@@ -97,9 +101,11 @@ async function loadAllVenues() {
         sourcePage: (meta.source || {}).sourcePage || ''
       });
     }
+    // 记录最近一次合并结果（含子源降级）：getVenuesCache 优先读它，避免"返回值有 32 馆、缓存却是 0"的消费方分叉
+    _lastMerged = merged;
     // 只有核心 + 子数据全部成功才固化缓存；任一子加载失败（降级结果仍返回供首屏）不缓存，
     // 使 loadAliases/loadExtMeta/loadVenueDetails 的失败重试钩子真正可达（否则瞬时 404 会固化整个会话）
-    if (merged.length > 0 && extMetaOk && aliasesOk && detailsOk) {
+    if (merged.length > 0 && extendedOk && extMetaOk && aliasesOk && detailsOk) {
       _venuesCache = merged;
     } else {
       _venuesPromise = null;  // 允许下次重试
@@ -158,7 +164,8 @@ function getVenueDetail(name) {
   const lookupName = nameAlias[name] || name;
   const details = loadVenueDetails.getCache();
   if (!details) return null;
-  return details[lookupName] || details[lookupName?.replace(/纪念馆$/, '')] || null;
+  // 仅精确键查找：剥"纪念馆"后缀的回退分支在当前数据下不可达，且未来某馆名缺键时会误配到同名前缀馆的详情
+  return details[lookupName] || null;
 }
 
 /* ---- 纯数据查询（无 DOM 依赖） ---- */
@@ -179,7 +186,7 @@ function filterVenues(venues, { query, province, category } = {}) {
 }
 
 function getProvinces(venues) {
-  return [...new Set(venues.map(v => v.province))].sort();
+  return [...new Set(venues.map(v => v.province))].filter(Boolean).sort();
 }
 
 function getCategories(venues) {
@@ -188,13 +195,30 @@ function getCategories(venues) {
 
 function findVenueByName(venues, name) {
   name = name.replace(/[的了吗呢]$/, '').trim();
-  return venues.find(v => (v.name || '').includes(name) || (v.standardName || '').includes(name))
-    || venues.find(v => (v.name || '').includes(name.slice(0, 3)));
+  // 剥后缀后为空（聊天输入"的"等）→ 直接返回，杜绝"includes('') 恒真"误配到 venues[0]
+  if (!name) return null;
+  // 打分匹配：精确 > 前缀 > 包含；仅短查询（≤4 字）才允许"前 3 字"模糊回退，
+  // 避免长查询（如"上海红色记忆展"）截断成"上海红"误配到无关场馆
+  let best = null, bestScore = 0;
+  for (const v of venues) {
+    const cands = [v.name, v.standardName].filter(Boolean);
+    for (const c of cands) {
+      let s = 0;
+      if (c === name) s = 6;
+      else if (c.startsWith(name)) s = 5;
+      else if (c.includes(name)) s = 4;
+      else if (name.length <= 4 && (c.startsWith(name.slice(0, 3)) || c.includes(name.slice(0, 3)))) s = 2;
+      if (s > bestScore) { bestScore = s; best = v; }
+    }
+  }
+  return best;
 }
 
-/* 场馆列表权威缓存的同步读取（供 venue-store 直读，消除双缓存分叉） */
+/* 场馆列表权威缓存的同步读取（供 venue-store 直读，消除双缓存分叉）。
+   子源降级时 _venuesCache 未固化（留重试钩子），此时回退最近一次合并结果，
+   保证 loadAllVenues() 返回值与 getVenuesCache() 对同一失败结果保持一致 */
 function getVenuesCache() {
-  return _venuesCache || [];
+  return _venuesCache || _lastMerged || [];
 }
 
 /* 实践成果按 id 查询（数据访问统一走 data 层，弹窗/渲染不再自取数据） */

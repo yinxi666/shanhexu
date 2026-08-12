@@ -5,11 +5,11 @@
    说明：与 chat.js（悬浮 UI 组件）分离，本模块可在无 DOM 环境直接单元测试。
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081035';
-import * as RedData from './data.js?v=2026081035';
-import { getVenues } from './venue-store.js?v=2026081035';
-import { knowledge } from './chat-knowledge.js?v=2026081035';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081035';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081304';
+import * as RedData from './data.js?v=2026081304';
+import { getVenues } from './venue-store.js?v=2026081304';
+import { knowledge } from './chat-knowledge.js?v=2026081304';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081304';
 
 export function generateReply(query) {
   const q = query.trim();
@@ -299,11 +299,12 @@ function getCategories() {
 }
 
 function getCategoriesRaw() {
-  return [...new Set(getVenues().map(v => v.category).filter(Boolean))].sort();
+  // 复用 data.js 的权威实现，避免两份类别/省份语义漂移
+  return RedData.getCategories(getVenues());
 }
 
 function getProvinceCount() {
-  return new Set(getVenues().map(v => v.province)).size;
+  return RedData.getProvinces(getVenues()).length;
 }
 
 function getHelp() {

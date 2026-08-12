@@ -87,12 +87,14 @@
   border-color: var(--red);
 }
 
-/* 搜索图标 */
+/* 搜索图标（内联 SVG 放大镜，全站禁 emoji 契约——emoji 图标跨平台渲染差异大） */
 .search-toolbar .search-box::before {
-  content: "🔍";
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin-left: 16px;
   flex-shrink: 0;
-  padding-left: 16px;
-  font-size: 15px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") no-repeat center / contain;
   opacity: 0.5;
   transition: opacity var(--duration-fast);
 }
@@ -173,7 +175,9 @@
 .search-toolbar select:focus {
   border-color: var(--red);
   box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
-  background-color: var(--on-primary);
+  /* 背景色用 --white（浅色 #fff / 深色 #1e293b 自动反转）；
+     --on-primary 语义是"红底/深底上的文字色"，拿它当背景会强制白底，深色下需补丁救场 */
+  background-color: var(--white);
 }
 
 /* ---- 视图切换按钮 ---- */
@@ -269,7 +273,7 @@
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--line);
-  background: #f8fafc;
+  background: var(--card-bg);
 }
 
 /* ---------- Venue Cards ---------- */
@@ -316,7 +320,7 @@
   position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #e5e7eb;
+  background: var(--img-placeholder);
 }
 
 .venue-card .card-img img {
@@ -467,22 +471,22 @@
 
 .heatmap-zoom-bar .hm-zoom-btn,
 .heatmap-zoom-bar .hm-zoom-reset {
-  border: 1px solid #ccc;
-  background: #fff;
+  border: 1px solid var(--line);
+  background: var(--card-bg);
   border-radius: var(--radius-xs);
   cursor: pointer;
 }
 
 .heatmap-zoom-bar .hm-zoom-btn {
-  width: 28px;
-  height: 28px;
-  font-size: 16px;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
 }
 
 .heatmap-zoom-bar .hm-zoom-reset {
-  height: 28px;
-  font-size: 12px;
-  padding: 0 8px;
+  height: 40px;
+  font-size: 13px;
+  padding: 0 12px;
 }
 
 /* ============================================================
@@ -574,7 +578,7 @@
 }
 
 .map-tooltip-value {
-  color: #b91c1c;
+  color: var(--red);
   font-weight: bold;
 }
 
@@ -582,7 +586,7 @@
 .mini-map-svg {
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: var(--white);
 }
 
 /* 详情页官方链接间距 */

@@ -5,9 +5,9 @@
          onScroll/scrollToStation/startAutoScroll 协作。
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081035';
-import { $ } from './ui.js?v=2026081035';
-import { STATIONS, STATION_PHOTOS } from './cz-stations.js?v=2026081035';
+import { getBasePath } from './utils.js?v=2026081304';
+import { $ } from './ui.js?v=2026081304';
+import { STATIONS, STATION_PHOTOS } from './cz-stations.js?v=2026081304';
 
 let _theaterRaf = null;
 let _theaterHideTimer = null;
@@ -38,7 +38,7 @@ export function showTheater(id, onDeferredJump) {
     return;
   }
   const photo = STATION_PHOTOS[s.id];
-  if (photo && theaterPhoto) theaterPhoto.style.backgroundImage = `url(${getBasePath()}images/longmarch/${photo})`;
+  if (photo && theaterPhoto) theaterPhoto.style.backgroundImage = `url(${getBasePath()}assets/长征图片/${photo})`;
   if (theaterName) theaterName.textContent = s.name;
   if (theaterDate) theaterDate.textContent = s.date + ' · 已走 ' + (s.miles || 0).toLocaleString() + ' 里';
   theaterOverlay.classList.toggle('fog-on', s.mood === 'swamp');
@@ -47,6 +47,9 @@ export function showTheater(id, onDeferredJump) {
   try { startTheaterWeather(s.mood); } catch (e) { /* 忽略，剧场仍正常收场 */ }
   theaterOverlay.classList.add('show');
   theaterOverlay.setAttribute('aria-hidden', 'false');
+  // 小剧场是纯展示的沉浸实景：给读屏一个可识别的命名图形角色，避免只暴露一堆匿名内容
+  theaterOverlay.setAttribute('role', 'img');
+  theaterOverlay.setAttribute('aria-label', s.name + ' 实景 · ' + s.date);
   clearTimeout(_theaterHideTimer);
   _theaterHideTimer = setTimeout(() => {
     theaterLock.release();  // 收场：恢复滚动

@@ -4,21 +4,23 @@
    依赖：utils / icons / favorites
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount, isPracticeLiked } from './utils.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
 
 // 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
 function renderVenueCard(venue, basePath, isFav = false) {
   const bp = basePath || getBasePath();
-  const imgSrc = sanitizeUrl(resolveAssetPath(venue.image, bp));
+  const imgSrc = safeAssetSrc(venue.image, bp);
   const fb = fallbackSrc();
   const favActive = isFav;
   const favClass = favActive ? 'active' : '';
   const favIcon = icon('heart'); // 收藏态由 .fav-btn.active 的 CSS fill 区分，无需两个图标
   const esc = escapeHtml;
   const attr = escapeAttr;
+  // 容器不设 role="button"：内部含真实 <button>（收藏），role=button 容器会让读屏压平嵌套交互。
+  // 键盘激活仍可用：data-action 委托的 keydown 处理 Enter/Space
   return `
-      <div class="venue-card" data-id="${esc(venue.id)}" data-action="go-detail" tabindex="0" role="button" aria-label="${esc(venue.name)}">
+      <div class="venue-card" data-id="${esc(venue.id)}" data-action="go-detail" tabindex="0">
         <div class="card-img">
           <img src="${attr(imgSrc)}" alt="${esc(venue.name)}" title="${esc(venue.name)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
           <span class="card-category">${esc(venue.category || '红色场馆')}</span>
@@ -50,15 +52,18 @@ function renderVenueCard(venue, basePath, isFav = false) {
  */
 function renderPracticeCard(practice, basePath) {
   const bp = basePath || getBasePath();
-  const imgSrc = sanitizeUrl(resolveAssetPath(practice.image, bp));
+  const imgSrc = safeAssetSrc(practice.image, bp);
   const fb = fallbackSrc();
   const practiceLiked = isPracticeLiked(practice.id); // 已赞保持高亮
   const hasVideo = practice.video && practice.video.trim();
-  const videoSrc = hasVideo ? resolveAssetPath(practice.video, bp) : '';
+  // 视频地址在渲染处即做协议白名单（与弹窗内路径同一安全边界，不把净化拖到打开时）
+  const videoSrc = hasVideo ? safeAssetSrc(practice.video, bp) : '';
   const esc = escapeHtml;
   const attr = escapeAttr;
+  // 容器不设 role="button"：内部含播放/点赞交互元素，role=button 容器会压平嵌套交互。
+  // 键盘激活仍可用：data-action 委托的 keydown 处理 Enter/Space
   return `
-      <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="${esc(practice.title || practice.name || '')}">
+      <div class="practice-card" data-action="open-practice" data-id="${esc(practice.id)}" tabindex="0">
         <div class="practice-img">
           <img src="${attr(imgSrc)}" alt="${esc(practice.title)}" loading="lazy" decoding="async" data-fallback="${attr(fb)}">
           ${hasVideo ? `
@@ -166,18 +171,18 @@ function renderPagination(totalItems, pageSize, currentPage, containerSelector, 
       const page = parseInt(btn.dataset.page, 10);
       if (!page) return;
       handler(page);
-      const section = container.closest('.section');
-      if (section) window.scrollTo({ top: section.offsetTop - 100, behavior: 'smooth' });
+      // 注意：不做 window.scrollTo 锚定——handler(navigateToPage) 会 location.href 整页重载，
+      // 新文档的锚定由 pages.js anchorToListIfPaged 在渲染后处理，此处 scrollTo 只会作用在即将卸载的旧页上
     });
   }
   paginationHandlers.set(containerSelector, renderFn);
 
-  let html = '<div class="pagination">';
-  html += `<button ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">‹</button>`;
+  let html = '<div class="pagination" role="navigation" aria-label="分页">';
+  html += `<button ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}" aria-label="上一页">‹</button>`;
   for (let i = 1; i <= totalPages; i++) {
-    html += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+    html += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}" aria-label="第 ${i} 页"${i === currentPage ? ' aria-current="page"' : ''}>${i}</button>`;
   }
-  html += `<button ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">›</button>`;
+  html += `<button ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}" aria-label="下一页">›</button>`;
   html += '</div>';
 
   return html;

@@ -3,6 +3,8 @@
    原 index.html 内联脚本提取，职责：首页 entrance-canvas 全屏叙事动画
    ============================================================ */
 
+import { resolveAssetPath } from './utils.js?v=2026081304';
+
 export function initEntranceAnimation() {
   // sessionStorage 访问防护（Safari 隐私模式等会抛异常，避免开场黑屏卡死）
   function isEntranceDone() {
@@ -16,19 +18,33 @@ export function initEntranceAnimation() {
   }
   // 只在首页存在 entrance-overlay 时初始化，避免非首页直接调用报错
   if (!document.getElementById('entrance-overlay')) return;
+  // 背景页面对键盘焦点不设防：开场期间把主体内容标为惰性，焦点只落在遮罩内（skip 已 autofocus）
+  const _entranceMain = document.querySelector('main');
+  const _entranceHeader = document.getElementById('site-header');
+  const _entranceFooter = document.getElementById('site-footer');
+  if (_entranceMain) _entranceMain.setAttribute('aria-hidden', 'true');
+  if (_entranceHeader) _entranceHeader.setAttribute('aria-hidden', 'true');
+  if (_entranceFooter) _entranceFooter.setAttribute('aria-hidden', 'true');
+  const _restoreEntranceInert = function () {
+    if (_entranceMain) _entranceMain.removeAttribute('aria-hidden');
+    if (_entranceHeader) _entranceHeader.removeAttribute('aria-hidden');
+    if (_entranceFooter) _entranceFooter.removeAttribute('aria-hidden');
+  };
+  window.addEventListener('entranceFinished', _restoreEntranceInert);
+  // 已播放过则跳过（也要复位 aria-hidden）
+  if (isEntranceDone()) {
+    _restoreEntranceInert();
+    let el = document.getElementById('entrance-overlay');
+    if (el) el.remove();
+    finishEntrance();
+    return;
+  }
   // 尊重系统"减弱动态效果"设置：直接跳过全屏叙事（与 longmarch 的 reduced-motion 处理保持一致）
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     let el = document.getElementById('entrance-overlay');
     if (el) el.remove();
     document.documentElement.classList.remove('entrance-active');
     markEntranceDone();
-    finishEntrance();
-    return;
-  }
-  // 已播放过则跳过
-  if (isEntranceDone()) {
-    let el = document.getElementById('entrance-overlay');
-    if (el) el.remove();
     finishEntrance();
     return;
   }
@@ -48,6 +64,7 @@ export function initEntranceAnimation() {
   let DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
   let W = 0, H = 0;
   let rafId = null; // 动画循环句柄，供跳过/结束分支取消
+  let entranceFinished = false; // 入场动画结束后，resize 不再重建粒子层（场景已移除，纯浪费）
 
   // ===== 叙事时间线 =====
   let TL = {
@@ -69,6 +86,14 @@ export function initEntranceAnimation() {
   function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
   function easeOutExpo(x) { return x >= 1 ? 1 : 1 - Math.pow(2, -10 * x); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  // 星火状态单源计算：全屏光晕与星火弧/余烬两处共用 sparkT/breathe/sparkR/sparkAlpha，避免两套数学漂移
+  function sparkState(t) {
+    let sparkT = t - TL.spark;
+    let breathe = 0.6 + 0.4 * Math.sin(t * 5);
+    let sparkR = Math.max(1, (1.5 + breathe * 1.8) * clamp(sparkT * 2, 0, 1));
+    let sparkAlpha = clamp(sparkT * 2, 0, 1) * clamp((TL.dawn + 0.3 - t), 0, 1);
+    return { sparkT, sparkR, sparkAlpha };
+  }
 
   // ===== DPR 适配 =====
   function resize() {
@@ -173,7 +198,7 @@ export function initEntranceAnimation() {
     }
   };
   tiananmenImg.onerror = function () { tiananmenReady = false; };
-  tiananmenImg.src = 'assets/通用/天安门.webp';
+  tiananmenImg.src = resolveAssetPath('assets/通用/天安门.webp');
 
   let taFireCanvas = document.createElement('canvas');
   taFireCanvas.setAttribute('aria-hidden', 'true');
@@ -781,16 +806,16 @@ export function initEntranceAnimation() {
 
     // ===== 星火光晕（全屏） =====
     if (t >= TL.spark && t < TL.dawn + 0.3) {
-      let sparkT_full = t - TL.spark;
-      let breathe_full = 0.6 + 0.4 * Math.sin(t * 5);
-      let sparkR_full = Math.max(1, (1.5 + breathe_full * 1.8) * clamp(sparkT_full * 2, 0, 1));
-      let sparkGlow_full = Math.max(1, sparkR_full * 6);
-      let sparkAlpha_full = clamp(sparkT_full * 2, 0, 1) * clamp((TL.dawn + 0.3 - t), 0, 1);
+      const ss = sparkState(t);
+      let sparkGlow_full = Math.max(1, ss.sparkR * 6);
+      // 星火弧在下方 translate(0, H*0.05) 内绘制（屏幕坐标 = sparkY + H*0.05），
+      // 光晕在此处补齐同一偏移，否则全屏光晕与内弧垂直错位约 5% 屏高
+      let glowY = sparkY + H * 0.05;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = sparkAlpha_full * 0.3;
-      ctx.drawImage(emberSprite, sparkX - sparkGlow_full, sparkY - sparkGlow_full, sparkGlow_full * 2, sparkGlow_full * 2);
-      ctx.globalAlpha = sparkAlpha_full * 0.45;
-      ctx.drawImage(sparkSprite, sparkX - sparkGlow_full * 0.5, sparkY - sparkGlow_full * 0.5, sparkGlow_full, sparkGlow_full);
+      ctx.globalAlpha = ss.sparkAlpha * 0.3;
+      ctx.drawImage(emberSprite, sparkX - sparkGlow_full, glowY - sparkGlow_full, sparkGlow_full * 2, sparkGlow_full * 2);
+      ctx.globalAlpha = ss.sparkAlpha * 0.45;
+      ctx.drawImage(sparkSprite, sparkX - sparkGlow_full * 0.5, glowY - sparkGlow_full * 0.5, sparkGlow_full, sparkGlow_full);
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
     }
@@ -851,15 +876,12 @@ export function initEntranceAnimation() {
 
     // ===== 星火 =====
     if (t >= TL.spark && t < TL.dawn + 0.3) {
-      let sparkT = t - TL.spark;
-      let breathe = 0.6 + 0.4 * Math.sin(t * 5);
-      let sparkR = Math.max(1, (1.5 + breathe * 1.8) * clamp(sparkT * 2, 0, 1));
-      let sparkAlpha = clamp(sparkT * 2, 0, 1) * clamp((TL.dawn + 0.3 - t), 0, 1);
-      ctx.fillStyle = 'rgba(255,230,170,' + (sparkAlpha * 0.5) + ')';
+      const ss = sparkState(t);
+      ctx.fillStyle = 'rgba(255,230,170,' + (ss.sparkAlpha * 0.5) + ')';
       ctx.beginPath();
-      ctx.arc(sparkX, sparkY, sparkR, 0, Math.PI * 2);
+      ctx.arc(sparkX, sparkY, ss.sparkR, 0, Math.PI * 2);
       ctx.fill();
-      if (sparkT > 0.3 && Math.random() < 0.2) spawnEmber(sparkX, sparkY, 1);
+      if (ss.sparkT > 0.3 && Math.random() < 0.2) spawnEmber(sparkX, sparkY, 1);
     }
 
     // ===== 山脉 =====
@@ -1123,6 +1145,7 @@ export function initEntranceAnimation() {
     if (t < totalDuration) {
       rafId = requestAnimationFrame(draw);
     } else {
+      entranceFinished = true;
       let overlay = document.getElementById('entrance-overlay');
       if (!overlay) return;
       overlay.classList.add('fade-out');
@@ -1166,6 +1189,8 @@ export function initEntranceAnimation() {
   // resize 用 rAF 节流：拖拽窗口时避免同步重建全部粒子/山脉/颗粒层；同时刷新 isMobile/DPR
   let resizeRaf = null;
   window.addEventListener('resize', function () {
+    // 动画已结束/已跳过：场景已移除，不再重建粒子层（此前每次 resize 都做全量重建 + ImageData 分配）
+    if (entranceFinished) return;
     if (resizeRaf) return;
     resizeRaf = requestAnimationFrame(function () {
       resizeRaf = null;
@@ -1187,6 +1212,7 @@ export function initEntranceAnimation() {
   document.getElementById('skip').addEventListener('click', function () {
     // 取消动画循环，避免跳过后再逐帧运行数秒（低端机全屏 Canvas 高负载）
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    entranceFinished = true;
     let overlay = document.getElementById('entrance-overlay');
     if (!overlay) return;
     overlay.classList.add('fade-out');

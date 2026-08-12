@@ -27,13 +27,7 @@
   z-index: 1;
 }
 
-.cinematic-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(185, 28, 28, 0) 0%, transparent 50%);
-  z-index: 2;
-}
+/* .cinematic-hero::after 原为"底部红光"渐变，两端色标全部透明 → 不渲染任何像素，已删除（死代码） */
 
 .hero-bg {
   position: absolute;
@@ -108,7 +102,7 @@
 }
 
 .hero-title .accent {
-  color: #ff3333;
+  color: var(--bright-red);
   -webkit-text-stroke: 1px rgba(255, 80, 80, 0.25);
   text-shadow:
     0 0 8px rgba(255, 60, 60, 0.7),
@@ -203,14 +197,7 @@
   z-index: 1;
 }
 
-.subpage-hero .hero-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
+/* .subpage-hero .hero-bg 与基类 .hero-bg 逐属性重复，已删除（基类已覆盖） */
 
 .subpage-hero-content {
   position: relative;
@@ -547,7 +534,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #b45309, #b8860b);
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-light));
   transform: scaleX(0);
   transition: transform var(--duration-fast) var(--ease-smooth);
 }
@@ -564,7 +551,7 @@
 .stat-item .stat-num {
   font-size: 3rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #b45309, #b8860b);
+  background: linear-gradient(135deg, var(--gold-deep), var(--gold-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

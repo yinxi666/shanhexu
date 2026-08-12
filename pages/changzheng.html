@@ -16,17 +16,17 @@
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/changzheng.html">
   <title>长征·二万五千里 - 赓续血脉・数绘红旅</title>
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026081035">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026081304">
   <link rel="manifest" href="../manifest.json">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="../css/base.css?v=2026081035">
-  <link rel="stylesheet" href="../css/home.css?v=2026081035">
-  <link rel="stylesheet" href="../css/components.css?v=2026081035">
-  <link rel="stylesheet" href="../css/pages.css?v=2026081035">
-  <link rel="stylesheet" href="../css/widgets.css?v=2026081035">
-  <link rel="stylesheet" href="../css/effects.css?v=2026081035">
-  <link rel="stylesheet" href="../css/dark.css?v=2026081035">
-  <link rel="stylesheet" href="../css/changzheng.css?v=2026081035">
+  <link rel="stylesheet" href="../css/base.css?v=2026081304">
+  <link rel="stylesheet" href="../css/home.css?v=2026081304">
+  <link rel="stylesheet" href="../css/components.css?v=2026081304">
+  <link rel="stylesheet" href="../css/pages.css?v=2026081304">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026081304">
+  <link rel="stylesheet" href="../css/effects.css?v=2026081304">
+  <link rel="stylesheet" href="../css/dark.css?v=2026081304">
+  <link rel="stylesheet" href="../css/changzheng.css?v=2026081304">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     /* ===== 长征页面禁用body默认padding ===== */
@@ -45,6 +45,8 @@
   <div id="site-header"></div>
 
   <main id="cz-main">
+    <!-- 沉浸页唯一的顶级标题（视觉隐藏，供读屏标题导航） -->
+    <h1 class="sr-only">重走长征路</h1>
     <!-- ============================================================
          固定层 1/4：多层视差背景（山脉+宣纸+墨迹+mood+粒子）
          ============================================================ -->
@@ -153,7 +155,7 @@
     <button class="cz-sound-toggle" id="cz-sound-toggle" type="button" title="环境音开关" aria-label="环境音开关"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h3l5 4V6l-5 4z"/><path d="M17 9.5l4 5M21 9.5l-4 5"/></svg></button>
     <button class="cz-autoplay-btn" id="cz-autoplay-btn" type="button" title="自动行军" aria-label="自动行军"
       aria-pressed="false">▶ 自动行军</button>
-    <div class="cz-hud-row">
+    <div class="cz-hud-row" aria-live="polite">
       <span class="cz-hud-index" id="cz-hud-index">第 1 / 17 站</span>
       <span class="cz-hud-station" id="cz-hud-station">瑞金</span>
     </div>
@@ -175,7 +177,7 @@
       <span class="cz-route-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 16 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg> 中央红军长征路线</span>
       <span class="cz-route-tag">二万五千里 · 17站</span>
     </div>
-    <svg id="cz-route-svg" viewBox="0 0 600 360" preserveAspectRatio="xMidYMid meet">
+    <svg id="cz-route-svg" viewBox="0 0 600 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="中央红军长征路线迷你地图">
       <path id="cz-route-track" d="" fill="none" stroke="rgba(200,160,90,0.15)" stroke-width="5" stroke-linecap="round"
         stroke-linejoin="round" />
       <path id="cz-route-fill" d="" fill="none" stroke="url(#cz-route-grad)" stroke-width="7" stroke-linecap="round"
@@ -282,7 +284,7 @@
   <div id="site-footer"></div>
 
   <!-- ===== 脚本 ===== -->
-  <script type="module" src="../js/app.js?v=2026081035"></script>
+  <script type="module" src="../js/app.js?v=2026081304"></script>
 </body>
 
 </html>

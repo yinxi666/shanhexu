@@ -30,7 +30,7 @@ export function stampSvg(s) {
   return svg;
 }
 
-export function renderStampText(chars, len) {
+function renderStampText(chars, len) {
   const arr = Array.from(chars);
   if (len === 1) {
     return `<text x="50" y="52" font-size="60">${arr[0]}</text>`;

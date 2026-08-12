@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081035';
-import { $, $$ } from './ui.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
-import { generateReply } from './chat-engine.js?v=2026081035';
+import { getBasePath, safeStorage } from './utils.js?v=2026081304';
+import { $, $$ } from './ui.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
+import { generateReply } from './chat-engine.js?v=2026081304';
 
 /* 恢复时对机器人消息 HTML 做白名单净化（用惰性的 <template> 解析，脚本不执行），
    既保留富文本（场馆按钮/小卡片），又堵住 sessionStorage 被篡改时的注入 */
@@ -27,7 +27,14 @@ function sanitizeBotHtml(html) {
         const name = attr.name.toLowerCase();
         const val = attr.value.trim().toLowerCase();
         if (name === 'style' || name === 'srcdoc' || name.indexOf('on') === 0) { node.removeAttribute(attr.name); return; }
-        if ((name === 'href' || name === 'src') && /^(javascript|vbscript|data:text\/html)/.test(val)) { node.removeAttribute(attr.name); }
+        // href/src 协议白名单（与 utils.sanitizeUrl 同口径）：http(s)/mailto/tel、站内相对路径、assets/images/uploads/pages/data 前缀；
+        // 其余一律剔除——堵住 javascript:/vbscript:/data: 各种子 scheme（含 data:image/svg+xml 这类黑名单漏网）
+        if ((name === 'href' || name === 'src')
+          && !/^(https?:|mailto:|tel:)/i.test(val)
+          && !(/^[/.]/.test(val) && !/^\/\//.test(val))
+          && !/^(assets|images|uploads|pages|data)\//i.test(val)) {
+          node.removeAttribute(attr.name);
+        }
       });
       clean(node);
     });
@@ -41,11 +48,11 @@ function initChatWidget() {
 
   const html = `
       <div class="chat-widget">
-        <button class="chat-fab" aria-label="AI导览助手" title="AI智能导览助手">
+        <button class="chat-fab" aria-label="AI导览助手" title="AI智能导览助手" aria-expanded="false" aria-controls="chat-panel">
           <img class="chat-fab-icon" src="${getBasePath()}assets/通用/ai图标.webp" alt="AI导览助手">
           <span class="chat-fab-badge">AI</span>
         </button>
-        <div class="chat-panel">
+        <div class="chat-panel" id="chat-panel" role="dialog" aria-modal="true" aria-label="AI导览助手">
           <div class="chat-header">
             <div class="chat-header-left">
               <img class="chat-avatar" src="${getBasePath()}assets/通用/ai图标.webp" alt="">
@@ -102,13 +109,20 @@ function initChatWidget() {
     const opening = !panel.classList.contains('open');
     panel.classList.toggle('open');
     fab.classList.toggle('is-hidden', opening);
+    fab.setAttribute('aria-expanded', String(opening));
     if (opening) { if (quickBtns) quickBtns.classList.remove('is-hidden'); input.focus(); restoreChatHistory(); }
   });
-  close.addEventListener('click', () => {
+  function closePanel() {
     panel.classList.remove('open');
     fab.classList.remove('is-hidden');
+    fab.setAttribute('aria-expanded', 'false');
     saveChatHistory();
-  });
+    // 关闭后把焦点还给 FAB，避免键盘/读屏焦点悬在 display:none 的关闭按钮上
+    fab.focus();
+  }
+  close.addEventListener('click', closePanel);
+  // Esc 关闭（对话面板内任意焦点位置均可触发）
+  panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closePanel(); } });
 
   function saveChatHistory() {
     const bubbles = $$('.chat-bubble', messages);
@@ -132,8 +146,9 @@ function initChatWidget() {
       messages.innerHTML = '';
       valid.forEach(m => {
         if (m.cls === 'bot') {
-          // 机器人消息：有富文本存档则恢复为净化后的 HTML（场馆按钮/小卡片），无则回退纯文本
-          appendMsg('bot', m.html ? sanitizeBotHtml(m.html) : m.text, false);
+          // 机器人消息：有富文本存档则恢复为净化后的 HTML（场馆按钮/小卡片），
+          // 无 html 字段的回退文本必须走 textContent 纯文本渲染（plain=!m.html），堵住篡改 sessionStorage 注入
+          appendMsg('bot', m.html ? sanitizeBotHtml(m.html) : m.text, !m.html);
         } else {
           appendMsg('user', m.text, true);
         }
@@ -141,19 +156,32 @@ function initChatWidget() {
     }
   }
 
+  let _replyQueue = [];
+  let _replying = false;
+
   function sendMessage(text) {
     if (!text.trim()) return;
     appendMsg('user', text);
     input.value = '';
-    // 保留底部推荐示例按钮：提问后不隐藏，随时可再点（仅折叠示例会挡住输入，不折叠则常驻）
+    // 串行化回复：多条问题连发时按发送顺序逐条回答。
+    // 之前每条回复独立 setTimeout(700+rand*600)，后问的可先答造成乱序
+    _replyQueue.push(text);
+    pumpReplies();
+  }
 
+  function pumpReplies() {
+    if (_replying || _replyQueue.length === 0) return;
+    _replying = true;
+    const q = _replyQueue.shift();
     const thinkingId = appendMsg('bot', '<span class="ai-thinking"><span class="ai-thinking-icon">✦</span><span class="ai-thinking-text">正在检索知识库</span><span class="ai-thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>');
     setTimeout(() => {
-      const reply = generateReply(text);
+      const reply = generateReply(q);
       const thinkingEl = document.getElementById(thinkingId);
       if (thinkingEl) thinkingEl.remove();
       appendMsg('bot', reply);
       saveChatHistory();
+      _replying = false;
+      pumpReplies();
     }, 700 + Math.random() * 600);
   }
 

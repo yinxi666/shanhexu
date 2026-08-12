@@ -4,10 +4,11 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
-import { getVenues } from './venue-store.js?v=2026081035';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081035';
+import { getBasePath } from './utils.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
+import { getVenues } from './venue-store.js?v=2026081304';
+import { findVenueByName } from './data.js?v=2026081304';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081304';
 
 function initTimeline() {
   // 首页 guard 已在 homepage.js initHomepageInnovation 统一执行，此处不重复
@@ -41,7 +42,8 @@ function initTimeline() {
     const bp = getBasePath();
     const venues = getVenues();
     const venueLinks = ev.venues.map(function (vn) {
-      const v = venues.find(function (x) { return (x.name || '').indexOf(vn) >= 0; });
+      // 复用 data.js 的单一场馆匹配器，避免时间线与聊天各持一套匹配逻辑
+      const v = findVenueByName(venues, vn);
       if (!v) return '<span class="tl-venue-link is-muted">' + icon('building') + ' ' + vn + '</span>';
       return '<a class="tl-venue-link" href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">' + icon('building') + ' ' + vn + '</a>';
     }).join('');

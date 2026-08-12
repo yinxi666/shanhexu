@@ -2,10 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081035';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081035';
+import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081304';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081304';
 
 /* ---- 可选数据 ---- */
 const SPIRITS = ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];
@@ -37,20 +37,55 @@ let currentVenueImage = '';
 /* ============================================================
    Canvas 合成
    ============================================================ */
+const CARD_W = 640, CARD_H = 900;
+
 function drawCover(ctx, img, cw, ch) {
   const scale = Math.max(cw / img.width, ch / img.height);
   const dw = img.width * scale;
   const dh = img.height * scale;
   ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
 }
-function roundRectPath(ctx, x, y, w, h, r) {
-  ctx.beginPath();
+/* 圆角矩形路径：begin=true 时自建路径（独立形状）；begin=false 追加进复合 evenodd 孔（与 traceRoundRect 合并） */
+function roundRectPath(ctx, x, y, w, h, r, begin = true) {
+  if (begin) ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.arcTo(x + w, y, x + w, y + h, r);
   ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r);
   ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
+}
+/* 卡片画布样板（两张卡面共用的创建/初始化序列） */
+function initCardCanvas() {
+  const cv = document.createElement('canvas');
+  cv.setAttribute('aria-hidden', 'true');
+  cv.width = CARD_W; cv.height = CARD_H;
+  const ctx = cv.getContext('2d');
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  return cv;
+}
+/* 入参防御与兜底（两张卡面共用） */
+function normalizeCardInputs(bgImg, name, spirit) {
+  if (!bgImg || !bgImg.naturalWidth) throw new Error('背景图未加载');
+  return {
+    name: (name && String(name).trim()) || '同学',
+    spirit: String(spirit || '').trim() || '红色精神'
+  };
+}
+/* 中文日期串（两张卡面共用） */
+function formatZhDate(now) {
+  return now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日';
+}
+/* 做旧 + 暗角收尾（两张卡面共用，仅 alpha 参数不同） */
+function drawAgedVignette(ctx, W, H, ageAlpha, vignetteAlpha) {
+  ctx.fillStyle = 'rgba(139, 100, 60, ' + ageAlpha + ')';
+  ctx.fillRect(0, 0, W, H);
+  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H * 0.9);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,' + vignetteAlpha + ')');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, W, H);
 }
 // 印章：经典篆刻式圆章，中央 2×2「数绘红旅」章文，双层描边 + 底纹渐变（姓名已单独展示）
 function drawSeal(ctx, x, y) {
@@ -79,9 +114,9 @@ function drawSeal(ctx, x, y) {
   ctx.fillText('旅', r * 0.37, r * 0.37);
   ctx.restore();
 }
-// 五角星路径
-function drawStarPath(ctx, cx, cy, R, r) {
-  ctx.beginPath();
+// 五角星路径：begin=true 时自建路径（独立形状）；begin=false 追加进复合 evenodd 孔（与 traceStar 合并）
+function drawStarPath(ctx, cx, cy, R, r, begin = true) {
+  if (begin) ctx.beginPath();
   for (let i = 0; i < 10; i++) {
     const rad = (i % 2 === 0) ? R : r;
     const ang = -Math.PI / 2 + i * Math.PI / 5;
@@ -150,18 +185,12 @@ function drawRoute(ctx, W, baseY) {
 }
 
 function renderCard(bgImg, spirit, name, venueName) {
-  const W = 640, H = 900;
-  const cv = document.createElement('canvas');
-  cv.setAttribute('aria-hidden', 'true');
-  cv.width = W; cv.height = H;
+  const W = CARD_W, H = CARD_H;
+  const cv = initCardCanvas();
   const ctx = cv.getContext('2d');
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  // 入参防御：背景未加载/无宽高时抛错；name/spirit 兜底
-  if (!bgImg || !bgImg.naturalWidth) throw new Error('背景图未加载');
-  name = (name && String(name).trim()) || '同学';
-  spirit = String(spirit || '').trim() || '红色精神';
+  const inputs = normalizeCardInputs(bgImg, name, spirit);
+  name = inputs.name;
+  spirit = inputs.spirit;
 
   // 1) 背景照片（cover 裁剪）
   drawCover(ctx, bgImg, W, H);
@@ -259,7 +288,7 @@ function renderCard(bgImg, spirit, name, venueName) {
   drawSeal(ctx, W - 150, nameY - 10);
   ctx.fillStyle = 'rgba(255, 245, 215, 0.9)';
   ctx.font = '18px "STZhongsong","SimSun",serif';
-  ctx.fillText(now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日', W / 2, H - 112);
+  ctx.fillText(formatZhDate(now), W / 2, H - 112);
 
   // 12) 水印
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
@@ -267,13 +296,7 @@ function renderCard(bgImg, spirit, name, venueName) {
   ctx.fillText('红色文旅数字导览 · 纪念卡', W / 2, H - 78);
 
   // 13) 做旧 + 暗角
-  ctx.fillStyle = 'rgba(139, 100, 60, 0.12)';
-  ctx.fillRect(0, 0, W, H);
-  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H * 0.9);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.32)');
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, W, H);
+  drawAgedVignette(ctx, W, H, 0.12, 0.32);
 
   return cv.toDataURL('image/png');
 }
@@ -284,26 +307,6 @@ function renderCard(bgImg, spirit, name, venueName) {
    呼应首页入场动画的"山脉剪影 + 赓续血脉"叙事。
    ============================================================ */
 const PAPER_CREAM = '#f3e2c0';
-// 追加式星形（不 beginPath，供 evenodd 镂空孔复用）
-function traceStar(ctx, cx, cy, R, r) {
-  for (let i = 0; i < 10; i++) {
-    const rad = (i % 2 === 0) ? R : r;
-    const ang = -Math.PI / 2 + i * Math.PI / 5;
-    const x = cx + rad * Math.cos(ang);
-    const y = cy + rad * Math.sin(ang);
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-}
-// 追加式圆角矩形（不 beginPath）
-function traceRoundRect(ctx, x, y, w, h, r) {
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
 // 剪纸实面：外层形状 + evenodd 孔（照片透过孔透出）+ 奶白剪边
 function fillHomePaper(ctx, build, holes, color) {
   ctx.save();
@@ -334,16 +337,12 @@ function drawPaperGrain(ctx, W, H, alpha) {
 }
 
 function renderHomeCard(bgImg, spirit, name) {
-  const W = 640, H = 900;
-  const cv = document.createElement('canvas');
-  cv.setAttribute('aria-hidden', 'true');
-  cv.width = W; cv.height = H;
+  const W = CARD_W, H = CARD_H;
+  const cv = initCardCanvas();
   const ctx = cv.getContext('2d');
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  if (!bgImg || !bgImg.naturalWidth) throw new Error('背景图未加载');
-  name = (name && String(name).trim()) || '同学';
-  spirit = String(spirit || '').trim() || '红色精神';
+  const inputs = normalizeCardInputs(bgImg, name, spirit);
+  name = inputs.name;
+  spirit = inputs.spirit;
 
   const GOLD = '#e8b33a', CREAM = '#f2e3c2';
 
@@ -413,9 +412,9 @@ function renderHomeCard(bgImg, spirit, name) {
 
   // 5) 三层剪纸山（渐变 + 镂空孔透出照片）
   const mountains = [
-    { base: 676, color: '#7a1414', holes: [function (c) { traceStar(c, 130, 640, 14, 6); }, function (c) { traceRoundRect(c, 470, 630, 36, 42, 5); }] },
-    { base: 712, color: '#8a1414', holes: [function (c) { traceStar(c, 340, 682, 12, 5); }, function (c) { traceRoundRect(c, 140, 678, 26, 30, 4); }] },
-    { base: 748, color: '#a02020', holes: [function (c) { traceStar(c, 250, 726, 10, 4.5); }] },
+    { base: 676, color: '#7a1414', holes: [function (c) { drawStarPath(c, 130, 640, 14, 6, false); }, function (c) { roundRectPath(c, 470, 630, 36, 42, 5, false); }] },
+    { base: 712, color: '#8a1414', holes: [function (c) { drawStarPath(c, 340, 682, 12, 5, false); }, function (c) { roundRectPath(c, 140, 678, 26, 30, 4, false); }] },
+    { base: 748, color: '#a02020', holes: [function (c) { drawStarPath(c, 250, 726, 10, 4.5, false); }] },
   ];
   mountains.forEach(function (m, li) {
     fillHomePaper(ctx,
@@ -443,14 +442,11 @@ function renderHomeCard(bgImg, spirit, name) {
   ctx.fillText('姓名：' + name, W / 2 - 96, 858);
   ctx.font = '18px "STZhongsong","SimSun",serif';
   const now = new Date();
-  ctx.fillText(now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日', W / 2 + 88, 858);
+  ctx.fillText(formatZhDate(now), W / 2 + 88, 858);
 
   // 8) 纸纹 + 做旧 + 暗角
   drawPaperGrain(ctx, W, H, 0.05);
-  ctx.fillStyle = 'rgba(139, 100, 60, 0.10)'; ctx.fillRect(0, 0, W, H);
-  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H * 0.9);
-  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.30)');
-  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  drawAgedVignette(ctx, W, H, 0.10, 0.30);
 
   return cv.toDataURL('image/png');
 }
@@ -603,8 +599,8 @@ function buildModal() {
         <div class="cardgen-field">
           <label>③ 精神关键词（或自定义寄语）</label>
           <div class="cardgen-spirits">
-            ${SPIRITS.map((s, i) => `<button type="button" class="cardgen-chip${i === 0 ? ' selected' : ''}" data-i="${i}">${s}</button>`).join('')}
-            <button type="button" class="cardgen-chip" data-custom="1">${icon('pen')} 自定义</button>
+            ${SPIRITS.map((s, i) => `<button type="button" class="cardgen-chip${i === 0 ? ' selected' : ''}" data-i="${i}" aria-pressed="${i === 0}">${s}</button>`).join('')}
+            <button type="button" class="cardgen-chip" data-custom="1" aria-pressed="false">${icon('pen')} 自定义</button>
           </div>
           <input type="text" id="cardgen-slogan" class="is-hidden" placeholder="自定义寄语（最多10字）" maxlength="10">
         </div>
@@ -628,7 +624,11 @@ function buildModal() {
 
   overlay.querySelectorAll('.cardgen-chip').forEach(function (ch) {
     ch.addEventListener('click', function () {
-      overlay.querySelectorAll('.cardgen-chip').forEach(function (x) { x.classList.toggle('selected', x === ch); });
+      overlay.querySelectorAll('.cardgen-chip').forEach(function (x) {
+        const sel = x === ch;
+        x.classList.toggle('selected', sel);
+        x.setAttribute('aria-pressed', String(sel));
+      });
       const slogan = $('#cardgen-slogan');
       if (ch.dataset.custom) {
         slogan.classList.remove('is-hidden');
@@ -653,23 +653,33 @@ function getBgList() {
   if (currentVenueImage && !/暂无图片/.test(currentVenueImage)) return [{ label: '本场馆', src: currentVenueImage }].concat(BG_IMAGES);
   return BG_IMAGES;
 }
+/* 背景选择网格构建（cardgen 与 cz-card-modal 共用，消除两份近同实现）：
+   grid: 容器；items: [{label, src}]；selected: 当前选中索引；onPick(i)；cls: 元素类名。
+   每次调用重建网格并恢复选中高亮，元素带 role/tabindex + Enter/Space 键盘可达 */
+function buildBgGrid(grid, items, selected, onPick, cls = 'cardgen-bg') {
+  if (!grid) return;
+  grid.innerHTML = items.map((b, i) =>
+    `<div class="${cls}${i === selected ? ' selected' : ''}" role="button" tabindex="0" data-i="${i}" data-src="${escapeAttr(resolveAssetPath(b.src))}"><span>${b.label}</span></div>`
+  ).join('');
+  grid.querySelectorAll('.' + cls).forEach(function (el) {
+    const src = el.dataset.src;
+    if (src) el.style.backgroundImage = 'url(' + src + ')';
+    const pick = function () { onPick(parseInt(el.dataset.i, 10)); };
+    el.addEventListener('click', pick);
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+    });
+  });
+}
+
 function renderBgSelector() {
   const grid = $('#cardgen-bgs');
   if (!grid) return;
   const list = getBgList();
   // 保留用户已选背景；仅当选择越界（如换场馆后列表变化）才落回默认（0 = 有场馆图时「本场馆」，否则第一张）
   if (!Number.isInteger(selectedBg) || selectedBg < 0 || selectedBg >= list.length) selectedBg = 0;
-  grid.innerHTML = list.map((b, i) =>
-    `<div class="cardgen-bg${i === 0 ? ' selected' : ''}" data-i="${i}" data-src="${escapeAttr(resolveAssetPath(b.src))}"><span>${b.label}</span></div>`
-  ).join('');
-  grid.querySelectorAll('.cardgen-bg').forEach(function (b) {
-    const src = b.dataset.src;
-    if (src) b.style.backgroundImage = 'url(' + src + ')';
-    b.addEventListener('click', function () {
-      selectedBg = parseInt(b.dataset.i, 10);
-      grid.querySelectorAll('.cardgen-bg').forEach(function (x) { x.classList.toggle('selected', x === b); });
-    });
-  });
+  // 每次重建背景网格并恢复选中高亮（修复"重开后高亮恒在第 0 格、生成却用 selectedBg"的脱节）
+  buildBgGrid(grid, list, selectedBg, function (i) { selectedBg = i; renderBgSelector(); }, 'cardgen-bg');
 }
 
 function open(venueName, venueImage) {
@@ -707,5 +717,5 @@ function init() {
   if (!overlay) buildModal();
 }
 
-// 暴露 renderCard/downloadDataUrl/shareDataUrl/SPIRITS：供长征纪念卡专用弹窗等复用
-export { init, open, renderCard, downloadDataUrl, shareDataUrl, SPIRITS };
+// 暴露 renderCard/downloadDataUrl/shareDataUrl/SPIRITS/buildBgGrid：供长征纪念卡专用弹窗等复用
+export { init, open, renderCard, downloadDataUrl, shareDataUrl, SPIRITS, buildBgGrid };

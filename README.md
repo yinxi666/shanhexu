@@ -69,6 +69,7 @@
 │   ├── music.js            # 背景音乐播放器
 │   ├── modals.js           # 共享弹窗：视频/实践详情/灯箱
 │   ├── heatmap.js          # 首页热力图（ECharts + SVG 降级）
+│   ├── guide-map.js        # 全国导览 Leaflet 地图门面（容器显隐后需 invalidateSize）
 │   ├── pages.js            # 页面控制器层：6 个页面初始化 + 点赞
 │   ├── chat.js             # AI 智能导览助手（浮动面板组件）
 │   ├── chat-engine.js      # AI 规则问答引擎（纯逻辑无 DOM，与 chat.js 解耦）
@@ -129,9 +130,9 @@
 │   ├── 演示视频/            # 实践视频 + 国旗动态壁纸
 │   ├── icons/              # PWA 图标（192/512）
 │   ├── 学院标识_四川农业大学信息工程学院.webp
-│   └── 通用/               # 全站/入口素材（天安门.webp 入场动画+纪念卡背景、长征.webp+毛主席雕像.webp 长征完成弹窗、ai图标.webp+挑战赛.webp 聊天/问答 FAB）
-├── images/
-│   └── longmarch/          # 长征 17 站实景照片
+│   ├── 通用/               # 全站/入口素材（天安门.webp 入场动画+纪念卡背景、长征.webp+毛主席雕像.webp 长征完成弹窗、ai图标.webp+挑战赛.webp 聊天/问答 FAB）
+│   ├── 长征图片/           # 长征 17 站实景照片（2026-08-13 自 images/longmarch 迁入）
+│   └── leaflet/            # 自托管 Leaflet 1.9.4（导览地图库，原 unpkg CDN）
 ├── docs/
 │   └── 素材说明/            # 素材来源、授权与核验说明
 ├── manifest.json           # PWA 配置

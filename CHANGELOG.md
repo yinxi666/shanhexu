@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-08-13 · v2026081304 — 小瑕疵清理批
+
+- 首页统计首帧闪旧值：`stat-categories` 硬编码 6→8（与实际类别数一致，JS 加载前不再闪错值）
+- 分页补读屏语义：`role="navigation" aria-label="分页"` + 当前页 `aria-current="page"` + 上/下页 `aria-label`
+- `.detail-carousel` 改名 `.detail-photo`（单主图，名字不再误导为轮播）
+- `images/longmarch/` 合并进 `assets/长征图片/`（消除双媒体根目录分裂，引用同步 3 处模块）
+- 两处可安全令牌化的裸 hex：`.card-img` 占位 `#e5e7eb`→`var(--img-placeholder)`（深色自动适配）、热力图缩放条 `#ccc/#fff`→`var(--line)/var(--card-bg)`
+- `.claude/settings.local.json` 精简：清除历史一次性 curl/sed/资产下载权限，保留 Web 检索 + JS 语法检查
+
+## 2026-08-13 · v2026081303 — Leaflet 自托管
+
+- 导览地图库 Leaflet 1.9.4 从 unpkg CDN 改为自托管 `assets/leaflet/`（js + css + 图标资源，BSD-2-Clause），国内/离线/评审现场不再依赖 unpkg 可达性
+- 移除 guide.html 的 unpkg preconnect 与 CDN integrity；地图瓦片仍走高德在线服务（运行时数据依赖，无法自托管）
+
+## 2026-08-13 · v2026081302 — 移动端适配加固
+
+- 触达目标提升到 44px（WCAG 2.5.5）：移动端浮动按钮栈（chat/quiz/music/back-to-top）38→44px 并重排底部偏移，分页按钮 38/32→44px（`flex-wrap` 防窄屏溢出），热力图缩放条 28→40px
+- 热力图触屏双指缩放：`roam` 按设备分流（触屏 `true` / 桌面 `'move'`），scaleLimit 1-5 仍生效
+- 长征页 `.cz-atmos` 固定层 `100vh→100dvh`（地址栏收展跟随可见区，vh 兜底旧浏览器）
+- 浮动按钮栈补 `:active` 按压反馈（触屏无 hover）
+
+## 2026-08-13 · v2026081301 — 全仓审查修复批次（安全/正确性/冗余/文档）
+
+针对 88 条全仓审查发现的修复（34 条经对抗复核确认）：
+
+- **高危**：data.js 合并成功门禁补 `province-candidates`（瞬时失败不再被静默固化为截断缓存，17 扩展馆不再无声消失）；chat.js 聊天历史恢复注入修复（无 html 回退走 textContent）+ `sanitizeBotHtml` 协议白名单（堵 data: 子 scheme）
+- **正确性**：app.js boot 拆逐子系统独立降级；hero 轮播 pageshow 不再抢跑入场 gating；长征 resize 重建补投便签 + 首站剧场不再回访补播 + venue 链接单路径；弹窗双开守卫 + focus-trap 改栈式（嵌套弹窗不丢焦点圈禁）；聊天回复串行化（不再乱序）；纪念卡背景选择器恢复高亮；`pageFadeIn` 排除长征 `#cz-main`；热力图深色适配 + 缩放钳制对齐 scaleLimit；bump/audit import 正则支持 `../` 与大小写混合名
+- **死代码/数据**：venue-details 死 `gallery` 字段剥离；venues `author/license` 渲染进详情页（CC 合规）；`isCompleteShown`/`_completeShown` 死状态删除；venue-store 分叉消除（`_lastMerged`）；practices 11/12 并入 2（20→18 条）；reflections id 统一字符串；findVenueByName 空串守卫 + 前缀回退收紧
+- **冗余重构**：chat-engine/timeline/homepage 复用 data.js 权威实现；`likeDeltaKey`/`FALLBACK_IMAGE`/`safeAssetSrc`/`isHomePage` 单源；`pagedSlice` 分页助手消 4 处拷贝；cardgen 提取 canvas 样板/日期/做旧/星形几何；`closeModal` 关闭序列；entrance 星火单源 + resize 泄漏门控
+- **a11y**：长征页补 h1/SVG 可访问名/HUD aria-live/诗词层 aria-hidden 同步/剧场 role；聊天面板 role=dialog + Esc 关闭 + 焦点归还；卡片背景键盘可达；入场遮罩回访不再闪黑 + skip 聚焦 + 背景 inert
+- **工程卫生**：CLAUDE.md 过时修正（版本号不再写死/已知坑速查/模块数统一 39）；README 补 guide-map；settings.local 清陈旧条目；emoji-clean 跳过 `_site`；smoke 过滤 `net::ERR_ABORTED` + `waitForFunction` 替代固定 sleep；新增 head CSS 加载序一致契约测试（39→40 项）
+
 ## 2026-08-12 · v2026081035 — 实践成果页顶部轮播
 
 - 实践成果页顶部背景改为轮播（6 张代表性实践照片），与全国导览页共用通用化 hero-carousel 与 `data-hero-images` 单源

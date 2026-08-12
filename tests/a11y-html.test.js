@@ -53,8 +53,9 @@ test('所有 createElement("canvas") 附带 aria-hidden="true"', () => {
     for (let i = 0; i < lines.length; i++) {
       const [no, line] = lines[i];
       if (/createElement\(['"]canvas['"]\)/.test(line)) {
-        const claim = (lines[i + 1]?.[1] || '') + ' ' + line;
-        assert.match(claim, /aria-hidden/, `${file}:${no} createElement('canvas') 应立即声明 aria-hidden`);
+        // 断言 createElement 后 3 行内声明 aria-hidden（此前硬性"紧邻下一行"，重构插入空行会无辜变红）
+        const window3 = lines.slice(i, i + 4).map(([, l]) => l || '').join('\n');
+        assert.match(window3, /aria-hidden/, `${file}:${no} createElement('canvas') 应立即声明 aria-hidden`);
       }
     }
   }
@@ -142,4 +143,21 @@ test('darkmode.js 同步 meta[name=theme-color]（浅色 #b91c1c / 深色 #0f172
   assert.ok((js.match(/setAttribute\(/g) || []).length >= 1, '应通过 setAttribute 写入 meta');
   assert.ok(js.includes("document.querySelector('meta[name=\"theme-color\"]')") ||
     js.includes('meta[name="theme-color"]'), '应查询 theme-color meta');
+});
+
+/* ---------------- 9. head CSS 加载序一致性（防各页手抄头漂移） ---------------- */
+
+test('7 个页面 CSS 加载序一致（base→home→components→pages→widgets→effects→dark，dark 最后；changzheng 追加 changzheng.css）', () => {
+  const pages = ['index.html', 'pages/guide.html', 'pages/detail.html', 'pages/changzheng.html', 'pages/policy.html', 'pages/practice.html', 'pages/message.html'];
+  const localCss = (html) => [...html.matchAll(/<link rel="stylesheet" href="([^"]+\.css)[^"]*">/g)]
+    .map(m => m[1].replace(/\.\.\//g, '').split('?')[0])
+    .filter(h => h.includes('css/') && !h.startsWith('http'));
+  const seqs = pages.map(p => localCss(read(p)));
+  const base = seqs[0];
+  for (let i = 1; i < seqs.length; i++) {
+    assert.deepStrictEqual(seqs[i].slice(0, base.length), base, `${pages[i]} 的 CSS 加载序与 index 不一致`);
+  }
+  assert.strictEqual(base[base.length - 1], 'css/dark.css', 'dark.css 必须最后加载');
+  const cz = seqs[pages.indexOf('pages/changzheng.html')];
+  assert.strictEqual(cz[cz.length - 1], 'css/changzheng.css', 'changzheng 末尾应为 changzheng.css');
 });

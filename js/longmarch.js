@@ -3,20 +3,20 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081035';
-import { getBasePath } from './utils.js?v=2026081035';
-import { $ } from './ui.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
+import * as RedData from './data.js?v=2026081304';
+import { getBasePath } from './utils.js?v=2026081304';
+import { $ } from './ui.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081035';
-import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081035';
-import * as czSound from './cz-sound.js?v=2026081035';
-import { stampSvg } from './cz-stamps.js?v=2026081035';
-import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081035';
-import { openRelicDetail, closeRelic, showComplete, closeComplete, isCompleteShown, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081035';
-import { showTheater, theaterLock } from './cz-theater.js?v=2026081035';
-import { initAtmosphere } from './cz-atmosphere.js?v=2026081035';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081304';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081304';
+import * as czSound from './cz-sound.js?v=2026081304';
+import { stampSvg } from './cz-stamps.js?v=2026081304';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081304';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081304';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081304';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081304';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化）。
    兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
@@ -125,6 +125,20 @@ function layout() {
   buildInkDots(totalW, vh);
   buildMiniRoute();   // 构建右上迷你地图(路径 + 圆点)
   onScroll();   // 立即按当前位置渲染一次
+  // 场馆链接补投：buildContents 重建笺纸后，若链接已解析过，重新注入「探访」按钮（幂等）
+  patchVenueLinks();
+  // resize 重建后补投已到站笺纸：新建的 .cz-note 默认 opacity:0，
+  // 若活动站未变，onScroll 不会触发 setActive 重新 drop，导致当前站笔记整体隐形
+  if (state.activeStationId) dropNotesUpTo(state.activeStationId);
+}
+
+/* 把所有 sid <= id 的笺纸立即标为 dropped（resize 重建后补投用，镜像 setActive 的落纸逻辑） */
+function dropNotesUpTo(id) {
+  const noteEls = state._noteEls;
+  for (let i = 0; i < noteEls.length; i++) {
+    const el = noteEls[i];
+    if (i + 1 <= id) el.classList.add('dropped');
+  }
 }
 
 /* 在老宣纸手卷上随机散布墨迹墨点（28 个不规则大小污渍） */
@@ -275,7 +289,7 @@ function buildContents(totalW, vh, perStationW, sidePad) {
     const poemHtml = s.poem.split('\n').map(l => `<div>${l}</div>`).join('');
     const photo = STATION_PHOTOS[s.id];
     const photoHtml = photo
-      ? `<div class="cz-note-photo"><img src="${getBasePath()}images/longmarch/${photo}" alt="${s.name}实景" loading="lazy"></div>`
+      ? `<div class="cz-note-photo"><img src="${getBasePath()}assets/长征图片/${photo}" alt="${s.name}实景" loading="lazy"></div>`
       : '';
     const relic = RELIC_MAP[s.id];
     const relicHtml = relic
@@ -296,11 +310,6 @@ function buildContents(totalW, vh, perStationW, sidePad) {
         <div class="cz-note-poem">${poemHtml}</div>
         <div class="cz-note-event">${s.event}</div>
         ${relicHtml}
-        ${s._venueResolved ? `
-        <a class="cz-note-venue" href="${s._venueHref}">
-          ${icon('pin')} 探访${s.venue}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>` : ''}
       `;
     handrollCont.appendChild(note);
     state._noteEls.push(note);
@@ -512,7 +521,11 @@ function showPoem(id) {
   if (poemText) poemText.textContent = p.text;
   if (poemSrc) poemSrc.textContent = p.src || '';
   poemOverlay.classList.add('show');
-  _poemTimer = setTimeout(() => poemOverlay.classList.remove('show'), 4600);
+  poemOverlay.setAttribute('aria-hidden', 'false');  // 视觉可见时必须同步 ARIA 状态，否则读屏丢失诗词内容
+  _poemTimer = setTimeout(() => {
+    poemOverlay.classList.remove('show');
+    poemOverlay.setAttribute('aria-hidden', 'true');
+  }, 4600);
 }
 
 /* 环境音开关按钮（传入 cz-sound 模块的 initSound） */
@@ -685,7 +698,7 @@ function setActive(id) {
 function setPhoto(photo) {
   if (!bgPhoto) return;
   if (photo) {
-    bgPhoto.style.backgroundImage = `url(${getBasePath()}images/longmarch/${photo})`;
+    bgPhoto.style.backgroundImage = `url(${getBasePath()}assets/长征图片/${photo})`;
     bgPhoto.classList.add('active');
   } else {
     bgPhoto.classList.remove('active');
@@ -879,6 +892,9 @@ async function init() {
   // 仅当未激活任何站点时兜底到第 1 站，避免覆盖浏览器恢复的滚动位置导致 HUD/氛围错位
   if (!state.activeStationId) setActive(1);
   _firstStationDone = true;  // 首站（加载即达）不播小剧场
+  // 站 1 是加载即达的初始视图：标记"已播"，否则首次回访时（_firstStationDone 已为 true）
+  // 会在站 1 补播一次剧场，与"首站不播"的意图相悖
+  _shownTheater.add(1);
 
   // 粒子特效（状态访问器注入，解耦 cz-atmosphere 与手卷 state）
   const startAtmosphere = () => initAtmosphere({

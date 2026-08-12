@@ -3,10 +3,10 @@
    依赖：cz-stations(STATIONS) / cz-content(RELIC_MAP) / focus-trap / ui / cz-card-modal
    ============================================================ */
 
-import { $, onOverlayClick } from './ui.js?v=2026081035';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081035';
-import { STATIONS } from './cz-stations.js?v=2026081035';
-import { RELIC_MAP } from './cz-content.js?v=2026081035';
+import { $, onOverlayClick } from './ui.js?v=2026081304';
+import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081304';
+import { STATIONS } from './cz-stations.js?v=2026081304';
+import { RELIC_MAP } from './cz-content.js?v=2026081304';
 
 /* ---------- 文物详情弹窗 ---------- */
 const relicModal = $('#cz-relic-modal');
@@ -34,21 +34,14 @@ export function openRelicDetail(stationId) {
 }
 
 export function closeRelic() {
-  // 仅当文物弹窗确实打开时才解锁，避免 Escape 误触发把滚动锁计数减穿
-  if (!relicModal || !relicModal.classList.contains('show')) return;
-  releaseFocus();
-  relicModal.classList.remove('show');
-  relicModal.setAttribute('aria-hidden', 'true');
-  unlockBodyScroll();
+  closeModal(relicModal, 'show');
 }
 
 /* ---------- 终点成就：走完全程 → 长征纪念卡 ---------- */
 const completeOverlay = $('#cz-complete');
-let _completeShown = false;
 
 export function showComplete() {
   if (!completeOverlay) return;
-  _completeShown = true;
   completeOverlay.classList.add('show');
   completeOverlay.setAttribute('aria-hidden', 'false');
   lockBodyScroll();
@@ -60,17 +53,7 @@ export function showComplete() {
 }
 
 export function closeComplete() {
-  if (!completeOverlay || !completeOverlay.classList.contains('show')) return;
-  releaseFocus();
-  completeOverlay.classList.remove('show');
-  completeOverlay.setAttribute('aria-hidden', 'true');
-  unlockBodyScroll();
-  _completeShown = false;
-}
-
-/* 是否已触发终点成就（longmarch setActive 的守卫用，替代原 _completeShown） */
-export function isCompleteShown() {
-  return _completeShown;
+  closeModal(completeOverlay, 'show');
 }
 
 /* 弹窗当前是否打开（longmarch 的 Escape/键盘守卫用） */

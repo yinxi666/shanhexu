@@ -5,15 +5,15 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081035';
-import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081035';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, isPracticeLiked } from './utils.js?v=2026081035';
-import { $, $$, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081035';
-import { initBgMusic } from './music.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
-import { initHomeHeatmap } from './heatmap.js?v=2026081035';
-import { createGuideMap } from './guide-map.js?v=2026081035';
-import { isFavorite } from './favorites.js?v=2026081035';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081304';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081304';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081304';
+import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081304';
+import { initBgMusic } from './music.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
+import { initHomeHeatmap } from './heatmap.js?v=2026081304';
+import { createGuideMap } from './guide-map.js?v=2026081304';
+import { isFavorite } from './favorites.js?v=2026081304';
 
 /* ---------- 分页公共助手（四个页面控制器复用，消除页码解析与跳转回调的四处拷贝） ---------- */
 function normalizePage(raw, totalPages) {
@@ -27,6 +27,23 @@ function navigateToPage(paramName) {
     url.searchParams.set(paramName, newPage);
     location.href = url.toString();
   };
+}
+/* 分页切片公共助手：页码归一化 + 切片（消除四个控制器重复的 totalPages/page/pageItems 三行） */
+function pagedSlice(items, pageSize, paramName) {
+  const totalPages = Math.ceil(items.length / pageSize);
+  const page = normalizePage(new URLSearchParams(location.search).get(paramName) || '1', totalPages);
+  return { page, totalPages, pageItems: items.slice((page - 1) * pageSize, page * pageSize) };
+}
+/* 分页整页重载（navigateToPage → location.href）后锚定到列表区：仅当 URL 携带 page>1 时滚动到首个 .section。
+   scrollRestoration='manual' 下重载停在顶部，不锚定用户会掉到列表上方空白 */
+function anchorToListIfPaged(paramName) {
+  const page = parseInt(new URLSearchParams(location.search).get(paramName) || '1', 10);
+  if (page <= 1) return;
+  requestAnimationFrame(function () {
+    const sec = document.querySelector('.section');
+    if (!sec) return;
+    try { sec.scrollIntoView({ block: 'start' }); } catch (e) { sec.scrollIntoView(); }
+  });
 }
 /* 详情页"返回导览"：尽量恢复进入详情前的导览筛选状态（无记录则回导览首页） */
 function buildGuideBackLink() {
@@ -46,7 +63,8 @@ function buildGuideBackLink() {
   return url;
 }
 
-/* ---------- 点赞（统一 key：redguide_likes_<id> 存计数；旧 redguide_likecount_<id> 仅作迁移兼容） ---------- */
+/* ---------- 点赞：权威存储只记用户增量 redguide_likes_delta_<id>（存在即已赞）；
+   practices.json 编造基数仅作展示基线，不写入存储；旧 redguide_likes_<id>/redguide_likecount_<id> 仅迁移兼容 ---------- */
 function likePractice(el, id) {
   const countEl = el.querySelector('.like-count');
   if (!countEl) return;
@@ -57,9 +75,14 @@ function likePractice(el, id) {
     setTimeout(() => el.style.transform = '', 150);
     return;
   }
-  const deltaKey = 'redguide_likes_delta_' + id;
-  const newCount = parseInt(countEl.textContent) + 1;
-  const delta = (parseInt(sessionStorage.getItem(deltaKey) || '0', 10)) + 1;
+  // 写入权威增量（键存在即已赞，无需读-改-写算术——isPracticeLiked 已保证首次进入）
+  const wrote = safeStorage.set(likeDeltaKey(id), 1, sessionStorage);
+  if (!wrote) {
+    // 写失败：回滚 UI，避免界面高亮与存储发散（与 favorites 的写失败契约一致）
+    showToast('点赞保存失败，请检查浏览器存储');
+    return;
+  }
+  const newCount = parseInt(countEl.textContent, 10) + 1;
   countEl.textContent = newCount;
   // 已赞保持高亮：红心填充 + 红色药丸
   el.classList.add('active');
@@ -73,8 +96,6 @@ function likePractice(el, id) {
       if (c && c !== countEl) c.textContent = newCount;
     }
   });
-  // 权威存储只记真实用户增量（practices.json 编造基数仅作展示基线，不写入存储）
-  try { sessionStorage.setItem(deltaKey, String(delta)); } catch (e) { }
   el.style.transform = 'scale(1.2)';
   setTimeout(() => el.style.transform = '', 200);
 }
@@ -116,7 +137,10 @@ function initMessageForm() {
       return;
     }
 
-    // 前端模拟提交
+    // 前端模拟提交（时间戳用本地时间，与预设留言 reflections.json 的本地时制一致，避免 UTC 差 8 小时）
+    const now = new Date();
+    const pad2 = n => String(n).padStart(2, '0');
+    const submitTime = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate()) + ' ' + pad2(now.getHours()) + ':' + pad2(now.getMinutes());
     const newMsg = {
       id: Date.now(),
       title,
@@ -124,7 +148,7 @@ function initMessageForm() {
       className: ($('#msg-class')?.value || ''),  // 选填，未选不编造班级
       studentId: ($('#msg-studentid')?.value || '***'),
       content,
-      submitTime: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      submitTime,
       status: 'pending',
       isDemo: false
     };
@@ -181,11 +205,7 @@ async function refreshMessageList() {
 
   let html = '';
   const pageSize = 4;
-  const totalPages = Math.ceil(all.length / pageSize);
-  const currentPage = normalizePage(new URLSearchParams(location.search).get('msg_page') || '1', totalPages);
-
-  const start = (currentPage - 1) * pageSize;
-  const pageItems = all.slice(start, start + pageSize);
+  const { page: currentPage, pageItems } = pagedSlice(all, pageSize, 'msg_page');
 
   if (pageItems.length === 0) {
     html = '<div class="empty-state"><div class="empty-icon">' + icon('chat') + '</div><h3>暂无留言</h3><p>快来写下你的学习感悟吧！</p></div>';
@@ -196,6 +216,7 @@ async function refreshMessageList() {
 
   container.innerHTML = html;
   applyMessageCardStyles(container);
+  anchorToListIfPaged('msg_page');
 }
 
 /* ---------- 公共 UI 装配 ---------- */
@@ -388,19 +409,17 @@ async function initGuidePage() {
     const category = categorySelect ? categorySelect.value : 'all';
     const filtered = filterVenues(venues, { query: query, province: province, category: category });
 
-    // 地图始终更新（桌面端）
+    // 地图始终更新（桌面端）；mapOnly 短路必须在 isReady 之外，
+    // 否则地图未就绪（Leaflet CDN 挂）时 mapOnly 会落到下方去渲染一个已被隐藏的列表
     if (guideMapCtrl.isReady()) {
       guideMapCtrl.plotVenuesOnMap(filtered);
-      if (mapOnly) return;
     }
+    if (mapOnly) return;
 
     // URL 同步
     const pageSize = 9;
-    const totalPages = Math.ceil(filtered.length / pageSize);
-    const page = normalizePage(resetPage ? 1 : (new URLSearchParams(location.search).get('page') || '1'), totalPages);
-    syncURL(query, province, category, page);
-
-    const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+    const { page, pageItems } = pagedSlice(filtered, pageSize, resetPage ? '' : 'page');
+    syncURL(query, province, category, resetPage ? 1 : page);
     const countEl = $('#result-count');
     if (countEl) countEl.innerHTML = '共找到 <strong>' + filtered.length + '</strong> 个场馆，点击卡片可查看场馆详细介绍。';
 
@@ -437,6 +456,8 @@ async function initGuidePage() {
     await guideMapCtrl.initMap();
   }
   render();
+  // 首次加载带 ?page>1 时锚定到列表区（后续筛选/搜索渲染不重复滚动）
+  anchorToListIfPaged('page');
 }
 
 // 详情页
@@ -458,6 +479,9 @@ async function initDetailPage() {
   } catch (err) {
     console.warn('[Pages] 详情数据加载失败', err);
     showToast('场馆数据加载失败，请刷新重试');
+    // 数据源整体失败：与"id 无效"区分开，给可重试的空态而非误导性的"场馆未找到"
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">' + icon('search') + '</div><h3>场馆数据加载失败</h3><p>请刷新页面重试</p></div>';
+    return;
   }
   const venue = venues.find(v => String(v.id) === String(id));
 
@@ -467,7 +491,7 @@ async function initDetailPage() {
   }
 
   const bp = getBasePath();
-  const imgSrc = resolveAssetPath(venue.image, bp);
+  const imgSrc = safeAssetSrc(venue.image, bp);
   const fb = fallbackSrc();
   const detail = getVenueDetail(venue.name);
 
@@ -495,8 +519,8 @@ async function initDetailPage() {
 
   // 详情主图（详情数据 gallery 与主图同源，恒为单图，无需轮播）
   const detailImageHtml = `
-      <div class="detail-carousel">
-        <img class="detail-carousel-img" src="${escapeAttr(sanitizeUrl(resolveAssetPath(venue.image, bp)))}" alt="${escapeHtml(venue.name)} 图片" loading="lazy" data-fallback="${escapeAttr(fb)}">
+      <div class="detail-photo">
+        <img class="detail-photo-img" src="${escapeAttr(safeAssetSrc(venue.image, bp))}" alt="${escapeHtml(venue.name)} 图片" loading="lazy" data-fallback="${escapeAttr(fb)}">
       </div>
     `;
 
@@ -545,7 +569,13 @@ async function initDetailPage() {
           <div class="sidebar-card">
             <h3>${icon('link')} 官方链接</h3>
             <a class="official-link" href="${escapeAttr(sanitizeUrl(venue.officialUrl))}" target="_blank" rel="noopener">${icon('globe')} ${escapeHtml(venue.officialLinkType || '官方网站')}</a>
-            ${venue.sourcePage ? `<a class="official-link official-link-spaced" href="${escapeAttr(sanitizeUrl(venue.sourcePage))}" target="_blank" rel="noopener">${icon('globe')} 图片来源</a>` : ''}
+          </div>` : ''}
+          ${(venue.author || venue.license || venue.sourcePage) ? `
+          <div class="sidebar-card">
+            <h3>图片来源与许可</h3>
+            ${venue.author ? `<div class="info-row"><span class="info-label">作者</span><span class="info-value">${escapeHtml(venue.author)}</span></div>` : ''}
+            ${venue.license ? `<div class="info-row"><span class="info-label">许可</span><span class="info-value">${escapeHtml(venue.license)}</span></div>` : ''}
+            ${venue.sourcePage ? `<a class="official-link official-link-spaced" href="${escapeAttr(sanitizeUrl(venue.sourcePage))}" target="_blank" rel="noopener">${icon('globe')} 图片来源链接</a>` : ''}
           </div>` : ''}
           <div class="sidebar-card">
             <h3>${icon('map')} 位置信息</h3>
@@ -586,12 +616,10 @@ async function initPolicyPage() {
 
   // 分页：5条/页
   const pageSize = 5;
-  const totalPages = Math.ceil(policies.length / pageSize);
-  const page = normalizePage(new URLSearchParams(location.search).get('page') || '1', totalPages);
-  const pageItems = policies.slice((page - 1) * pageSize, page * pageSize);
+  const { page, pageItems, totalPages } = pagedSlice(policies, pageSize, 'page');
 
   let html = pageItems.map(function (p) {
-    const imgSrc = p.image ? resolveAssetPath(p.image, bp) : (bp + 'assets/页面通用图片/时事政策模块封面.webp');
+    const imgSrc = p.image ? safeAssetSrc(p.image, bp) : (bp + 'assets/页面通用图片/时事政策模块封面.webp');
     const hasUrl = p.url && p.url.trim();
     const pubDate = p.publishedAt || '';
     return `
@@ -626,6 +654,7 @@ async function initPolicyPage() {
   }
   container.innerHTML = html;
   bindImageFallbacks(container);
+  anchorToListIfPaged('page');
 }
 
 // 实践成果页
@@ -639,10 +668,7 @@ async function initPracticePage() {
 
   const bp = getBasePath();
   const pageSize = 6;
-  const params = new URLSearchParams(location.search);
-  const totalPages = Math.ceil(practices.length / pageSize);
-  const page = normalizePage(params.get('page') || '1', totalPages);
-  const pageItems = practices.slice((page - 1) * pageSize, page * pageSize);
+  const { page, pageItems, totalPages } = pagedSlice(practices, pageSize, 'page');
 
   container.innerHTML = pageItems.map(p => renderPracticeCard(p, bp)).join('');
   bindImageFallbacks(container);
@@ -651,6 +677,7 @@ async function initPracticePage() {
   if (pagContainer && totalPages > 1) {
     pagContainer.innerHTML = renderPagination(practices.length, pageSize, page, '#pagination-container', navigateToPage('page'));
   }
+  anchorToListIfPaged('page');
 }
 
 // 留言墙页
@@ -664,7 +691,7 @@ async function initMessagePage() {
 async function autoInit() {
   const path = location.pathname;
 
-  if (path.endsWith('/') || path.endsWith('index.html')) {
+  if (isHomePage()) {
     await initHomePage();
   } else if (path.includes('guide.html')) {
     await initGuidePage();

@@ -75,6 +75,8 @@
   top: 0;
   width: 100vw;
   height: 100vh;
+  /* 动态视口：移动端地址栏收展时跟随可见区（dvh 优先，vh 作旧浏览器回退） */
+  height: 100dvh;
   z-index: 50;
   pointer-events: none;
   /* 禁止拉伸，保持 1:1 贴合视口 */

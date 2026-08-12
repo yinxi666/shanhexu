@@ -1358,6 +1358,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap; /* 窄屏页码多时换行，配合 44px 触达目标不溢出 */
   gap: 8px;
   margin-top: 32px;
   grid-column: 1 / -1;
@@ -1365,8 +1366,8 @@
 }
 
 .pagination button {
-  min-width: 38px;
-  height: 38px;
+  min-width: 44px;
+  height: 44px;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
   background: var(--card-bg);
@@ -1402,7 +1403,7 @@
 .pagination button:last-child {
   position: relative;
   min-width: 44px;
-  height: 38px;
+  height: 44px;
   font-size: 0;
   color: transparent;
   border: 1px solid var(--card-border);

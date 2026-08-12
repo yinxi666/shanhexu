@@ -214,9 +214,9 @@
   }
 
   .pagination button {
-    min-width: 32px;
-    height: 32px;
-    font-size: 12px;
+    min-width: 44px;
+    height: 44px;
+    font-size: 13px;
   }
 }
 
@@ -242,7 +242,7 @@
   border-radius: var(--radius-lg);
   border: 0;
   background: var(--red);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 24px;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(185, 28, 28, 0.4);
@@ -255,6 +255,14 @@
 .chat-fab:hover {
   transform: scale(1.08);
   box-shadow: 0 6px 28px rgba(185, 28, 28, 0.5);
+}
+
+/* 触屏按压反馈：浮动按钮栈在触屏上无 hover，用 :active 给按压力反馈（桌面同样适用，无副作用） */
+.chat-fab:active,
+.music-toggle:active,
+.quiz-fab:active,
+.back-to-top:active {
+  transform: scale(0.94);
 }
 
 .chat-fab-icon {
@@ -361,7 +369,7 @@
 .chat-close {
   background: rgba(255, 255, 255, 0.2);
   border: 0;
-  color: #fff;
+  color: var(--on-primary);
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -480,7 +488,7 @@
   border: 0;
   border-radius: 50%;
   background: var(--red);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 16px;
   cursor: pointer;
   flex-shrink: 0;
@@ -799,17 +807,18 @@
     padding-bottom: 88px;
   }
 
+  /* 浮动按钮栈：触达目标 44px（WCAG 2.5.5），按钮间距 8px 不重叠 */
   .back-to-top {
     right: 8px ;
     bottom: 104px ;
-    width: 38px ;
-    height: 38px ;
+    width: 44px ;
+    height: 44px ;
     font-size: 16px ;
   }
 
   .music-player {
     right: 8px ;
-    bottom: 150px ;
+    bottom: 156px ;
     padding: 0 ;
     border: none ;
     border-radius: 0 ;
@@ -818,8 +827,8 @@
   }
 
   .music-toggle {
-    width: 38px ;
-    height: 38px ;
+    width: 44px ;
+    height: 44px ;
     font-size: 16px ;
   }
 
@@ -829,22 +838,22 @@
 
   .quiz-fab {
     right: 8px ;
-    bottom: 196px ;
-    width: 38px ;
-    height: 38px ;
+    bottom: 208px ;
+    width: 44px ;
+    height: 44px ;
     font-size: 16px ;
   }
 
   .chat-widget {
     right: 8px ;
-    bottom: 242px ;
-    width: 38px ;
-    height: 38px ;
+    bottom: 260px ;
+    width: 44px ;
+    height: 44px ;
   }
 
   .chat-fab {
-    width: 38px ;
-    height: 38px ;
+    width: 44px ;
+    height: 44px ;
     font-size: 16px ;
   }
 

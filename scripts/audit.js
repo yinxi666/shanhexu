@@ -92,14 +92,16 @@ function collectJsFiles(dir, out) {
 const jsFiles = collectJsFiles(jsDir, []);
 for (const f of jsFiles) {
   const content = fs.readFileSync(f, 'utf8');
-  // 兼容 bump-version 写入的 ?v= 缓存破击后缀（支持 ./x.js 与 ./sub/x.js）
-  for (const m of content.matchAll(/(?:from|import)\s+['"]\.\/([a-z0-9-]+(?:\/[a-z0-9-]+)*)\.js(\?v=\d{10,16})?['"]/g)) {
-    const target = path.join(jsDir, m[1] + '.js');
+  const fileDir = path.dirname(f);
+  // 兼容 bump-version 写入的 ?v= 缓存破击后缀（支持 ./x.js、../sub/x.js、./sub/x.js 与大小写混合名；
+  // 目标按"import 所在文件"的相对目录解析，../ 不再漏检）
+  for (const m of content.matchAll(/(?:from|import)\s+['"](\.{1,2}\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*)\.js(\?v=\d{10,16})?['"]/g)) {
+    const target = path.resolve(fileDir, m[1] + '.js');
     if (!fs.existsSync(target)) {
-      errors.push(`import 目标不存在：js/${path.relative(jsDir, f)} → ./${m[1]}.js`);
+      errors.push(`import 目标不存在：js/${path.relative(jsDir, f)} → ${m[1]}.js`);
     }
     if (!m[2]) {
-      errors.push(`import 缺少缓存版本号：js/${path.relative(jsDir, f)} → ./${m[1]}.js（须带 ?v=${version || 'ASSET_VERSION'}）`);
+      errors.push(`import 缺少缓存版本号：js/${path.relative(jsDir, f)} → ${m[1]}.js（须带 ?v=${version || 'ASSET_VERSION'}）`);
     }
   }
 }
@@ -123,7 +125,8 @@ walk(ROOT, (f) => {
 for (const f of jsFiles) {
   const code = stripComments(fs.readFileSync(f, 'utf8'));
   for (const d of DEAD_FILES) {
-    if (new RegExp(`['"]\\.?\\/?${d.replace('.', '\\.')}(?:\\?v=\\d+)?['"]`).test(code)) {
+    // 匹配 './'、'../' 等相对前缀下的死文件引用（含带 ?v= 后缀）
+    if (new RegExp(`['"]\\.{0,2}\\/?${d.replace('.', '\\.')}(?:\\?v=\\d+)?['"]`).test(code)) {
       errors.push(`死引用：js/${path.relative(jsDir, f)} 指向已删除的 ${d}`);
     }
   }

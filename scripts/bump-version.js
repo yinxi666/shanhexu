@@ -35,8 +35,10 @@ function processFile(filePath, version) {
   }
 }
 
-// ES 模块 import 说明符：from './x.js' / import './sub/x.js'（支持子目录多段路径；已带 ?v= 则替换版本号，幂等）
-const JS_IMPORT_RE = /((?:from|import)\s+['"]\.\/[a-z0-9-]+(?:\/[a-z0-9-]+)*\.js)(?:\?v=\d{10,16})?(['"])/g;
+// ES 模块 import 说明符：from './x.js' / from '../sub/x.js' / import './sub/x.js'
+// 支持 ./ 与 ../ 前缀 + 多段子目录 + 大小写混合文件名（工具链不再对驼峰/上目录静默漏刷新）；
+// 已带 ?v= 则替换版本号，幂等
+const JS_IMPORT_RE = /((?:from|import)\s+['"]\.{1,2}\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*\.js)(?:\?v=\d{10,16})?(['"])/g;
 
 function processJsImports(filePath, version) {
   // 仅处理 js/ 目录下的 ES 模块；scripts/ 是 CommonJS（require），不会命中

@@ -22,6 +22,19 @@
    - css/changzheng.css：长征手卷页面专属样式
    ============================================================ */
 /* ---------- CSS Variables ---------- */
+/* 视觉隐藏但读屏可达（sr-only 辅助类，供不可见标题/标签使用） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 :root {
   --red: #b91c1c;
   --deep-red: #7f1d1d;
@@ -30,6 +43,9 @@
   --soft-red: #fef5f5;
   --gold: #d9a441;
   --light-gold: #f5e6c8;
+  /* 金渐变两色（stat 高亮下划线/数字文字两处共用，消除硬编码 hex） */
+  --gold-deep: #b45309;
+  --gold-light: #b8860b;
   --ink: #1f2933;
   --muted: #64748b;
   --light-muted: #9ca3af;

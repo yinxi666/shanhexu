@@ -103,12 +103,12 @@ export const POEM_MOMENTS = {
 };
 
 export const CZ_CARD_BGS = [
-  { label: '延安', src: 'images/longmarch/yanan.jpg' },
-  { label: '瑞金', src: 'images/longmarch/ruijin.jpg' },
-  { label: '遵义', src: 'images/longmarch/zunyi.jpg' },
-  { label: '泸定桥', src: 'images/longmarch/luding.jpg' },
-  { label: '雪山', src: 'images/longmarch/jiajinshan.jpg' },
-  { label: '草地', src: 'images/longmarch/caodi.jpg' },
-  { label: '湘江', src: 'images/longmarch/xiangjiang.jpg' },
-  { label: '会宁', src: 'images/longmarch/huining.jpg' },
+  { label: '延安', src: 'assets/长征图片/yanan.jpg' },
+  { label: '瑞金', src: 'assets/长征图片/ruijin.jpg' },
+  { label: '遵义', src: 'assets/长征图片/zunyi.jpg' },
+  { label: '泸定桥', src: 'assets/长征图片/luding.jpg' },
+  { label: '雪山', src: 'assets/长征图片/jiajinshan.jpg' },
+  { label: '草地', src: 'assets/长征图片/caodi.jpg' },
+  { label: '湘江', src: 'assets/长征图片/xiangjiang.jpg' },
+  { label: '会宁', src: 'assets/长征图片/huining.jpg' },
 ];

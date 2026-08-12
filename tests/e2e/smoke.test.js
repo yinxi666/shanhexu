@@ -73,7 +73,11 @@ test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 4
       const u = r.url();
       // 只记录同源资源失败（ES 模块 404 / 本站资源缺失）；
       // 外部 CDN（echarts/leaflet/字体）失败属可降级场景，首页会回退 SVG，不计为错误
-      if (u.startsWith(url)) errors.push('[资源失败] ' + u.replace(url, '') + ' ' + (r.failure() && r.failure().errorText));
+      if (!u.startsWith(url)) return;
+      const err = r.failure() && r.failure().errorText;
+      // 切页导航会 abort 上一页仍在途的同源请求（net::ERR_ABORTED），并非真实资源失败，跳过避免误报
+      if (err === 'net::ERR_ABORTED') return;
+      errors.push('[资源失败] ' + u.replace(url, '') + ' ' + err);
     });
 
     const pages = [
@@ -91,8 +95,13 @@ test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 4
       // 而本站 ES 模块在 DOMContentLoaded 前即求值，足以捕获模块加载/初始化错误
       const resp = await page.goto(url + p, { waitUntil: 'domcontentloaded' });
       assert.ok(resp && resp.ok(), name + ' 应返回 200，实际 ' + (resp && resp.status()));
-      // 留出异步初始化时间(数据加载/地图/入场动画)
-      await page.waitForTimeout(p === '/pages/changzheng.html' ? 1500 : 1000);
+      // 等待 app.js boot 完成标志（替代固定 sleep：慢机器不再按固定时长赌时序）。
+      // 超时不直接判负——真实的 JS 异常已由 pageerror/console 收集，此处只做等待兜底
+      try {
+        await page.waitForFunction('window.__shanhexuBooted === true', null, { timeout: 15000 });
+      } catch (e) {
+        // boot 标志缺失：交由 errors 数组里捕获的异常判定，不在此处误报
+      }
     }
 
     assert.deepStrictEqual(errors, [], '页面运行时错误：\n' + errors.join('\n'));

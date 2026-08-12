@@ -4,12 +4,13 @@
    约束：依赖 timeline(initTimeline)；被 app.js 初始化（首页）
    ============================================================ */
 
-import { initTimeline } from './timeline.js?v=2026081035';
-import { $ } from './ui.js?v=2026081035';
-import { icon } from './icons.js?v=2026081035';
+import { initTimeline } from './timeline.js?v=2026081304';
+import { $ } from './ui.js?v=2026081304';
+import { icon } from './icons.js?v=2026081304';
+import { isHomePage } from './utils.js?v=2026081304';
 
 function initHomepageInnovation() {
-  if (!(location.pathname.endsWith('/') || location.pathname.endsWith('index.html'))) return;
+  if (!isHomePage()) return;
 
   initTimeline();
 
