@@ -99,8 +99,8 @@
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   padding: 24px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* 不再 backdrop-filter：背景是不透明 --card-bg，blur(12px) 物理上无可虚化，纯白养合成层；
+     与导览列表角标 blur 同源——Chrome Android 合成器在滚动时把三张侧栏卡纹理画成同一张 */
   box-shadow: var(--card-shadow);
 }
 
