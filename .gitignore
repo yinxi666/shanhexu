@@ -9,3 +9,6 @@ Thumbs.db
 _claude/
 .claude/
 _site/
+
+# 临时/调试文件
+image.png
