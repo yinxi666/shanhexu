@@ -3,7 +3,7 @@
    原 index.html 内联脚本提取，职责：首页 entrance-canvas 全屏叙事动画
    ============================================================ */
 
-import { resolveAssetPath } from './utils.js?v=2026081320';
+import { resolveAssetPath } from './utils.js?v=2026081427';
 
 export function initEntranceAnimation() {
   // sessionStorage 访问防护（Safari 隐私模式等会抛异常，避免开场黑屏卡死）
@@ -60,6 +60,16 @@ export function initEntranceAnimation() {
   document.documentElement.classList.add('entrance-active');
 
   let canvas = document.getElementById('entrance-canvas');
+  if (!canvas) {
+    // 缺 canvas：与 reduced-motion 分支一致的完整清理，避免 entrance-active + 遮罩 + inert 卡死页面
+    let el = document.getElementById('entrance-overlay');
+    if (el) el.remove();
+    document.documentElement.classList.remove('entrance-active');
+    _restoreEntranceInert();
+    markEntranceDone();
+    finishEntrance();
+    return;
+  }
   let ctx = canvas.getContext('2d', { willReadFrequently: false });
   let isMobile = window.innerWidth < 768;
   let DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
@@ -1210,7 +1220,8 @@ export function initEntranceAnimation() {
     });
   });
 
-  document.getElementById('skip').addEventListener('click', function () {
+  const skipBtn = document.getElementById('skip');
+  if (skipBtn) skipBtn.addEventListener('click', function () {
     // 取消动画循环，避免跳过后再逐帧运行数秒（低端机全屏 Canvas 高负载）
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     entranceFinished = true;

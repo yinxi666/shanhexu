@@ -22,6 +22,8 @@ export function initHeroCarousel() {
       if (Array.isArray(parsed) && parsed.length > 1) images = parsed;
     } catch (e) { images = null; }
   }
+  // 无轮播配置的页面（详情/政策/留言/长征）不注册任何全局监听
+  if (!images) return;
 
   function startCarousel() {
     if (timer) return; // 已经启动
@@ -72,6 +74,10 @@ export function initHeroCarousel() {
   window.addEventListener('pageshow', function (e) {
     if (e.persisted && started) startCarousel();
   });
+  // 运行期切换 reduced-motion：开启时停轮播、关闭时恢复（初始 reduce 由 startCarousel 内守卫处理）
+  const reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const onReduceChange = (e) => { if (e.matches) stopCarousel(); else startCarousel(); };
+  if (typeof reduceMQ.addEventListener === 'function') reduceMQ.addEventListener('change', onReduceChange);
 
   // 如果开场动画已结束或不存在，立即启动；否则等 entranceFinished 事件
   const overlay = document.getElementById('entrance-overlay');

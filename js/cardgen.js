@@ -2,10 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081320';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081320';
+import { resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026081427';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081427';
 
 /* ---- 可选数据 ---- */
 const SPIRITS = ['建党', '红船', '井冈山', '长征', '延安', '西柏坡', '抗战', '红岩', '红旗渠', '两弹一星', '苏区', '雷锋精神'];
@@ -457,7 +457,7 @@ function renderHomeCard(bgImg, spirit, name) {
 function generateCard() {
   const genBtn = $('#cardgen-generate');
   if (genBtn && genBtn.disabled) return; // 防连点
-  if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '⏳ 正在盖章…'; }
+  if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = icon('sparkle') + ' 正在盖章…'; }
 
   const nameInput = $('#cardgen-name');
   const name = (nameInput && nameInput.value.trim()) || '同学';
@@ -471,8 +471,14 @@ function generateCard() {
     if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = icon('sparkle') + ' 生成纪念卡'; }
   };
 
+  // 背景图挂起 8 秒超时复位按钮，避免图片加载卡死时按钮永久禁用
+  const genTimer = setTimeout(function () {
+    if (genBtn && genBtn.disabled) { resetBtn(); showToast('背景图加载超时，请重试'); }
+  }, 8000);
+
   const img = new Image();
   img.onload = function () {
+    clearTimeout(genTimer);
     // 确保首页已引的弘雷卓书字体就绪（剪纸横批标题用；未就绪自动回退系统宋体）
     try { if (document.fonts) document.fonts.load('50px "HongLeiZhuoShu"'); } catch (e) { }
     try {
@@ -514,7 +520,7 @@ function generateCard() {
     resetBtn();
     showToast(icon('check') + ' 纪念卡已生成');
   };
-  img.onerror = function () { resetBtn(); showToast('背景图加载失败，请重试'); };
+  img.onerror = function () { clearTimeout(genTimer); resetBtn(); showToast('背景图加载失败，请重试'); };
   img.src = resolveAssetPath(bg.src);
 }
 
@@ -523,7 +529,8 @@ function dataUrlToBlob(dataUrl) {
   if (typeof dataUrl !== 'string' || dataUrl.indexOf(',') < 0) return null;
   const parts = dataUrl.split(',');
   const mime = (parts[0].match(/data:([^;]+)/) || [])[1] || 'image/png';
-  const bin = atob(parts[1]);
+  let bin;
+  try { bin = atob(parts[1]); } catch (e) { return null; }  // 畸形 data URL 不抛断下载/分享
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return new Blob([bytes], { type: mime });
@@ -690,6 +697,8 @@ function renderBgSelector() {
 
 function open(venueName, venueImage) {
   if (!overlay) buildModal();
+  // 幂等：已打开时快速重入不重复压 body 锁与 focus-trap
+  if (overlay.classList.contains('open')) return;
   currentVenueName = (venueName || '').trim();
   currentVenueImage = (venueImage || '').trim();
   const venueEl = $('#cardgen-venue');
@@ -717,6 +726,12 @@ function close() {
   releaseFocus();
   overlay.classList.remove('open');
   unlockBodyScroll();
+  lastCardDataUrl = null;  // 释放约 1MB 的 PNG data URL，重开需重新生成
+  // 重开不残留上一张卡：隐藏预览与下载/分享（与 cz-card-modal 关闭清理对齐，避免按钮可见却 no-op）
+  const pv = $('#cardgen-preview'); if (pv) pv.classList.add('is-hidden');
+  const d = $('#cardgen-download'), s = $('#cardgen-share');
+  if (d) d.classList.add('is-hidden');
+  if (s) s.classList.add('is-hidden');
 }
 
 function init() {

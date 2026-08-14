@@ -1,11 +1,11 @@
 /* ============================================================
    赓续血脉・数绘红旅 — 渲染器模块 (Renderers)
    职责：所有页面组件的HTML渲染函数
-   依赖：utils / icons / favorites
+   依赖：utils / icons（收藏态由调用方经 isFav 参数传入，渲染层不读 favorites 存储）
    ============================================================ */
 
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
 
 // 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
 function renderVenueCard(venue, basePath, isFav = false) {
@@ -77,7 +77,7 @@ function renderPracticeCard(practice, basePath) {
         </div>
         <div class="practice-footer">
           <span class="practice-date"><span class="pd-year">${(practice.createdAt || '----').slice(0, 4)}</span><span class="pd-month">${parseInt((practice.createdAt || '--').slice(5, 7), 10) || '--'}</span><span class="pd-day">${parseInt((practice.createdAt || '--').slice(8, 10), 10) || '--'}</span></span>
-          <span class="practice-likes${practiceLiked ? ' active' : ''}" data-action="like-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="点赞">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
+          <span class="practice-likes${practiceLiked ? ' active' : ''}" data-action="like-practice" data-id="${esc(practice.id)}" tabindex="0" role="button" aria-label="点赞" aria-pressed="${practiceLiked}">${icon('heart')} <span class="like-count">${getLikeCount(practice.id, practice.likes || 0)}</span></span>
         </div>
       </div>
     `;

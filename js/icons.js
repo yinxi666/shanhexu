@@ -90,6 +90,7 @@ const PATHS = {
   'arrow-left': '<path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>',
   /* 右箭头：下一题/前进 */
   'arrow-right': '<path d="M5 12h14"/><path d="M12 5l7 7-7 7"/>',
+  'arrow-up': '<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>',
 };
 
 export function icon(name, cls) {

@@ -4,11 +4,11 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081320';
-import { $, onOverlayClick } from './ui.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import { getBasePath } from './utils.js?v=2026081320';
-import { quizData } from './quiz-data.js?v=2026081320';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081427';
+import { $, onOverlayClick } from './ui.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import { getBasePath } from './utils.js?v=2026081427';
+import { quizData } from './quiz-data.js?v=2026081427';
 
 function initQuiz() {
   if ($('.quiz-fab')) return;
@@ -122,7 +122,11 @@ function initQuiz() {
       if (!s || !Array.isArray(s.qs) || !Array.isArray(s.answers)) return null;
       const gq = s.qs.map(i => quizData[i]).filter(Boolean);
       if (gq.length === 0 || gq.length !== s.answers.length) return null; // 数据损坏则丢弃
-      return { currentQ: s.currentQ, score: s.score, gameQuestions: gq, answers: s.answers };
+      // 校验 currentQ 边界（非负整数且 < 题数）：越界/负数的损坏存储会触发 gameQuestions[-1] 未捕获异常，
+      // 且已在完成态(>=length)的陈旧断点在此被丢弃，避免每次打开重复读取
+      const cq = Number(s.currentQ);
+      if (!Number.isInteger(cq) || cq < 0 || cq >= gq.length) return null;
+      return { currentQ: cq, score: s.score, gameQuestions: gq, answers: s.answers };
     } catch (e) { return null; }
   }
   function clearState() {
@@ -166,7 +170,7 @@ function initQuiz() {
               </button>`;
             }).join('')}
           </div>
-          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <div class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></div>
           <div class="quiz-nav">
             <button class="quiz-nav-btn" id="quiz-prev-btn" ${currentQ === 0 ? 'disabled' : ''}>${icon('arrow-left')} 上一题</button>
             <button class="quiz-nav-btn" id="quiz-next-btn">${isLast ? '完成' : '下一题'}${isLast ? '' : icon('arrow-right')}</button>

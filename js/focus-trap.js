@@ -24,7 +24,7 @@ function _topTrap() {
 function _getFocusable(modal) {
   // 用 getClientRects 判断可见性：offsetParent 为 null 会把 position:fixed 元素（如吸底操作条）误排除
   return [...modal.querySelectorAll(FOCUSABLE_SELECTORS)]
-    .filter(el => el.getClientRects().length > 0 && !el.hasAttribute('disabled'));
+    .filter(el => el.getClientRects().length > 0 && !el.hasAttribute('disabled') && getComputedStyle(el).visibility !== 'hidden');
 }
 
 /* ---- 全站 body 滚动锁（计数式）：多弹窗叠加时，仅当计数归零才恢复滚动 ----
