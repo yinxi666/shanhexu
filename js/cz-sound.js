@@ -5,7 +5,7 @@
    - getStation：返回当前站点的回调（用于确定 mood）
    ============================================================ */
 
-import { icon } from './icons.js?v=2026081320';
+import { icon } from './icons.js?v=2026081427';
 
 let _audioCtx = null;
 let _soundMaster = null;
@@ -124,7 +124,11 @@ function updateSoundscape(mood) {
   playSoundscape(mood);
 }
 function updateSoundToggle() {
-  if (_toggleBtn) _toggleBtn.innerHTML = _soundOn ? icon('speaker') : icon('speaker-off');
+  if (_toggleBtn) {
+    _toggleBtn.innerHTML = _soundOn ? icon('speaker') : icon('speaker-off');
+    _toggleBtn.setAttribute('aria-pressed', String(_soundOn));
+    _toggleBtn.setAttribute('aria-label', _soundOn ? '关闭环境音景' : '开启环境音景');
+  }
 }
 function _ensureAudio() {
   if (_audioCtx) return true;
@@ -152,6 +156,8 @@ function toggleSound() {
   if (!_audioCtx) {
     // 首次点击：在用户手势内创建 AudioContext 才能出声
     if (!_ensureAudio()) return;
+    // Safari/iOS 新建 context 默认 suspended，须在用户手势内 resume 才出声（与再开分支行为一致）
+    if (_audioCtx.state === 'suspended') _audioCtx.resume().catch(() => { });
     _soundOn = true;
     const s = _currentStation();
     playSoundscape(s ? s.mood : 'ember');

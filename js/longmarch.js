@@ -3,20 +3,20 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081320';
-import { getBasePath } from './utils.js?v=2026081320';
-import { $ } from './ui.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
+import * as RedData from './data.js?v=2026081427';
+import { getBasePath } from './utils.js?v=2026081427';
+import { $ } from './ui.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081320';
-import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081320';
-import * as czSound from './cz-sound.js?v=2026081320';
-import { stampSvg } from './cz-stamps.js?v=2026081320';
-import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081320';
-import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081320';
-import { showTheater, theaterLock } from './cz-theater.js?v=2026081320';
-import { initAtmosphere } from './cz-atmosphere.js?v=2026081320';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081427';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081427';
+import * as czSound from './cz-sound.js?v=2026081427';
+import { stampSvg } from './cz-stamps.js?v=2026081427';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081427';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081427';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081427';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081427';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化）。
    兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
@@ -43,7 +43,7 @@ async function resolveVenueLinks() {
         s._venueResolved = true;
       }
     });
-  } catch (e) { }
+  } catch (e) { console.error('[longmarch] 场馆链接解析失败，「探访」按钮将不显示', e); }
 }
 
 /* 场馆链接异步解析完成后，把"探访"按钮补进已渲染的笺纸（layout 先跑，不阻塞首屏） */
@@ -136,6 +136,11 @@ function layout() {
   // resize 重建后补投已到站笺纸：新建的 .cz-note 默认 opacity:0，
   // 若活动站未变，onScroll 不会触发 setActive 重新 drop，导致当前站笔记整体隐形
   if (state.activeStationId) dropNotesUpTo(state.activeStationId);
+  // resize 重建后印章默认无 active 类：补回当前站发光高亮（只加类，不重放 setActive 的剧场/诗副作用）
+  if (state.activeStationId) {
+    const activeStamp = state._stampEls[state.activeStationId - 1];
+    if (activeStamp) activeStamp.classList.add('active');
+  }
 }
 
 /* 把所有 sid <= id 的笺纸立即标为 dropped（resize 重建后补投用，镜像 setActive 的落纸逻辑） */
@@ -518,11 +523,17 @@ const poemText = $('#cz-poem-text');
 const poemSrc = $('#cz-poem-src');
 let _poemTimer = null;
 function showPoem(id) {
+  // 切站先清上一首：隐藏并取消计时，避免旧诗残留到计时结束
+  clearTimeout(_poemTimer);
+  _poemTimer = null;
+  if (poemOverlay) {
+    poemOverlay.classList.remove('show');
+    poemOverlay.setAttribute('aria-hidden', 'true');
+  }
   if (_poemShown.has(id)) return;  // 每站只浮现一次，避免进出反复闪现
   _poemShown.add(id);
   const p = POEM_MOMENTS[id];
   if (!p || !poemOverlay) return;
-  clearTimeout(_poemTimer);
   if (poemText) poemText.textContent = p.text;
   if (poemSrc) poemSrc.textContent = p.src || '';
   poemOverlay.classList.add('show');
@@ -603,8 +614,8 @@ function initImmersiveUI() {
     // preventDefault：标记事件已处理，避免 focus-trap（后注册、栈式）再触发下层弹窗的 Escape 连关
     if (isCardModalOpen()) { e.preventDefault(); closeCardModal(); return; }
     if (isCompleteOpen()) { e.preventDefault(); closeComplete(); return; }
-    e.preventDefault();
-    closeRelic();
+    // 无弹窗打开时不拦截 Escape：不 preventDefault、不空 closeRelic
+    if (isRelicOpen()) { e.preventDefault(); closeRelic(); }
   });
   // 终点成就：领取长征纪念卡（打开专属弹窗）/ 关闭（成就弹窗遮罩接线已在 initModalsUI 内）
   const completeBtn = $('#cz-complete-btn');

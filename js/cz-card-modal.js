@@ -4,12 +4,12 @@
    依赖：utils/ui/icons/cardgen/focus-trap/cz-content
    ============================================================ */
 
-import { getBasePath, isTouchDevice } from './utils.js?v=2026081320';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081320';
-import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081320';
-import { CZ_CARD_BGS } from './cz-content.js?v=2026081320';
+import { getBasePath, isTouchDevice } from './utils.js?v=2026081427';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081427';
+import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081427';
+import { CZ_CARD_BGS } from './cz-content.js?v=2026081427';
 
 // 精神词列表复用 cardgen 的 SPIRITS（静态 import 恒为数组，无需兜底副本）
 const CZ_CARD_SPIRITS = CZ_SPIRITS;
@@ -24,6 +24,7 @@ let _czCardBg = 0;
 let _czCardSpirit = 0;
 let _czCardDataUrl = null;
 let _czCardGenTimer = null;  // 生成中的背景图超时句柄（弹窗关闭时清除，防残留回调）
+let _czCardGen = 0;  // 生成代际：弹窗重开后旧的 in-flight 图片结果作废
 
 function buildCardModal() {
   if (!czCardBgs || !czCardSpirits) return;
@@ -59,6 +60,7 @@ function buildCardModal() {
 
 export function openCardModal() {
   if (!czCardModal) return;
+  _czCardGen++;  // 代际递增：重开后旧请求产物作废
   buildCardModal();
   czCardModal.classList.add('open');
   czCardModal.setAttribute('aria-hidden', 'false');
@@ -78,7 +80,8 @@ export function closeCardModal() {
   if (czCardPreviewImg) czCardPreviewImg.removeAttribute('src');
 }
 
-export function generateLongMarchCard() {
+function generateLongMarchCard() {
+  const gen = _czCardGen;  // 捕获本次生成的代际，供 onload/onerror 判别是否已重开
   const genBtn = $('#cz-card-gen');
   if (genBtn && genBtn.disabled) return;
   if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '正在盖章…'; }
@@ -92,6 +95,7 @@ export function generateLongMarchCard() {
     if (genBtn && genBtn.disabled) { resetBtn(); showToast('背景图加载超时，请重试'); }
   }, 8000);
   img.onload = () => {
+    if (gen !== _czCardGen) return;  // 弹窗已重开：旧 in-flight 图片不得碰共享状态（timer/dataUrl/按钮）
     clearTimeout(_czCardGenTimer);
     _czCardGenTimer = null;
     try {
@@ -114,15 +118,20 @@ export function generateLongMarchCard() {
     }
     resetBtn();
   };
-  img.onerror = () => { clearTimeout(_czCardGenTimer); _czCardGenTimer = null; _czCardDataUrl = null; resetBtn(); showToast('背景图加载失败'); };
+  img.onerror = () => {
+    if (gen !== _czCardGen) return;  // 重开后的旧请求不碰共享状态
+    clearTimeout(_czCardGenTimer); _czCardGenTimer = null; _czCardDataUrl = null; resetBtn();
+    if (czCardModal && !czCardModal.classList.contains('open')) return;  // 弹窗已关不弹无意义 toast
+    showToast('背景图加载失败');
+  };
   img.src = getBasePath() + bg.src;
 }
 
-export function downloadLongMarchCard() {
+function downloadLongMarchCard() {
   downloadDataUrl(_czCardDataUrl, '长征纪念卡_' + Date.now() + '.png');
 }
 
-export function shareLongMarchCard() {
+function shareLongMarchCard() {
   shareDataUrl(_czCardDataUrl, '长征纪念卡.png', '长征纪念卡', '我走完了二万五千里长征');
 }
 

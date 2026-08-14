@@ -6,7 +6,7 @@
      setMoodBridge（注册 mood 回调，setActive 调用）
    ============================================================ */
 
-import { STATIONS } from './cz-stations.js?v=2026081320';
+import { STATIONS } from './cz-stations.js?v=2026081427';
 
 export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, getLastActiveT, setLastActiveT, setMoodBridge }) {
   if (getReduceMotion()) return;
@@ -153,6 +153,8 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
   function loop(t) {
     atmosRafId = requestAnimationFrame(loop);
     const dt = Math.min(60, t - lastT); lastT = t;
+    // 运行期系统开启 reduced-motion：立即暂停粒子（getReduceMotion 由 longmarch 动态注入）
+    if (getReduceMotion && getReduceMotion()) { pause(); return; }
     if (document.hidden) { pause(); return; }
     const idleMs = t - (getLastActiveT() || 0);
     if (idleMs > 4500 && parts.length) {
@@ -173,13 +175,14 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
         p.y += p.vy - 0.15 * Math.sin(p.flick);
         const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
         if (alpha > 0.02) {
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.5);
-          grad.addColorStop(0, `hsla(${p.hue},100%,75%,${alpha * 0.95})`);
-          grad.addColorStop(0.35, `hsla(${p.hue},100%,55%,${alpha * 0.45})`);
-          grad.addColorStop(1, `hsla(${p.hue},100%,50%,0)`);
-          ctx.fillStyle = grad;
+          // 双同心圆替代径向渐变：避免每帧每粒子 createRadialGradient 的开销，视觉近似发光
+          ctx.fillStyle = `hsla(${p.hue},100%,75%,${alpha * 0.95})`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `hsla(${p.hue},100%,55%,${alpha * 0.35})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 2.6, 0, Math.PI * 2);
           ctx.fill();
         }
         if (p.life > p.maxLife || p.y < -10) dead = true;
@@ -248,13 +251,14 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
           const a1 = alpha * 0.95;
           const a2 = alpha * 0.45;
           const sparkM = 0.65 + 0.35 * Math.sin(p.sparkle);
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
-          grad.addColorStop(0, `hsla(48,100%,82%,${alpha * 0.9})`);
-          grad.addColorStop(0.4, `hsla(46,100%,62%,${a2})`);
-          grad.addColorStop(1, `hsla(44,100%,55%,0)`);
-          ctx.fillStyle = grad;
+          // 双同心圆替代径向渐变（每帧每粒子 createRadialGradient 开销大）
+          ctx.fillStyle = `hsla(48,100%,82%,${alpha * 0.9})`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.r * 2.6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `hsla(46,100%,62%,${a2})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 1.2, 0, Math.PI * 2);
           ctx.fill();
           ctx.fillStyle = `hsla(52,100%,${Math.round(70 + sparkM * 22)}%,${a1})`;
           ctx.save();
@@ -293,4 +297,8 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
   window.addEventListener('scroll', wake, { passive: true });
   window.addEventListener('pointerdown', wake, { passive: true });
   window.addEventListener('wheel', wake, { passive: true });
+  // 运行期切换 reduced-motion：开启→暂停，关闭→恢复（初始 reduce 用户已在入口 return）
+  const reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const onReduceChange = (e) => { if (e.matches) pause(); else resume(); };
+  if (typeof reduceMQ.addEventListener === 'function') reduceMQ.addEventListener('change', onReduceChange);
 }

@@ -3,10 +3,10 @@
    依赖：cz-stations(STATIONS) / cz-content(RELIC_MAP) / focus-trap / ui / cz-card-modal
    ============================================================ */
 
-import { $, onOverlayClick } from './ui.js?v=2026081320';
-import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081320';
-import { STATIONS } from './cz-stations.js?v=2026081320';
-import { RELIC_MAP } from './cz-content.js?v=2026081320';
+import { $, onOverlayClick } from './ui.js?v=2026081427';
+import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081427';
+import { STATIONS } from './cz-stations.js?v=2026081427';
+import { RELIC_MAP } from './cz-content.js?v=2026081427';
 
 /* ---------- 文物详情弹窗 ---------- */
 const relicModal = $('#cz-relic-modal');
@@ -16,6 +16,8 @@ const relicStoryEl = $('#cz-relic-story');
 const relicStationEl = $('#cz-relic-station');
 
 export function openRelicDetail(stationId) {
+  // 幂等：已打开时快速重入（连点/多站触发）不重复压 body 锁与 focus-trap
+  if (relicModal && relicModal.classList.contains('show')) return;
   const s = STATIONS[stationId - 1];
   const relic = RELIC_MAP[s && s.id];
   if (!s || !relic || !relicModal) return;
@@ -41,7 +43,7 @@ export function closeRelic() {
 const completeOverlay = $('#cz-complete');
 
 export function showComplete() {
-  if (!completeOverlay) return;
+  if (!completeOverlay || completeOverlay.classList.contains('show')) return;
   completeOverlay.classList.add('show');
   completeOverlay.setAttribute('aria-hidden', 'false');
   lockBodyScroll();
