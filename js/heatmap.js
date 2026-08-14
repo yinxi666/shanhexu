@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081429';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081429';
-import { ASSET_VERSION } from './version.js?v=2026081429';
+import { getBasePath } from './utils.js?v=2026081430';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081430';
+import { ASSET_VERSION } from './version.js?v=2026081430';
 
 /* 读取 CSS 令牌（含深色覆盖后的计算值），供 ECharts/SVG 主题适配 */
 function cssVar(name, fallback) {

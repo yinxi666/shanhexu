@@ -172,22 +172,21 @@ main:not(#cz-main) {
    卡默认 3D 隐藏态，grid 可见后逐张翻入（nth-child transition-delay stagger）
    ============================================================ */
 .feature-grid .feature-card {
-  opacity: 0;
-  transform: perspective(700px) rotateY(16deg) translateZ(-34px);
+  /* 卡始终可见（不设 opacity:0，避免依赖滚动触发导致卡片区空白）；
+     滚动进入时从 8° 3D 倾斜翻正，保留"下滑有感觉"的滚动驱动感 */
+  transform: perspective(800px) rotateY(8deg);
   /* duration 走令牌刻度（--duration-normal=0.6s）；stagger 用 transition-delay 单独属性（不受 duration 校验） */
-  transition: opacity var(--duration-normal) var(--ease-cinematic), transform var(--duration-normal) var(--ease-cinematic);
-  will-change: transform, opacity;
+  transition: transform var(--duration-normal) var(--ease-cinematic);
+  will-change: transform;
 }
 .feature-grid.visible .feature-card {
-  opacity: 1;
-  transform: perspective(700px) rotateY(0deg) translateZ(0);
+  transform: perspective(800px) rotateY(0deg);
 }
 .feature-grid .feature-card:nth-child(2) { transition-delay: 0.08s; }
 .feature-grid .feature-card:nth-child(3) { transition-delay: 0.16s; }
 .feature-grid .feature-card:nth-child(4) { transition-delay: 0.24s; }
 @media (prefers-reduced-motion: reduce) {
   .feature-grid .feature-card {
-    opacity: 1;
     transform: none;
   }
 }

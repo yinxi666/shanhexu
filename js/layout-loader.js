@@ -4,8 +4,8 @@
    注意：导航高亮由 setActiveNav() 在注入后统一处理（含 aria-current）
    ============================================================ */
 
-import { ASSET_VERSION } from './version.js?v=2026081429';
-import { getBasePath } from './utils.js?v=2026081429';
+import { ASSET_VERSION } from './version.js?v=2026081430';
+import { getBasePath } from './utils.js?v=2026081430';
 
 function resolveTemplate(name, base) {
   // 模板也带版本号缓存破击，避免修改 header/footer 后线上最长 10 分钟不生效

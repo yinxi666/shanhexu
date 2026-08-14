@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081429';
-import { $, $$ } from './ui.js?v=2026081429';
-import { icon } from './icons.js?v=2026081429';
-import { generateReply } from './chat-engine.js?v=2026081429';
+import { getBasePath, safeStorage } from './utils.js?v=2026081430';
+import { $, $$ } from './ui.js?v=2026081430';
+import { icon } from './icons.js?v=2026081430';
+import { generateReply } from './chat-engine.js?v=2026081430';
 
 /* 相对路径重定向到当前页 base：聊天历史跨页恢复时，首页生成的 'pages/…' 在 /pages/ 子页会解析成
    /pages/pages/… 404；把开头 '../' 剥成根相对再拼当前 base（http/锚点/根绝对 原样保留） */

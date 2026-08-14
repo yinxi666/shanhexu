@@ -3,7 +3,7 @@
    原 index.html 内联脚本提取，职责：首页 entrance-canvas 全屏叙事动画
    ============================================================ */
 
-import { resolveAssetPath } from './utils.js?v=2026081429';
+import { resolveAssetPath } from './utils.js?v=2026081430';
 
 export function initEntranceAnimation() {
   // sessionStorage 访问防护（Safari 隐私模式等会抛异常，避免开场黑屏卡死）
