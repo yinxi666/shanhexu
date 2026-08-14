@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081320';
-import { $, $$ } from './ui.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import { generateReply } from './chat-engine.js?v=2026081320';
+import { getBasePath, safeStorage } from './utils.js?v=2026081427';
+import { $, $$ } from './ui.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import { generateReply } from './chat-engine.js?v=2026081427';
 
 /* 相对路径重定向到当前页 base：聊天历史跨页恢复时，首页生成的 'pages/…' 在 /pages/ 子页会解析成
    /pages/pages/… 404；把开头 '../' 剥成根相对再拼当前 base（http/锚点/根绝对 原样保留） */
@@ -46,6 +46,8 @@ function sanitizeBotHtml(html) {
           if (!safe) { node.removeAttribute(attr.name); return; }
           // 白名单通过后，把相对路径 rebase 到当前页 base（防跨页恢复 404）
           node.setAttribute(attr.name, rebaseUrl(attr.value));
+          // 链接强制 rel=noopener：防 target="_blank" 反向 tabnabbing
+          if (name === 'href' && node.tagName === 'A') node.setAttribute('rel', 'noopener');
         }
       });
       clean(node);
@@ -189,13 +191,17 @@ function initChatWidget() {
     const q = _replyQueue.shift();
     const thinkingId = appendMsg('bot', '<span class="ai-thinking"><span class="ai-thinking-icon">✦</span><span class="ai-thinking-text">正在检索知识库</span><span class="ai-thinking-dots"><span>.</span><span>.</span><span>.</span></span></span>');
     setTimeout(() => {
-      const reply = generateReply(q);
-      const thinkingEl = document.getElementById(thinkingId);
-      if (thinkingEl) thinkingEl.remove();
-      appendMsg('bot', reply);
-      saveChatHistory();
-      _replying = false;
-      pumpReplies();
+      try {
+        const reply = generateReply(q);
+        const thinkingEl = document.getElementById(thinkingId);
+        if (thinkingEl) thinkingEl.remove();
+        appendMsg('bot', reply);
+        saveChatHistory();
+      } finally {
+        // 单次回复异常（如存储不可用）也必须复位队列标志，否则整个对话队列永久卡死
+        _replying = false;
+        pumpReplies();
+      }
     }, 700 + Math.random() * 600);
   }
 

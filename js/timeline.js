@@ -4,11 +4,11 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import { getVenues } from './venue-store.js?v=2026081320';
-import { findVenueByName } from './data.js?v=2026081320';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081320';
+import { getBasePath, escapeHtml } from './utils.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import { getVenues } from './venue-store.js?v=2026081427';
+import { findVenueByName } from './data.js?v=2026081427';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081427';
 
 function initTimeline() {
   // 首页 guard 已在 homepage.js initHomepageInnovation 统一执行，此处不重复
@@ -37,18 +37,23 @@ function initTimeline() {
     const ev = events[year];
     if (!ev) { detail.classList.add('is-hidden'); return; }
 
-    nodes.forEach(function (n) { n.classList.toggle('active', n.dataset.year === year); });
+    nodes.forEach(function (n) {
+      n.classList.toggle('active', n.dataset.year === year);
+      n.setAttribute('aria-current', n.dataset.year === year ? 'true' : 'false');
+    });
+    // 详情面板内容动态更新：暴露为 live region 供读屏播报
+    if (!detail.hasAttribute('role')) { detail.setAttribute('role', 'status'); detail.setAttribute('aria-live', 'polite'); }
 
     const bp = getBasePath();
     const venues = getVenues();
     const venueLinks = ev.venues.map(function (vn) {
       // 复用 data.js 的单一场馆匹配器，避免时间线与聊天各持一套匹配逻辑
       const v = findVenueByName(venues, vn);
-      if (!v) return '<span class="tl-venue-link is-muted">' + icon('building') + ' ' + vn + '</span>';
-      return '<a class="tl-venue-link" href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">' + icon('building') + ' ' + vn + '</a>';
+      if (!v) return '<span class="tl-venue-link is-muted">' + icon('building') + ' ' + escapeHtml(vn) + '</span>';
+      return '<a class="tl-venue-link" href="' + bp + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">' + icon('building') + ' ' + escapeHtml(vn) + '</a>';
     }).join('');
 
-    detail.innerHTML = '<h3>' + ev.title + '</h3><p>' + ev.desc + '</p><div class="tl-venues">' + venueLinks + '</div>';
+    detail.innerHTML = '<h3>' + escapeHtml(ev.title) + '</h3><p>' + escapeHtml(ev.desc) + '</p><div class="tl-venues">' + venueLinks + '</div>';
     detail.classList.remove('is-hidden');
   }
 

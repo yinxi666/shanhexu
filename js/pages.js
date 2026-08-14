@@ -5,15 +5,18 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081320';
-import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081320';
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081320';
-import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081320';
-import { initBgMusic } from './music.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import { initHomeHeatmap } from './heatmap.js?v=2026081320';
-import { createGuideMap } from './guide-map.js?v=2026081320';
-import { isFavorite } from './favorites.js?v=2026081320';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081427';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081427';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081427';
+import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081427';
+import { initBgMusic } from './music.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import { initHomeHeatmap } from './heatmap.js?v=2026081427';
+import { createGuideMap } from './guide-map.js?v=2026081427';
+import { isFavorite } from './favorites.js?v=2026081427';
+
+/* 导览页控制器暴露给 action-delegate 的私有动作（委托只分派，不碰页面闭包状态） */
+let _guideCtx = null;
 
 /* ---------- 分页公共助手（四个页面控制器复用，消除页码解析与跳转回调的四处拷贝） ---------- */
 function normalizePage(raw, totalPages) {
@@ -71,6 +74,7 @@ function likePractice(el, id) {
   if (isPracticeLiked(id)) {
     // 已赞过：确保高亮态存在（防弹窗新渲染的副本未带 active）
     el.classList.add('active');
+    el.setAttribute('aria-pressed', 'true');
     el.style.transform = 'scale(0.9)';
     setTimeout(() => el.style.transform = '', 150);
     return;
@@ -86,12 +90,14 @@ function likePractice(el, id) {
   countEl.textContent = newCount;
   // 已赞保持高亮：红心填充 + 红色药丸
   el.classList.add('active');
+  el.setAttribute('aria-pressed', 'true');
   // 同步更新页面上相同实践的所有点赞数（卡片+弹窗；统一用 data-action 选择器覆盖两种类名）
   const allLikes = document.querySelectorAll('[data-action="like-practice"]');
   allLikes.forEach(function (like) {
     // 通过 data-id 精确匹配，避免 practice-1 与 practice-10 子串误匹配
     if (like.dataset.id === id) {
       like.classList.add('active');
+      like.setAttribute('aria-pressed', 'true');
       const c = like.querySelector('.like-count');
       if (c && c !== countEl) c.textContent = newCount;
     }
@@ -153,16 +159,15 @@ function initMessageForm() {
       isDemo: false
     };
 
-    // 保存到 sessionStorage
-    const stored = safeStorage.get('redguide_messages', [], sessionStorage);
-    if (Array.isArray(stored)) {
-      stored.unshift(newMsg);
-      const wrote = safeStorage.set('redguide_messages', stored.slice(0, 50), sessionStorage);
-      if (!wrote) {
-        // 写失败：不渲染成功 UI（与 likePractice/favorites 的写失败契约一致）
-        showToast('留言保存失败，请检查浏览器存储');
-        return;
-      }
+    // 保存到 sessionStorage（被篡改为非数组时按空数组重建，避免静默丢消息却显示成功）
+    const rawStored = safeStorage.get('redguide_messages', [], sessionStorage);
+    const stored = Array.isArray(rawStored) ? rawStored : [];
+    stored.unshift(newMsg);
+    const wrote = safeStorage.set('redguide_messages', stored.slice(0, 50), sessionStorage);
+    if (!wrote) {
+      // 写失败：不渲染成功 UI（与 likePractice/favorites 的写失败契约一致）
+      showToast('留言保存失败，请检查浏览器存储');
+      return;
     }
 
     // 印章动画
@@ -383,22 +388,22 @@ async function initGuidePage() {
     }
   });
 
-  // 移动端切换按钮
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', async function () {
-      mapVisible = !mapVisible;
+  // 移动端切换按钮（经 data-action 委托分派：guideToggleViewFromDelegate → 本函数）
+  async function toggleGuideView() {
+    mapVisible = !mapVisible;
+    if (toggleBtn) {
       toggleBtn.innerHTML = mapVisible ? icon('list') + ' 列表视图' : icon('map') + ' 地图视图';
       toggleBtn.classList.toggle('map-active', mapVisible);
-      if (guideMapEl) guideMapEl.classList.toggle('is-hidden', !mapVisible);
-      if (guideList) guideList.classList.toggle('is-hidden', mapVisible);
-      const pagContainer = document.getElementById('pagination-container');
-      if (pagContainer) pagContainer.classList.toggle('is-hidden', mapVisible);
-      if (mapVisible) {
-        await guideMapCtrl.initMap();
-        guideMapCtrl.invalidateSize();
-        doRender(false, true);
-      }
-    });
+    }
+    if (guideMapEl) guideMapEl.classList.toggle('is-hidden', !mapVisible);
+    if (guideList) guideList.classList.toggle('is-hidden', mapVisible);
+    const pagContainer = document.getElementById('pagination-container');
+    if (pagContainer) pagContainer.classList.toggle('is-hidden', mapVisible);
+    if (mapVisible) {
+      await guideMapCtrl.initMap();
+      guideMapCtrl.invalidateSize();
+      doRender(false, true);
+    }
   }
 
   // ---- 渲染函数（支持 URL 同步） ----
@@ -454,10 +459,7 @@ async function initGuidePage() {
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') render(true);
     });
-    const guideSearchBtn = $('#guide-search-btn');
-    if (guideSearchBtn) {
-      guideSearchBtn.addEventListener('click', function () { render(true); });
-    }
+    // 搜索按钮经 data-action 委托分派（guideSearchFromDelegate → _guideCtx.render）
   }
   if (provinceSelect) provinceSelect.addEventListener('change', function () { render(true); });
   if (categorySelect) categorySelect.addEventListener('change', function () { render(true); });
@@ -469,6 +471,8 @@ async function initGuidePage() {
   render();
   // 首次加载带 ?page>1 时锚定到列表区（后续筛选/搜索渲染不重复滚动）
   anchorToListIfPaged('page');
+  // 暴露私有动作给 action-delegate 分派（搜索 / 切换地图视图）
+  _guideCtx = { render, toggleGuideView };
 }
 
 // 详情页
@@ -528,7 +532,7 @@ async function initDetailPage() {
   const historyText = detail?.history || `${venue.name}是${venue.province}具有重要历史意义的红色文化地标。这里记录着中国共产党和中国人民在革命、建设和改革各个历史时期的光辉足迹，是传承红色基因、弘扬革命精神的重要场所。场馆通过丰富的文物、图片、史料和现代化展陈手段，生动再现了那段波澜壮阔的历史。`;
   const educationText = detail?.education || `作为爱国主义教育基地和红色旅游经典景区，${venue.name}在开展党史学习教育、革命传统教育和爱国主义教育方面发挥着重要作用。每一位到访者都能在这里汲取精神力量，坚定理想信念。`;
 
-  // 详情主图（详情数据 gallery 与主图同源，恒为单图，无需轮播）
+  // 详情主图（单主图；图集能力曾为数据 gallery 字段启用，现无数据源使用，已移除避免死代码）
   const detailImageHtml = `
       <div class="detail-photo">
         <img class="detail-photo-img" src="${escapeAttr(safeAssetSrc(venue.image, bp))}" alt="${escapeHtml(venue.name)} 图片" loading="lazy" data-fallback="${escapeAttr(fb)}">
@@ -617,9 +621,9 @@ async function initPolicyPage() {
 
   let policies;
   try { policies = await loadJSON('data/policies.json'); } catch (e) { policies = []; }
-  // 按日期从早到晚排列（拷贝排序，避免原地修改 loadJSON 缓存数组）
+  // 按日期从晚到早排列（最新政策在前，符合资讯阅读习惯；拷贝排序避免原地修改 loadJSON 缓存数组）
   policies = [...policies].sort(function (a, b) {
-    return (a.publishedAt || '').localeCompare(b.publishedAt || '');
+    return (b.publishedAt || '').localeCompare(a.publishedAt || '');
   });
 
   const bp = getBasePath();
@@ -719,4 +723,8 @@ async function autoInit() {
   }
 }
 
-export { autoInit, likePractice, copyShareLinkFromDetail, resetMessageForm };
+/* action-delegate 分派入口：导览页搜索 / 地图视图切换（_guideCtx 为空时 no-op，非导览页不报错） */
+function guideSearchFromDelegate() { if (_guideCtx) _guideCtx.render(true, false); }
+function guideToggleViewFromDelegate() { if (_guideCtx) _guideCtx.toggleGuideView(); }
+
+export { autoInit, likePractice, copyShareLinkFromDetail, resetMessageForm, guideSearchFromDelegate, guideToggleViewFromDelegate };

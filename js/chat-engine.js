@@ -5,11 +5,11 @@
    说明：与 chat.js（悬浮 UI 组件）分离，本模块可在无 DOM 环境直接单元测试。
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081320';
-import * as RedData from './data.js?v=2026081320';
-import { getVenues } from './venue-store.js?v=2026081320';
-import { knowledge } from './chat-knowledge.js?v=2026081320';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081320';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081427';
+import * as RedData from './data.js?v=2026081427';
+import { getVenues } from './venue-store.js?v=2026081427';
+import { knowledge } from './chat-knowledge.js?v=2026081427';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081427';
 
 export function generateReply(query) {
   const q = query.trim();
@@ -27,9 +27,12 @@ export function generateReply(query) {
 
   // ===== 区域查询预处理：数据驱动提取地区名，避免 .{2,4} 通配吞疑问词/动词 =====
   const region = matchRegion(q);
-  if (region
-    && /(?:有哪些|几个|多少|什么|搜集|收录|覆盖).*(?:场馆|红色|景点)|(?:场馆|红色|景点).*(?:有哪些|几个|多少|什么|搜集|收录|覆盖)/.test(q)
-    && !/(?:纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔|精神)/.test(q)) {
+  // 意图词含馆名后缀：让「遵义有哪些纪念馆」这类"统计某地区某类场馆"也走区域分支，而非落入场馆搜索失败
+  const regionIntent = /(?:有哪些|几个|多少|什么|搜集|收录|覆盖|吗).*(?:场馆|红色|景点|纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔)|(?:场馆|红色|景点).*(?:有哪些|几个|多少|什么|搜集|收录|覆盖)/.test(q);
+  const venueLike = /(?:纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔|精神)/.test(q);
+  // 含馆名类词但无统计意图（如「遵义会议会址在哪里」）不走区域统计；
+  // 带统计词（如「遵义有哪些纪念馆」）即使含馆名后缀也应走区域，否则被推到失败路径
+  if (region && regionIntent && !(venueLike && !/(?:有哪些|几个|多少|什么)/.test(q))) {
     return searchByRegion(region);
   }
 
@@ -46,16 +49,18 @@ export function generateReply(query) {
     // 统计类
     { re: /(?:有多少|几个|多少).*(?:场馆|红色|收录)|(?:场馆|红色).*(?:有多少|几个|多少|统计)/, handler: () => getStats() },
     { re: /(?:有哪些|哪些|什么).*(?:省份|省|地区)|省份分布/, handler: () => getProvinceList() },
-    { re: /(?:有哪些|哪些|什么).*(?:类别|类型|分类|主题)/, handler: () => getCategories() },
+    { re: /(?:有哪些|哪些|什么).*(?:类别|类型|分类|主题)|(?:类别|类型|分类|主题).*(?:有哪些|哪些|什么)/, handler: () => getCategories() },
     // 场馆介绍
     { re: /(?:介绍|了解|说说|讲讲|查一下|查询|查看)(?:一下|下)?(.{2,})/, handler: (m) => searchVenue(m[1]) },
     { re: /(?:怎么去|怎么走|如何去|怎么到|在哪里|在哪儿|在哪)\s*(.{2,})/, handler: (m) => searchVenueLocation(m[1]) },
     { re: /(.{2,})(?:在哪里|怎么去|在哪|地址|位置|交通|怎么走)/, handler: (m) => searchVenueLocation(m[1]) },
     { re: /(.{3,})(?:纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔)/, handler: (m) => searchVenue(m[0]) },
-    // 类别查询
-    { re: /(?:有哪些|什么|哪些).*(.{1,4})(?:类型|类别|主题|式).*(?:场馆|纪念馆)/, handler: (m) => searchByCategory(m[1]) },
-    // 对比
-    { re: /(?:比较|对比|区别|哪个更好).*(.{2,})(?:和|与|vs)(.{2,})/, handler: (m) => compareVenues(m[1], m[2]) },
+    // 类别查询（疑问词在前后皆可；两分支都要捕获类别词，否则第二分支命中时 m[1]=undefined→searchByCategory('') 会列出全部场馆）
+    { re: /(?:有哪些|什么|哪些).*(.{1,4})(?:类型|类别|主题|式).*(?:场馆|纪念馆)|(.{1,4})(?:类型|类别|主题|式).*(?:有哪些|什么|哪些).*(?:场馆|纪念馆)/, handler: (m) => { const cat = (m[1] || m[2] || '').trim(); return cat ? searchByCategory(cat) : getCategories(); } },
+    // 具体类别列举：「革命纪念馆有哪些」（前缀 1-3 字不满足上面场馆后缀模式的场景）
+    { re: /(.{1,3})(?:纪念馆|博物馆|会址|故居|旧址|陵园|纪念园|陈列馆|展览馆|纪念塔)(?:有哪些|几个|多少|什么)/, handler: (m) => searchByCategory(m[0].replace(/(有哪些|几个|多少|什么)$/, '')) },
+    // 对比（.*? 非贪心，避免左操作数被吞成"和"前 2 字的残串）
+    { re: /(?:比较|对比|区别|哪个更好).*?([^和与]{2,})(?:和|与|vs)([^和与]{2,})/, handler: (m) => compareVenues(m[1], m[2]) },
     // 最近/周边
     { re: /(.{2,})(?:附近|周边|周围|旁边|临近).*(?:有什么|有哪些|场馆)/, handler: (m) => searchNearby(m[1]) },
     // 问候/帮助
@@ -213,7 +218,7 @@ function searchByCategory(cat) {
   const found = getVenues().filter(v => v.category && v.category.includes(cat));
   if (found.length === 0) {
     const allCats = getCategoriesRaw();
-    return `没找到「${escapeHtml(cat)}」类别。当前场馆类别有：${allCats.join('、')}<br><br><i> 输入类别名查看该类别下的场馆</i>`;
+    return `没找到「${escapeHtml(cat)}」类别。当前场馆类别有：${allCats.map(escapeHtml).join('、')}<br><br><i> 输入类别名查看该类别下的场馆</i>`;
   }
   return ` <b>${escapeHtml(cat)}</b> 类场馆共 <b>${found.length}</b> 个：<br><br>` +
     found.map(v => `• <b>${escapeHtml(v.name)}</b> — ${escapeHtml(v.province)} ${escapeHtml(v.city || '')}`).join('<br>') +

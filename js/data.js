@@ -4,8 +4,8 @@
    约束：只依赖 utils(getBasePath) 与 version；不操作 DOM
    ============================================================ */
 
-import { getBasePath, stripProvinceSuffix, FALLBACK_IMAGE } from './utils.js?v=2026081320';
-import { ASSET_VERSION } from './version.js?v=2026081320';
+import { getBasePath, stripProvinceSuffix, FALLBACK_IMAGE } from './utils.js?v=2026081427';
+import { ASSET_VERSION } from './version.js?v=2026081427';
 
 /* ---- 数据加载（内存级缓存，避免重复 fetch） ---- */
 const __JSON_CACHE = new Map();  // key: filename → value: Promise<any>
@@ -68,6 +68,8 @@ async function loadAllVenues() {
     coreAliases.forEach(a => coreNames.add(a));
     const merged = [...core];
 
+    // 官方核验状态枚举（5 种视为已核验），循环外定义避免每次迭代重复分配
+    const VERIFIED = ['已核验', '已匹配', '已匹配官方入口', '已核验官方入口', '名称已调整'];
     for (const ext of (extended || [])) {
       const name = ext.standardName || ext.name;
       if (coreNames.has(name)) continue;
@@ -77,8 +79,6 @@ async function loadAllVenues() {
       const meta = (extMeta && extMeta[name]) ? extMeta[name] : {};
       // id 基于省份生成（候选按省唯一），而非依赖合并顺序——避免数据增删/重排时已持久化收藏与分享链接错位
       const shortProvince = stripProvinceSuffix(ext.province);
-      // 官方核验状态枚举共 5 种，全部视为已核验；其余（未知/缺省）才提示进一步核验
-      const VERIFIED = ['已核验', '已匹配', '已匹配官方入口', '已核验官方入口', '名称已调整'];
       merged.push({
         id: 'ext-' + shortProvince,
         name: displayName,
@@ -105,7 +105,8 @@ async function loadAllVenues() {
     _lastMerged = merged;
     // 只有核心 + 子数据全部成功才固化缓存；任一子加载失败（降级结果仍返回供首屏）不缓存，
     // 使 loadAliases/loadExtMeta/loadVenueDetails 的失败重试钩子真正可达（否则瞬时 404 会固化整个会话）
-    if (merged.length > 0 && extendedOk && extMetaOk && aliasesOk && detailsOk) {
+    // merged 必非空（核心场馆已在上方门禁校验），无需再查长度
+    if (extendedOk && extMetaOk && aliasesOk && detailsOk) {
       _venuesCache = merged;
     } else {
       _venuesPromise = null;  // 允许下次重试

@@ -4,28 +4,29 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail, showToast } from './ui.js?v=2026081320';
-import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081320';
-import { likePractice, copyShareLinkFromDetail, resetMessageForm } from './pages.js?v=2026081320';
-import { toggleFavorite } from './favorites.js?v=2026081320';
+import { goToDetail, showToast } from './ui.js?v=2026081427';
+import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081427';
+import { likePractice, copyShareLinkFromDetail, resetMessageForm, guideSearchFromDelegate, guideToggleViewFromDelegate } from './pages.js?v=2026081427';
+import { toggleFavorite } from './favorites.js?v=2026081427';
 
-import { openChat } from './chat.js?v=2026081320';
-import { openQuiz } from './quiz.js?v=2026081320';
-import { toggleDarkMode } from './darkmode.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
-import * as RedCardGen from './cardgen.js?v=2026081320';
+import { openChat } from './chat.js?v=2026081427';
+import { openQuiz } from './quiz.js?v=2026081427';
+import { toggleDarkMode } from './darkmode.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
+import * as RedCardGen from './cardgen.js?v=2026081427';
 
 export function initActionDelegate() {
   document.addEventListener('click', handleAction);
   // 键盘可达：对 div 类 data-action 交互区(场馆卡/实践卡/时间线节点等)在 Enter/Space 时触发同一动作
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    if (e.repeat) return; // 长按不重复触发，避免非幂等动作被执行多次
     const t = e.target;
     // 焦点在原生交互元素上时交给浏览器默认行为（不劫持内嵌按钮/链接）
     if (t && /^(BUTTON|A|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
     const el = t && t.closest ? t.closest('[data-action]') : null;
     if (!el) return;
+    // 交互区长按：不重复触发动作（避免非幂等动作多次执行），但仍需 preventDefault 阻止页面随 Space 滚动
+    if (e.repeat) { e.preventDefault(); return; }
     e.preventDefault();
     handleAction(e);
   });
@@ -34,9 +35,6 @@ export function initActionDelegate() {
 function handleAction(e) {
   const actionEl = e.target.closest('[data-action]');
   if (!actionEl) return;
-
-  // 阻止冒泡，保持与原 onclick 行为一致
-  e.stopPropagation();
 
   const action = actionEl.dataset.action;
 
@@ -105,10 +103,20 @@ function handleAction(e) {
       resetMessageForm();  // 读 #message-form-card/#msg-form 的实现在 pages.js（页面归属方）
       break;
 
-    default:
-      // 未知动作不拦截，让默认行为继续
+    case 'guide-search':
+      guideSearchFromDelegate();  // 导览页搜索（读 #search-input 的实现在 pages.js 控制器闭包）
       break;
+
+    case 'guide-toggle-view':
+      guideToggleViewFromDelegate();  // 导览页移动端切换地图/列表视图
+      break;
+
+    default:
+      // 未知动作不拦截、不 stopPropagation，让默认行为继续
+      return;
   }
+  // 已知动作：阻止冒泡，保持与原 onclick 语义一致（未知动作不吞掉其他 document 级监听器）
+  e.stopPropagation();
 }
 
 function handleToggleFavorite(btn) {

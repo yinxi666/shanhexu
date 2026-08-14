@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081320';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081320';
-import { ASSET_VERSION } from './version.js?v=2026081320';
+import { getBasePath } from './utils.js?v=2026081427';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081427';
+import { ASSET_VERSION } from './version.js?v=2026081427';
 
 /* 读取 CSS 令牌（含深色覆盖后的计算值），供 ECharts/SVG 主题适配 */
 function cssVar(name, fallback) {
@@ -37,9 +37,12 @@ function heatmapTheme() {
 let _chinaMapPromise = null;
 function loadChinaMap() {
   if (!_chinaMapPromise) {
-    _chinaMapPromise = fetch(getBasePath() + 'data/china.json?v=' + ASSET_VERSION)
-      .then(function (r) { return r.json(); })
-      .catch(function (e) { _chinaMapPromise = null; throw e; });
+    // 10s 超时：请求挂起时中止并允许重试，避免热力图永久空白
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    _chinaMapPromise = fetch(getBasePath() + 'data/china.json?v=' + ASSET_VERSION, { signal: ctrl.signal })
+      .then(function (r) { clearTimeout(timer); return r.json(); })
+      .catch(function (e) { clearTimeout(timer); _chinaMapPromise = null; throw e; });
   }
   return _chinaMapPromise;
 }
@@ -95,13 +98,20 @@ async function initECharts(container, provinceData) {
 
     // 深色/浅色切换时重渲染（ECharts 不会自动响应 html.dark 类）；
     // 保留用户当前的缩放/中心，避免每次切换深色把视图重置回默认
+    // rAF 合并同帧内的多次 class 变化，避免每次 class 改动都全量重渲染 option
+    let _moTicking = false;
     const mo = new MutationObserver(function () {
-      const c = echarts.getInstanceByDom(container);
-      if (!c) return;
-      const s0 = c.getOption().series && c.getOption().series[0];
-      applyHeatmapOption(c, chartData, provinceData, {
-        zoom: s0 && s0.zoom,
-        center: s0 && s0.center
+      if (_moTicking) return;
+      _moTicking = true;
+      requestAnimationFrame(function () {
+        _moTicking = false;
+        const c = echarts.getInstanceByDom(container);
+        if (!c) return;
+        const s0 = c.getOption().series && c.getOption().series[0];
+        applyHeatmapOption(c, chartData, provinceData, {
+          zoom: s0 && s0.zoom,
+          center: s0 && s0.center
+        });
       });
     });
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
@@ -226,9 +236,10 @@ function createSimpleHeatmap(container, provinceData) {
   let svgContent = '';
 
   for (const [shortName, pos] of Object.entries(provinceMap)) {
+    // provinceMap 键为短名（黑龙江），provinceData 键为全名（黑龙江省）——短名直查恒为 undefined，
+    // 一律经 fullNameMap[短名]→全名 累加（原 provinceData[shortName] 是永命中不了的分支）
     let count = 0;
-    if (provinceData[shortName]) count = provinceData[shortName];
-    else if (fullNameMap[shortName]) {
+    if (fullNameMap[shortName]) {
       fullNameMap[shortName].forEach(fn => {
         if (provinceData[fn]) count += provinceData[fn];
       });

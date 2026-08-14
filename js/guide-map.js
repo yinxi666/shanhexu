@@ -5,17 +5,23 @@
          以 <script defer> 静态加载（自托管 assets/leaflet/，window.L）
    ============================================================ */
 
-import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081320';
+import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081427';
 
 export function createGuideMap(mapContainer) {
   let leafletMap = null;
   let venueMarkerMap = {}; // venue.id → marker 映射
   let userMoved = false;   // 用户手动缩放/平移后，筛选不再强制 fitBounds 重置视口
 
+  let _LRetries = 0;
   async function initMap() {
     if (leafletMap) return;
     // guide.html 已通过 <script defer> 静态加载 Leaflet（同一 CDN），此处无需再动态注入兜底
-    if (!window.L || !mapContainer) return;
+    if (!mapContainer) return;
+    if (!window.L) {
+      // Leaflet 脚本尚未就绪：短延迟重试（脚本真正加载失败时不无限重试）
+      if (_LRetries < 5) { _LRetries += 1; setTimeout(initMap, 250); }
+      return;
+    }
     leafletMap = L.map(mapContainer, {
       center: [35, 110],
       zoom: 3.4,
@@ -28,8 +34,9 @@ export function createGuideMap(mapContainer) {
       maxZoom: 18,
       attribution: '© 高德地图'
     }).addTo(leafletMap);
-    // 用户主动缩放/平移后不再自动复位视口
-    leafletMap.on('zoomstart dragstart', () => { userMoved = true; });
+    // 仅真实用户交互（滚轮/触屏/拖拽）才标记 userMoved：程序化 fitBounds/setView 的事件无 originalEvent，
+    // 否则首次渲染的 fitBounds 会把 userMoved 永久置 true，导致此后筛选永不自动复位视口
+    leafletMap.on('zoomstart dragstart', (e) => { if (e.originalEvent) userMoved = true; });
   }
 
   // 容器尺寸变化（窗口 resize / 移动端切换显隐）后纠正 Leaflet 视口，防瓦片错位或空白
@@ -46,7 +53,7 @@ export function createGuideMap(mapContainer) {
   function makeIcon(highlight) {
     return L.divIcon({
       className: highlight ? 'red-star-marker marker-highlight' : 'red-star-marker',
-      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="' + (highlight ? '#e8a820' : '#b91c1c') + '" stroke="' + (highlight ? '#b91c1c' : '#7f1d1d') + '" stroke-width="' + (highlight ? '0.8' : '0.5') + '"/></svg><div class="rsm-shadow"></div></div>',
+      html: '<div class="rsm-inner"><svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 31,13 23,20 25,30 16,24 7,30 9,20 1,13 12,12" fill="' + (highlight ? 'var(--gold)' : 'var(--red)') + '" stroke="' + (highlight ? 'var(--red)' : 'var(--deep-red)') + '" stroke-width="' + (highlight ? '0.8' : '0.5') + '"/></svg><div class="rsm-shadow"></div></div>',
       iconSize: highlight ? [38, 45] : [32, 38],
       iconAnchor: highlight ? [19, 43] : [16, 36],
       popupAnchor: highlight ? [0, -43] : [0, -38]

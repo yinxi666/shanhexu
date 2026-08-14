@@ -5,8 +5,8 @@
    约束：只依赖 utils.js，被 pages/music/modals/cardgen/longmarch/action-delegate 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081320';
-import { icon } from './icons.js?v=2026081320';
+import { getBasePath } from './utils.js?v=2026081427';
+import { icon } from './icons.js?v=2026081427';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
@@ -69,7 +69,7 @@ function initBackToTop() {
   if (!btn) {
     btn = document.createElement('button');
     btn.className = 'back-to-top';
-    btn.innerHTML = '↑';
+    btn.innerHTML = icon('arrow-up');
     btn.setAttribute('aria-label', '返回顶部');
     btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     document.body.appendChild(btn);
@@ -101,7 +101,9 @@ function initCurtainTransition() {
     e.preventDefault();
     locked = true;
     curtain.classList.add('go');
-    setTimeout(function () { location.href = href; }, 450);
+    // reduced-motion 下帷幕无动画：不白等 450ms，立即导航
+    const waitMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450;
+    setTimeout(function () { location.href = href; }, waitMs);
   });
   window.addEventListener('pageshow', function () { locked = false; curtain.classList.remove('go'); });
 }
