@@ -15,18 +15,18 @@
   <meta property="og:url" content="https://yinxi666.github.io/shanhexu/">
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/">
-  <link rel="icon" type="image/png" href="favicon.png?v=2026081431">
+  <link rel="icon" type="image/png" href="favicon.png?v=2026081515">
   <link rel="manifest" href="manifest.json">
   <!-- 首图已在 DOM 中（.hero-bg-active），无需单独 preload；轮播图清单见 .cinematic-hero[data-hero-images] -->
   <title>赓续血脉・数绘红旅 — 红色文旅数字导览</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="css/base.css?v=2026081431">
-  <link rel="stylesheet" href="css/home.css?v=2026081431">
-  <link rel="stylesheet" href="css/components.css?v=2026081431">
-  <link rel="stylesheet" href="css/pages.css?v=2026081431">
-  <link rel="stylesheet" href="css/widgets.css?v=2026081431">
-  <link rel="stylesheet" href="css/effects.css?v=2026081431">
-  <link rel="stylesheet" href="css/dark.css?v=2026081431">
+  <link rel="stylesheet" href="css/base.css?v=2026081515">
+  <link rel="stylesheet" href="css/home.css?v=2026081515">
+  <link rel="stylesheet" href="css/components.css?v=2026081515">
+  <link rel="stylesheet" href="css/pages.css?v=2026081515">
+  <link rel="stylesheet" href="css/widgets.css?v=2026081515">
+  <link rel="stylesheet" href="css/effects.css?v=2026081515">
+  <link rel="stylesheet" href="css/dark.css?v=2026081515">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <style>
     html.entrance-active,
@@ -156,12 +156,14 @@
 
     <!-- ===== 红色记忆时间线 ===== -->
     <section class="section">
+      <div class="feature-stage">
+        <div class="feature-pin">
       <div class="section-heading scroll-animate">
         <p class="eyebrow">Timeline</p>
         <h2>红色记忆时间线</h2>
         <p>左右滑动，点击年份了解关键事件与相关场馆</p>
       </div>
-      <div class="timeline-scroll scroll-animate">
+      <div class="timeline-scroll">
         <div class="timeline-track">
           <div class="tl-node" tabindex="0" role="button" data-year="1921">
             <div class="tl-dot"></div>
@@ -231,7 +233,8 @@
         </div>
       </div>
       <div id="timeline-detail" class="timeline-detail is-hidden"></div>
-
+        </div>
+      </div>
     </section>
 
     <!-- ===== 红色场馆分布热力图 ===== -->
@@ -258,6 +261,8 @@
 
     <!-- ===== 功能模块入口 ===== -->
     <section class="section" id="modules">
+      <div class="feature-stage">
+        <div class="feature-pin">
       <div class="section-heading scroll-animate">
         <p class="eyebrow">Explore</p>
         <h2>探索红色文旅</h2>
@@ -289,6 +294,8 @@
           <p>展示社会实践中的图文、视频等优秀成果，记录青年学子用脚步丈量红色热土的历程。</p>
         </a>
       </div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -306,7 +313,7 @@
 
   <!-- Hero背景轮播（ES Module，由 app.js 引入） -->
   <script defer src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <script type="module" src="js/app.js?v=2026081431"></script>
+  <script type="module" src="js/app.js?v=2026081515"></script>
 </body>
 
 </html>

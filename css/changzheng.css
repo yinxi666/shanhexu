@@ -332,7 +332,9 @@
   position: absolute;
   width: 76px;
   height: 76px;
-  transform: translate(-50%, -50%);
+  /* 未激活印章 3D 侧倾 + 稍暗；滚动到达时翻正 + 放大（盖章落印感） */
+  transform: translate(-50%, -50%) perspective(500px) rotateY(28deg) scale(0.78);
+  opacity: 0.7;
   z-index: 4;
   transition: transform var(--duration-normal) var(--ease-cinematic),
     filter var(--duration-normal) ease,
@@ -343,12 +345,12 @@
 }
 
 .cz-stamp:hover {
-  transform: translate(-50%, -50%) scale(1.08) rotate(-3deg);
+  transform: translate(-50%, -50%) perspective(500px) rotateY(0deg) scale(1.08) rotate(-3deg);
   opacity: 1;
 }
 
 .cz-stamp.active {
-  transform: translate(-50%, -50%) scale(1.22);
+  transform: translate(-50%, -50%) perspective(500px) rotateY(0deg) scale(1.22);
   opacity: 1;
   filter:
     drop-shadow(0 0 18px rgba(255, 80, 50, 0.85)) drop-shadow(0 0 38px rgba(255, 160, 60, 0.55));
@@ -413,7 +415,8 @@
     inset 0 0 28px rgba(180, 130, 60, 0.12);
   color: #3a2413;
   opacity: 0;
-  transform: translate(0, -120vh) rotate(-12deg) scale(0.9);
+  /* 未掉落笺纸带 3D 俯仰，落地时翻正 */
+  transform: perspective(600px) translate(0, -120vh) rotate(-12deg) rotateX(40deg) scale(0.9);
   transition:
     transform var(--duration-normal) var(--ease-cinematic),
     opacity var(--duration-normal) ease;
@@ -442,7 +445,7 @@
 
 .cz-note.dropped {
   opacity: 1;
-  transform: translate(0, 0) rotate(var(--note-tilt, 0deg));
+  transform: perspective(600px) translate(0, 0) rotate(var(--note-tilt, 0deg)) rotateX(0deg) scale(1);
 }
 
 /* 笺纸上的小铜钉（左上角） */

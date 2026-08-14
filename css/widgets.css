@@ -670,7 +670,7 @@
 
 .quiz-start h3 {
   font-size: 22px;
-  color: var(--ink);
+  color: var(--deep-red);
   margin-bottom: 8px;
 }
 
@@ -688,7 +688,7 @@
 
 .quiz-question h3 {
   font-size: 18px;
-  color: var(--ink);
+  color: var(--deep-red);
   margin-bottom: 16px;
   line-height: 1.6;
 }

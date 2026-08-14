@@ -3,20 +3,21 @@
    职责：统一初始化所有 ES Module 模块，按固定顺序编排引导流程
    ============================================================ */
 
-import * as RedPages from './pages.js?v=2026081431';
-import * as RedCardGen from './cardgen.js?v=2026081431';
-import * as RedLongMarch from './longmarch.js?v=2026081431';
-import { initChatWidget } from './chat.js?v=2026081431';
-import { initQuiz } from './quiz.js?v=2026081431';
-import { initDarkMode } from './darkmode.js?v=2026081431';
-import { initMobileNav } from './mobile-nav.js?v=2026081431';
-import { initHomepageInnovation } from './homepage.js?v=2026081431';
-import { loadVenues } from './venue-store.js?v=2026081431';
-import { initActionDelegate } from './action-delegate.js?v=2026081431';
-import { initEntranceAnimation } from './entrance-animation.js?v=2026081431';
-import { initHeroCarousel } from './hero-carousel.js?v=2026081431';
-import { loadLayout } from './layout-loader.js?v=2026081431';
-import { getBasePath, isHomePage } from './utils.js?v=2026081431';
+import * as RedPages from './pages.js?v=2026081515';
+import * as RedCardGen from './cardgen.js?v=2026081515';
+import * as RedLongMarch from './longmarch.js?v=2026081515';
+import { initChatWidget } from './chat.js?v=2026081515';
+import { initQuiz } from './quiz.js?v=2026081515';
+import { initDarkMode } from './darkmode.js?v=2026081515';
+import { initMobileNav } from './mobile-nav.js?v=2026081515';
+import { initHomepageInnovation } from './homepage.js?v=2026081515';
+import { loadVenues } from './venue-store.js?v=2026081515';
+import { initActionDelegate } from './action-delegate.js?v=2026081515';
+import { initEntranceAnimation } from './entrance-animation.js?v=2026081515';
+import { initHeroCarousel } from './hero-carousel.js?v=2026081515';
+import { loadLayout } from './layout-loader.js?v=2026081515';
+import { getBasePath, isHomePage } from './utils.js?v=2026081515';
+import { initFeatureStage } from './feature-stage.js?v=2026081515';
 
 /* ---------- 国旗视频：仅桌面大屏自动播放，且尊重"减少动效" ---------- */
 function initFlagVideo() {
@@ -56,6 +57,11 @@ async function boot() {
   }
   // Hero 背景轮播：任何带双图 hero 的页面（首页/全国导览）生效，无则 no-op
   await safe(initHeroCarousel);
+
+  // 首页内容板块滚动 3D 舞台（统计/时间线/热力图/创新功能，仅首页）
+  if (isHomePage()) {
+    await safe(initFeatureStage);
+  }
 
   // 先注册全局动作委托，替代 innerHTML + onclick
   await safe(initActionDelegate);

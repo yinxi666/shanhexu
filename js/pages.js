@@ -5,15 +5,15 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081431';
-import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081431';
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081431';
-import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081431';
-import { initBgMusic } from './music.js?v=2026081431';
-import { icon } from './icons.js?v=2026081431';
-import { initHomeHeatmap } from './heatmap.js?v=2026081431';
-import { createGuideMap } from './guide-map.js?v=2026081431';
-import { isFavorite } from './favorites.js?v=2026081431';
+import { loadJSON, loadAllVenues, filterVenues, getProvinces, getCategories, getVenueDetail } from './data.js?v=2026081515';
+import { renderVenueCard, renderPracticeCard, renderMessageCard, renderPagination, renderSkeletonGrid, applyMessageCardStyles } from './renderers.js?v=2026081515';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage, likeDeltaKey, isPracticeLiked, isHomePage } from './utils.js?v=2026081515';
+import { $, showToast, copyShareLink, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026081515';
+import { initBgMusic } from './music.js?v=2026081515';
+import { icon } from './icons.js?v=2026081515';
+import { initHomeHeatmap } from './heatmap.js?v=2026081515';
+import { createGuideMap } from './guide-map.js?v=2026081515';
+import { isFavorite } from './favorites.js?v=2026081515';
 
 /* 导览页控制器暴露给 action-delegate 的私有动作（委托只分派，不碰页面闭包状态） */
 let _guideCtx = null;

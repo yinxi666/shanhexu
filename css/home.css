@@ -186,14 +186,28 @@
   margin-bottom: 0;
 }
 
-.subpage-hero::before {
+/* 压暗渐变已按用户要求移除（2026-08-15）：hero 图片完整显示，标题靠金边+光晕可读 */
+
+/* hero 底部金线收边：图片底缘不再渐白，用一条细金线干净分隔 hero 与正文 */
+.subpage-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+  opacity: 0.85;
+  z-index: 2;
+}
+
+/* 亮色调 hero 图（policy/message 页 .hero-bright）轻压暗：整图一层薄黑罩，
+   亮图不再刺眼、标题更清楚；其余暗调子页不加类，保持全亮 */
+.subpage-hero.hero-bright::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0.25) 0%,
-      rgba(0, 0, 0, 0.5) 60%,
-      var(--bg) 100%);
+  background: rgba(0, 0, 0, 0.25);
   z-index: 1;
 }
 
@@ -208,17 +222,17 @@
 
 .subpage-hero-title {
   font-family: "HongLeiZhuoShu", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: calc(var(--section-title-size) * 1.45);
+  font-size: calc(var(--section-title-size) * 1.75);
   font-weight: 900;
   line-height: 1.35;
   margin-bottom: 0.5rem;
   letter-spacing: 0.12em;
   color: var(--hero-text);
-  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.15);
+  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.35);
   text-shadow:
-    0 0 6px rgba(255, 215, 0, 0.6),
-    0 0 20px rgba(255, 180, 0, 0.25),
-    0 0 45px rgba(255, 150, 0, 0.1);
+    0 0 8px rgba(255, 215, 0, 0.7),
+    0 0 25px rgba(255, 180, 0, 0.3),
+    0 0 60px rgba(255, 150, 0, 0.15);
 }
 
 .subpage-hero-subtitle {
@@ -247,6 +261,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  /* 导航栏用系统楷体（Win KaiTi / Mac STKaiti），楷体笔画圆润、和整体风格更搭 */
+  font-family: "KaiTi", "STKaiti", "楷体", serif;
 }
 
 .brand {
@@ -271,14 +287,14 @@
 
 .brand strong {
   display: block;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .brand small {
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .nav-links {
@@ -293,7 +309,7 @@
   padding: 12px 20px;
   border-radius: var(--radius-md);
   color: var(--ink);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   position: relative;
   transition: all var(--duration-fast) var(--ease-smooth);
@@ -503,7 +519,7 @@
 
 .feature-card h3 {
   margin: 8px 0 8px;
-  color: var(--ink);
+  color: var(--deep-red);
   font-size: 18px;
 }
 

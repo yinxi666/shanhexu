@@ -1,20 +1,111 @@
 /* ============================================================
    赓续血脉・数绘红旅 — 红色记忆时间线 (Homepage Timeline)
    职责：首页年份时间线 + 事件详情面板（场馆链接）
+         「漫漫长路」：SVG 蜿蜒山路 + 路碑印章节点 + 走过之路点亮
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath, escapeHtml } from './utils.js?v=2026081431';
-import { icon } from './icons.js?v=2026081431';
-import { getVenues } from './venue-store.js?v=2026081431';
-import { findVenueByName } from './data.js?v=2026081431';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081431';
+import { getBasePath, escapeHtml } from './utils.js?v=2026081515';
+import { icon } from './icons.js?v=2026081515';
+import { getVenues } from './venue-store.js?v=2026081515';
+import { findVenueByName } from './data.js?v=2026081515';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081515';
+
+function prefersReduce() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* 生成「漫漫长路」SVG：红色正弦山路 + 金色点亮层；
+   节点按同一曲线经 --tl-off 定 Y 偏移（相邻上下交错，像翻山） */
+function buildRoute() {
+  const track = document.querySelector('.timeline-track');
+  if (!track) return null;
+  const old = track.querySelector('.tl-route');
+  if (old) old.remove();
+
+  const nodes = Array.from(track.querySelectorAll('.tl-node'));
+  if (nodes.length < 2) return null;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  // 波形参数：中心线对齐路碑中心（track padding-top 20 + dot 半高 8），
+  // 周期 240px = 两个节点一个峰一个谷，相邻节点上下交错
+  const baseY = 28;
+  const amp = prefersReduce() ? 0 : 13;
+  const wavelength = 240;
+  const waveY = (x) => baseY + amp * Math.sin((2 * Math.PI * x) / wavelength);
+
+  const pts = nodes.map((n) => {
+    const x = n.offsetLeft + n.offsetWidth / 2;
+    const y = waveY(x);
+    n.style.setProperty('--tl-off', (y - baseY) + 'px');
+    return { x, y };
+  });
+
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'tl-route');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '100%');
+  svg.setAttribute('viewBox', '0 0 ' + track.scrollWidth + ' ' + track.offsetHeight);
+  track.prepend(svg);
+
+  // 路从 track 左缘起，蜿蜒穿过所有节点，终点略延伸（金星之下）
+  const startX = 16;
+  const endX = pts[pts.length - 1].x + 8;
+  let d = 'M ' + startX + ' ' + waveY(startX);
+  for (let x = startX + 8; x <= endX; x += 8) {
+    d += ' L ' + x + ' ' + waveY(x);
+  }
+
+  const base = document.createElementNS(ns, 'path');
+  base.setAttribute('d', d);
+  base.setAttribute('class', 'route-base');
+  const lit = document.createElementNS(ns, 'path');
+  lit.setAttribute('d', d);
+  lit.setAttribute('class', 'route-lit');
+  svg.appendChild(base);
+  svg.appendChild(lit);
+
+  // 各节点累计弧长（弦长近似弧长，缓坡足够）——金色路段延伸到激活节点
+  const lens = [0];
+  lens[0] = Math.hypot(pts[0].x - startX, waveY(startX) - pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    lens[i] = lens[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+  }
+  const total = lens[lens.length - 1];
+  lit.style.strokeDasharray = '0 ' + total;
+
+  function litTo(idx) {
+    const L = lens[idx];
+    lit.style.strokeDasharray = (L > 0 ? L : 0.01) + ' ' + total;
+  }
+
+  return { litTo };
+}
 
 function initTimeline() {
   // 首页 guard 已在 homepage.js initHomepageInnovation 统一执行，此处不重复
   const nodes = document.querySelectorAll('.tl-node');
   const detail = document.getElementById('timeline-detail');
   if (!nodes.length || !detail) return;
+
+  // 「漫漫长路」山路 + 点亮；resize 跨断点重算（860px 改节点 padding 后波形要对齐）
+  let route = buildRoute();
+  let resizeRaf = false;
+  window.addEventListener('resize', function () {
+    if (resizeRaf) return;
+    resizeRaf = true;
+    requestAnimationFrame(function () {
+      resizeRaf = false;
+      route = buildRoute();
+      const cur = document.querySelector('.tl-node.active');
+      if (route && cur) {
+        const idx = Array.prototype.findIndex.call(nodes, (n) => n.dataset.year === cur.dataset.year);
+        if (idx >= 0) route.litTo(idx);
+      }
+    });
+  });
 
   // 年份→事件叙述来自单一知识源 red-history.js（AI 问答共用），此处仅附加时间线专属的场馆链接
   const events = {
@@ -41,6 +132,11 @@ function initTimeline() {
       n.classList.toggle('active', n.dataset.year === year);
       n.setAttribute('aria-current', n.dataset.year === year ? 'true' : 'false');
     });
+    // 走过之路点亮：金色路段从起点延伸到该节点
+    if (route) {
+      const idx = Array.prototype.findIndex.call(nodes, (n) => n.dataset.year === year);
+      if (idx >= 0) route.litTo(idx);
+    }
     // 详情面板内容动态更新：暴露为 live region 供读屏播报
     if (!detail.hasAttribute('role')) { detail.setAttribute('role', 'status'); detail.setAttribute('aria-live', 'polite'); }
 

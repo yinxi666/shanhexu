@@ -173,17 +173,17 @@ main:not(#cz-main) {
    @supports 检测：不支持 scroll() 的浏览器回退为无动效（元素正常显示），零消失风险。
    ============================================================ */
 @supports (animation-timeline: scroll()) {
-  /* 创新功能卡：滚动进入视口时 3D 呈现（rotateY + 上移 + 透明度 0.5→1），
-     nth-child 错开 animation-range 起点实现 stagger（卡依次呈现） */
+  /* 创新功能卡：滚动进入视口时 3D 翻入（rotateX 俯仰 + rotateY 侧倾 + 大位移 + 缩放 + 渐入），
+     nth-child 错开 animation-range 起点，4 张卡逐张依次翻出（下滑炫酷感） */
   .feature-card {
     animation: cardScroll3d linear both;
     animation-timeline: view();
     animation-range: entry 0% entry 100%;
     will-change: transform, opacity;
   }
-  .feature-card:nth-child(2) { animation-range: entry 8% entry 100%; }
-  .feature-card:nth-child(3) { animation-range: entry 16% entry 100%; }
-  .feature-card:nth-child(4) { animation-range: entry 24% entry 100%; }
+  .feature-card:nth-child(2) { animation-range: entry 5% entry 100%; }
+  .feature-card:nth-child(3) { animation-range: entry 10% entry 100%; }
+  .feature-card:nth-child(4) { animation-range: entry 15% entry 100%; }
 
   /* 首页 hero：滚动离开时轻微视差上移 + 微透明 */
   .cinematic-hero {
@@ -191,10 +191,13 @@ main:not(#cz-main) {
     animation-timeline: scroll();
     animation-range: 0% 40%;
   }
+
+  /* 内容板块全屏 3D 由 JS initSection3d 驱动（rAF，任何浏览器生效），不再走 scroll-driven */
 }
 @keyframes cardScroll3d {
-  from { transform: perspective(800px) rotateY(14deg) translateY(30px); opacity: 0.5; }
-  to { transform: perspective(800px) rotateY(0deg) translateY(0); opacity: 1; }
+  from { transform: perspective(900px) rotateX(24deg) rotateY(-14deg) translateY(70px) scale(0.9); opacity: 0; }
+  25% { opacity: 1; }
+  to { transform: perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1); opacity: 1; }
 }
 @keyframes heroParallax {
   to { transform: translateY(-90px); opacity: 0.7; }
@@ -207,15 +210,43 @@ main:not(#cz-main) {
 }
 
 /* ============================================================
-   红色记忆时间线 (Homepage Timeline)
+   内容板块滚动 3D（feature-stage）
+   渐进增强：默认普通排列（间距正常）；.js-active（feature-stage.js
+   运行）驱动板块内容进入视口时 3D 翻出——不做 sticky 粘滞，避免板块间大空白
+   ============================================================ */
+.feature-stage.js-active .feature-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  perspective: 1200px;
+}
+.feature-stage.js-active .feature-card {
+  /* JS 接管卡的 3D 呈现，禁用 scroll-driven 卡动画避免冲突 */
+  animation: none !important;
+  will-change: transform, opacity;
+}
+
+/* ============================================================
+   红色记忆时间线 (Homepage Timeline) —「漫漫长路」
+   蜿蜒山路（SVG 正弦曲线）+ 路碑印章节点 + 走过之路点亮
+   SVG 由 js/timeline.js 动态生成并填充 .tl-route；节点 Y 偏移由
+   同一曲线经 --tl-off 变量设定（reduce-motion 时退化为水平直线）
    ============================================================ */
 .timeline-scroll {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 20px 0 0;
+  padding: 20px 16px 12px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--red) transparent;
+  /* 画卷底框：宣纸淡底 + 顶部红边 + 四周金细边 + 圆角装裱 */
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-top: 2px solid var(--red);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(185, 28, 28, 0.04) 0%, var(--card-bg) 100%);
+  box-shadow: 0 1px 0 rgba(217, 164, 65, 0.15) inset, var(--shadow-sm);
 }
 
 .timeline-scroll::-webkit-scrollbar {
@@ -233,17 +264,43 @@ main:not(#cz-main) {
   min-width: max-content;
   position: relative;
   padding: 0 16px;
+  /* 淡墨群山背景：横向错落的山影，山路穿行其间 */
+  background-image:
+    radial-gradient(ellipse 96px 36px at 10% 78%, rgba(100, 112, 128, 0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 128px 42px at 36% 84%, rgba(122, 132, 148, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 104px 38px at 62% 76%, rgba(150, 128, 96, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 144px 46px at 86% 86%, rgba(108, 120, 138, 0.09) 0%, transparent 70%);
 }
 
-.timeline-track::before {
-  content: '';
+/* 蜿蜒山路：JS 填充 SVG path（红色路基 + 金色点亮层） */
+.tl-route {
   position: absolute;
-  left: 16px;
-  right: 16px;
-  top: 30px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--red), var(--gold), var(--red));
-  border-radius: var(--radius-xs);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.tl-route .route-base {
+  stroke: var(--red);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.5;
+}
+
+.tl-route .route-lit {
+  stroke: var(--gold);
+  stroke-width: 3.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.45));
+  transition: stroke-dasharray 0.6s ease;
 }
 
 .tl-node {
@@ -256,10 +313,12 @@ main:not(#cz-main) {
   position: relative;
   z-index: 1;
   min-width: 80px;
+  /* 波形 Y 偏移由 JS 写 --tl-off；hover 在其上再上浮 6px */
+  transform: translateY(var(--tl-off, 0px));
 }
 
 .tl-node:hover {
-  transform: translateY(-6px);
+  transform: translateY(calc(var(--tl-off, 0px) - 6px));
 }
 
 .tl-dot {
@@ -281,11 +340,27 @@ main:not(#cz-main) {
   transform: scale(1.3);
 }
 
+/* 终点 1964：金星（走到胜利） */
+.tl-node:last-child .tl-dot {
+  background: var(--gold);
+  border: none;
+  width: 18px;
+  height: 18px;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.55));
+}
+
+.tl-node:last-child .tl-dot::after {
+  display: none;
+}
+
 .tl-year {
   font-family: "Noto Serif SC", "SimSun", serif;
   font-size: 20px;
   font-weight: 900;
   color: var(--red);
+  /* 年份微金晕，呼应全站"金字"语言 */
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 26px rgba(255, 180, 0, 0.22);
   margin-bottom: 4px;
 }
 
@@ -293,6 +368,11 @@ main:not(#cz-main) {
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
+}
+
+.tl-node:hover .tl-label,
+.tl-node.active .tl-label {
+  color: var(--deep-red);
 }
 
 @media (max-width: 860px) {

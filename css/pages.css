@@ -48,7 +48,7 @@
 
 .detail-main .detail-body h2 {
   font-size: 28px;
-  color: var(--ink);
+  color: var(--deep-red);
   margin-bottom: 12px;
 }
 
@@ -383,7 +383,7 @@
 
 .policy-card .policy-info h3 {
   font-size: 17px;
-  color: var(--ink);
+  color: var(--deep-red);
   margin-bottom: 8px;
 }
 
@@ -638,7 +638,7 @@
 
 .practice-card .practice-body h3 {
   font-size: 17px;
-  color: var(--ink);
+  color: var(--deep-red);
   margin-bottom: 8px;
   line-height: 1.4;
   font-weight: 700;

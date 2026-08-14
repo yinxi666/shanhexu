@@ -6,13 +6,63 @@
      setMoodBridge（注册 mood 回调，setActive 调用）
    ============================================================ */
 
-import { STATIONS } from './cz-stations.js?v=2026081431';
+import { STATIONS } from './cz-stations.js?v=2026081515';
 
 export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, getLastActiveT, setLastActiveT, setMoodBridge }) {
   if (getReduceMotion()) return;
   const c = canvas;
   if (!c) return;
   const ctx = c.getContext('2d');
+  // 预渲染雪花贴图（柔和光点 + 六角星芒），drawImage 缩放绘制——比硬圆更"雪"、性能更好
+  const snowSprite = (() => {
+    const sc = document.createElement('canvas');
+    sc.width = 64; sc.height = 64;
+    const sctx = sc.getContext('2d');
+    const g = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,0.95)');
+    g.addColorStop(0.3, 'rgba(242,246,255,0.55)');
+    g.addColorStop(0.7, 'rgba(230,238,255,0.18)');
+    g.addColorStop(1, 'rgba(225,235,255,0)');
+    sctx.fillStyle = g;
+    sctx.fillRect(0, 0, 64, 64);
+    // 六角星芒：雪晶体的轮廓感
+    sctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    sctx.lineWidth = 1.4;
+    sctx.lineCap = 'round';
+    for (let i = 0; i < 6; i++) {
+      const a = i * Math.PI / 3;
+      sctx.beginPath();
+      sctx.moveTo(32 + Math.cos(a) * 8, 32 + Math.sin(a) * 8);
+      sctx.lineTo(32 + Math.cos(a) * 26, 32 + Math.sin(a) * 26);
+      sctx.stroke();
+    }
+    return sc;
+  })();
+  // 预渲染余烬（火星）贴图：中心亮黄白 → 橙红 → 下方尾焰渐隐（上升拖尾）
+  const emberSprite = (() => {
+    const sc = document.createElement('canvas');
+    sc.width = 64; sc.height = 64;
+    const sctx = sc.getContext('2d');
+    const g = sctx.createRadialGradient(32, 27, 0, 32, 27, 17);
+    g.addColorStop(0, 'rgba(255, 238, 185, 0.95)');
+    g.addColorStop(0.35, 'rgba(255, 172, 95, 0.7)');
+    g.addColorStop(0.7, 'rgba(232, 95, 42, 0.32)');
+    g.addColorStop(1, 'rgba(190, 60, 30, 0)');
+    sctx.fillStyle = g;
+    sctx.fillRect(0, 0, 64, 64);
+    // 下方尾焰：火星上升的拖尾
+    const tg = sctx.createLinearGradient(32, 30, 32, 60);
+    tg.addColorStop(0, 'rgba(255, 160, 80, 0.42)');
+    tg.addColorStop(1, 'rgba(255, 120, 40, 0)');
+    sctx.fillStyle = tg;
+    sctx.beginPath();
+    sctx.moveTo(27, 30);
+    sctx.lineTo(37, 30);
+    sctx.lineTo(32, 60);
+    sctx.closePath();
+    sctx.fill();
+    return sc;
+  })();
   let W, H, dpr;
   const parts = [];
   let N_EMBER, N_SNOW, N_BLOOD, N_BUBBLE, N_GOLD;
@@ -53,30 +103,40 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
 
   // ========== 粒子生成器 ==========
   const spawners = {
-    ember: () => ({
-      type: 'ember',
-      x: Math.random() * W,
-      y: H + Math.random() * 40,
-      vx: -0.3 + Math.random() * 0.6,
-      vy: -0.5 - Math.random() * 1.1,
-      r: 1 + Math.random() * 2.6,
-      life: 0,
-      maxLife: 4000 + Math.random() * 5000,
-      hue: 10 + Math.random() * 38,
-      flick: Math.random() * Math.PI * 2
-    }),
-    snow: () => ({
-      type: 'snow',
-      x: Math.random() * W,
-      y: -10 - Math.random() * 40,
-      vx: -0.6 + Math.random() * 1.2,
-      vy: 0.4 + Math.random() * 1.1,
-      r: 0.9 + Math.random() * 2.6,
-      life: 0,
-      maxLife: 6000 + Math.random() * 6000,
-      drift: Math.random() * Math.PI * 2,
-      driftSp: 0.001 + Math.random() * 0.002
-    }),
+    ember: () => {
+      // 大小分层 0.8-3.4：大余烬上升慢、小余烬快散（近大远小）
+      const r = 0.8 + Math.random() * 2.6;
+      return {
+        type: 'ember',
+        x: Math.random() * W,
+        y: H + Math.random() * 40,
+        vx: -0.3 + Math.random() * 0.6,
+        vy: -(0.9 - r * 0.18 + Math.random() * 0.4), // 上升，大慢小快
+        r,
+        life: 0,
+        maxLife: 4000 + Math.random() * 5000,
+        hue: 12 + Math.random() * 30,
+        flick: Math.random() * Math.PI * 2
+      };
+    },
+    snow: () => {
+      // 大小层次 0.8-4（近大远小）：大雪花下落慢、摆幅大；小雪花快、摆幅小
+      const r = 0.8 + Math.random() * 3.2;
+      return {
+        type: 'snow',
+        x: Math.random() * W,
+        y: -10 - Math.random() * 40,
+        vx: -0.4 + Math.random() * 0.8,
+        vy: 0.35 + (4.4 - r) * 0.2 + Math.random() * 0.4,
+        r,
+        life: 0,
+        maxLife: 6000 + Math.random() * 6000,
+        drift: Math.random() * Math.PI * 2,
+        driftSp: 0.0012 + Math.random() * 0.002,
+        swing: 0.35 + r * 0.28,          // 摆幅随大小
+        flick: Math.random() * Math.PI * 2 // 闪烁相位
+      };
+    },
     blood: () => ({
       type: 'blood',
       x: Math.random() * W,
@@ -175,31 +235,26 @@ export function initAtmosphere({ canvas, getReduceMotion, getActiveStationId, ge
         p.y += p.vy - 0.15 * Math.sin(p.flick);
         const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
         if (alpha > 0.02) {
-          // 双同心圆替代径向渐变：避免每帧每粒子 createRadialGradient 的开销，视觉近似发光
-          ctx.fillStyle = `hsla(${p.hue},100%,75%,${alpha * 0.95})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `hsla(${p.hue},100%,55%,${alpha * 0.35})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 2.6, 0, Math.PI * 2);
-          ctx.fill();
+          // 火星贴图绘制（中心亮黄白 + 尾焰）+ 呼吸脉动（火在闪烁）
+          const breath = 0.8 + 0.2 * Math.sin(p.flick * 2.5);
+          const size = p.r * 1.7; // 视觉半径
+          ctx.globalAlpha = alpha * 0.95 * breath;
+          ctx.drawImage(emberSprite, p.x - size, p.y - size, size * 2, size * 2);
+          ctx.globalAlpha = 1;
         }
         if (p.life > p.maxLife || p.y < -10) dead = true;
       } else if (p.type === 'snow') {
         p.drift += dt * p.driftSp;
-        p.x += p.vx + Math.sin(p.drift) * 0.55;
+        p.x += p.vx + Math.sin(p.drift) * (p.swing || 0.55);
         p.y += p.vy;
         const alpha = Math.max(0, Math.min(1, Math.sin((p.life / p.maxLife) * Math.PI)));
         if (alpha > 0.02) {
-          ctx.fillStyle = `hsla(210,100%,96%,${alpha * 0.92})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `hsla(205,100%,88%,${alpha * 0.4})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 2.2, 0, Math.PI * 2);
-          ctx.fill();
+          // 轻微闪烁（雪在光下微闪 0.85~1 波动），贴图绘制（柔和光点 + 六角星芒）
+          const twinkle = 0.85 + 0.15 * Math.sin(p.flick + p.life * 0.012);
+          const size = p.r * 1.6; // 视觉半径
+          ctx.globalAlpha = alpha * 0.9 * twinkle;
+          ctx.drawImage(snowSprite, p.x - size, p.y - size, size * 2, size * 2);
+          ctx.globalAlpha = 1;
         }
         if (p.life > p.maxLife || p.y > H + 15) dead = true;
       } else if (p.type === 'blood') {
