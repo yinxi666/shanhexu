@@ -4,16 +4,16 @@
    约束：只做"派发"，动作实现来自各单职责模块
    ============================================================ */
 
-import { goToDetail, showToast } from './ui.js?v=2026081427';
-import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081427';
-import { likePractice, copyShareLinkFromDetail, resetMessageForm, guideSearchFromDelegate, guideToggleViewFromDelegate } from './pages.js?v=2026081427';
-import { toggleFavorite } from './favorites.js?v=2026081427';
+import { goToDetail, showToast } from './ui.js?v=2026081428';
+import { openPracticeDetail, openLightbox, closePracticeDetail, closeLightbox, openPracticeVideo, closePracticeVideo } from './modals.js?v=2026081428';
+import { likePractice, copyShareLinkFromDetail, resetMessageForm, guideSearchFromDelegate, guideToggleViewFromDelegate } from './pages.js?v=2026081428';
+import { toggleFavorite } from './favorites.js?v=2026081428';
 
-import { openChat } from './chat.js?v=2026081427';
-import { openQuiz } from './quiz.js?v=2026081427';
-import { toggleDarkMode } from './darkmode.js?v=2026081427';
-import { icon } from './icons.js?v=2026081427';
-import * as RedCardGen from './cardgen.js?v=2026081427';
+import { openChat } from './chat.js?v=2026081428';
+import { openQuiz } from './quiz.js?v=2026081428';
+import { toggleDarkMode } from './darkmode.js?v=2026081428';
+import { icon } from './icons.js?v=2026081428';
+import * as RedCardGen from './cardgen.js?v=2026081428';
 
 export function initActionDelegate() {
   document.addEventListener('click', handleAction);

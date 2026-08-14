@@ -123,7 +123,8 @@
 - showToast 用 innerHTML：只传常量文案，**禁传用户输入**。
 - 所有动态文本 `escapeHtml/escapeAttr` + URL `sanitizeUrl`（留言 sessionStorage 回填是存储型 XSS 面）。
 - server.js：默认 :9876、无 SPA fallback、404 掉 dotfiles/node_modules；浏览器代码勿引用 server.js/node 文件。
-- 服务端路径：`data/` JSON、`assets/`、`templates/` 必须随部署一起带上（CI 的 _site 打包已包含）。
+- 服务端路径：`data/` JSON、`assets/`、`templates/`、`sw.js` 必须随部署一起带上（CI 的 _site 打包已包含；build-site.js 固定文件清单含 sw.js）。
 - 首页纪念卡走 `renderHomeCard`（剪纸「赓续血脉」版），详情页/长征入口走 `renderCard`（证书版）——按 `currentVenueName` 是否为空分流，改卡面别动错分支。
 - hero 背景轮播图清单单源在页面容器 `[data-hero-images]`（首页 + 全国导览 + 实践成果页），改轮播图改该属性即可。
 - music.js 跨页续播恢复系统：`_autoResumeTried`/`_resumeBanner` 等 `let` 状态**必须在 `initBgMusic` 函数顶部声明**（2026-08-14 踩坑：放函数中部时，`attemptAutoResume()` 在 `if (wasPlaying)` 分支早期调用触发 TDZ ReferenceError，中断整个播放器初始化——按钮/滑条/手势监听全失效，页面看似正常）。改恢复逻辑时不要把这些 `let` 挪回函数中部。
+- sw.js（Service Worker，2026-08-14 新增）：离线可用 + 资源缓存。带 `?v=` 的 js/css 缓存优先、导航网络优先离线回退首页、图片/data stale-while-revalidate、跨源（CDN 字体/高德瓦片）不缓存。**版本由资源 URL 的 `?v=` 驱动，无需 bump 同步 sw.js**（它不在 js/ 下、不挂 `?v=`）。e2e 测试（smoke/interactions）已 block Service Worker 避免缓存旧资源干扰。

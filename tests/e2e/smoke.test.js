@@ -64,7 +64,8 @@ test('运行时冒烟：7 个页面无 JS 报错 / 模块加载失败 / 资源 4
   try {
     // 用本机系统 Chrome 无头运行，避免下载 Playwright 自带 chromium
     browser = await chromium.launch({ channel: 'chrome', headless: true });
-    const page = await browser.newPage();
+    // block Service Worker：冒烟测的是当前构建产物，避免 SW 缓存上一版本资源干扰
+    const page = await (await browser.newContext({ serviceWorkers: 'block' })).newPage();
     const errors = [];
 
     page.on('pageerror', (err) => errors.push('[JS异常] ' + err.message));

@@ -4,7 +4,7 @@
 html.dark body {
   background:
     radial-gradient(ellipse 55% 45% at 92% 96%, rgba(214, 160, 60, 0.06), transparent 70%),
-    linear-gradient(180deg, #0f172a 0%, #0a0f1d 100%);
+    var(--bg-grad);
   background-attachment: fixed;
 }
 /* 与 base.css 的 (hover:none) 覆盖保持一致：触屏禁用 fixed 背景防合成器滚动错乱 */
@@ -67,11 +67,21 @@ html.dark {
   --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.55);
   /* --deep-red 语义是"深红"，深色下保持深红用于按钮/悬停背景，而非反转为浅粉 */
   --deep-red: #991b1b;
+
+  /* 深色模式专用表面/文字令牌（base.css :root 已定义浅色默认，此处深色覆盖） */
+  --footer-bg: #020617;
+  --nav-link-fg: #cbd5e1;
+  --field-border: #475569;
+  --placeholder-bg: #1a2332;
+  --paper-deep: #2a2118;
+  --paper-border: #5c4a20;
+  --cz-ink-light: #f7ecc9;
+  --bg-grad: linear-gradient(180deg, #0f172a 0%, #0a0f1d 100%);
 }
 
 /* 深色下长征纪念卡姓名输入框：--cz-paper 变深棕(#2b2315)，深底深字不可读 → 文字固定为浅纸色 */
 html.dark .cz-card-field input[type="text"] {
-  color: #f7ecc9;
+  color: var(--cz-ink-light);
 }
 
 html.dark .site-header {
@@ -83,7 +93,7 @@ html.dark .nav-links {
 }
 
 html.dark .nav-links li a {
-  color: #cbd5e1;
+  color: var(--nav-link-fg);
 }
 
 html.dark .nav-links li a:hover,
@@ -93,7 +103,7 @@ html.dark .nav-links li a.active {
 }
 
 html.dark .site-footer {
-  background: #020617;
+  background: var(--footer-bg);
 }
 
 html.dark input,
@@ -102,12 +112,12 @@ html.dark textarea {
   /* 用 background-color 而非 background 简写：保留 .search-toolbar select 的自绘箭头 background-image */
   background-color: var(--card-bg);
   color: var(--ink);
-  border-color: #475569;
+  border-color: var(--field-border);
 }
 
 html.dark .empty-state,
 html.dark .map-placeholder {
-  background: #1a2332;
+  background: var(--placeholder-bg);
 }
 
 /* --deep-red 同时被用作文字颜色（章节标题/表单标题）——深色下 #991b1b 在深底上对比度不足，改回亮红 */
@@ -131,13 +141,13 @@ html.dark .mini-map-svg {
 html.dark .heatmap-zoom-bar .hm-zoom-btn,
 html.dark .heatmap-zoom-bar .hm-zoom-reset {
   background: var(--card-bg);
-  border-color: #475569;
+  border-color: var(--field-border);
   color: var(--ink);
 }
 /* 留言软木板 + 便签：深色下不再整块亮色 */
 html.dark .message-list {
-  background-color: #2a2118;
-  border-color: #5c4a20;
+  background-color: var(--paper-deep);
+  border-color: var(--paper-border);
 }
 html.dark .message-card {
   background: var(--bg);  /* 与浅色 pages.css 同源令牌，消除双源硬编码 */
@@ -189,13 +199,13 @@ html.dark .msg-status.rejected {
 /* 深色下 .dark-toggle 用 --card-bg(#1e293b) 会融入页面背景(#0f172a)看不清：
    提亮表面 + 实心金描边 + 金色光晕，与深色主题强调色一致 */
 html.dark .dark-toggle {
-  background: #334155;
+  background: var(--line);
   border-color: var(--gold);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 12px rgba(251, 191, 36, 0.35);
 }
 /* 深色下音乐按钮同样用 --white(#1e293b) 融入背景：提亮表面 + 金描边 + 光晕（用 box-shadow 环避免改动边框布局） */
 html.dark .music-toggle {
-  background: #334155;
+  background: var(--line);
   box-shadow: 0 0 0 1px var(--gold), 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(251, 191, 36, 0.3);
 }
 @media (max-width: 860px) {
@@ -210,8 +220,8 @@ html.dark .music-toggle {
 
 /* 深色下搜索筛选下拉框聚焦白底浅字不可读 */
 /* 深色下官方链接 hover 硬编码浅粉块 */
-html.dark .sidebar-card .official-link:hover { background: #2d1010; }
+html.dark .sidebar-card .official-link:hover { background: var(--soft-red); }
 /* 深色下高德静态卡片亮灰方框 */
-html.dark .amap-static-map { background: #1e293b; }
+html.dark .amap-static-map { background: var(--card-bg); }
 /* 深色下 form-success 标题深绿不可读 */
-html.dark .form-success h4 { color: #4ade80; }
+html.dark .form-success h4 { color: var(--status-ok); }

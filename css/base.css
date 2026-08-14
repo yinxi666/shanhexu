@@ -109,6 +109,16 @@
 
   --stat-label: #64748b;
 
+  /* 深色模式专用表面/文字令牌（浅色默认，dark.css html.dark 同名覆盖） */
+  --footer-bg: #ffffff;
+  --nav-link-fg: #1f2933;
+  --field-border: #e6dccf;
+  --placeholder-bg: #ffffff;
+  --paper-deep: #fdfbf7;
+  --paper-border: #e6dccf;
+  --cz-ink-light: #1f2933;
+  --bg-grad: linear-gradient(180deg, #ffffff 0%, #fdfbf7 100%);
+
   --hero-title-size: clamp(3rem, 10vw, 7rem);
   --hero-subtitle-size: clamp(1.1rem, 3vw, 1.6rem);
   --section-title-size: clamp(2rem, 6vw, 3.5rem);

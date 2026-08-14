@@ -4,6 +4,12 @@
 
 ---
 
+## 2026-08-14 · v2026081428 — PWA Service Worker + dark.css 令牌收敛
+
+- **Service Worker（sw.js）**：补全 PWA（manifest 已有，缺离线缓存）。带 `?v=` 的 js/css 缓存优先（版本化 URL 天然隔离新旧版本）；页面导航网络优先、离线回退缓存首页；图片/data JSON stale-while-revalidate；跨源（CDN 字体 / 高德瓦片）不缓存。`build-site.js` 打包 sw.js，`app.js` 注册，e2e 测试 block Service Worker 避免缓存旧资源干扰
+- **dark.css 裸 hex 令牌化**：新增 8 个深色专用令牌（`--footer-bg`/`--nav-link-fg`/`--field-border`/`--placeholder-bg`/`--paper-deep`/`--paper-border`/`--cz-ink-light`/`--bg-grad`，base.css :root + dark.css html.dark 双份），规则内散落裸 hex 全部改为 `var()` 引用，视觉零变化
+- **import map 评估后跳过**：无第三方裸包 + bump 已全自动，子路径 MPA 下每页 39 键 import map 维护负担大于收益
+
 ## 2026-08-14 · v2026081426 — 全站代码审查修复 + 背景音乐续播优化 + 黄麻起义主图更换
 
 **全面代码审查修复（12 批次 56 文件，契约测试 40→41 项）**：

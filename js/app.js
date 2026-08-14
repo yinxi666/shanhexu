@@ -3,20 +3,20 @@
    职责：统一初始化所有 ES Module 模块，按固定顺序编排引导流程
    ============================================================ */
 
-import * as RedPages from './pages.js?v=2026081427';
-import * as RedCardGen from './cardgen.js?v=2026081427';
-import * as RedLongMarch from './longmarch.js?v=2026081427';
-import { initChatWidget } from './chat.js?v=2026081427';
-import { initQuiz } from './quiz.js?v=2026081427';
-import { initDarkMode } from './darkmode.js?v=2026081427';
-import { initMobileNav } from './mobile-nav.js?v=2026081427';
-import { initHomepageInnovation } from './homepage.js?v=2026081427';
-import { loadVenues } from './venue-store.js?v=2026081427';
-import { initActionDelegate } from './action-delegate.js?v=2026081427';
-import { initEntranceAnimation } from './entrance-animation.js?v=2026081427';
-import { initHeroCarousel } from './hero-carousel.js?v=2026081427';
-import { loadLayout } from './layout-loader.js?v=2026081427';
-import { isHomePage } from './utils.js?v=2026081427';
+import * as RedPages from './pages.js?v=2026081428';
+import * as RedCardGen from './cardgen.js?v=2026081428';
+import * as RedLongMarch from './longmarch.js?v=2026081428';
+import { initChatWidget } from './chat.js?v=2026081428';
+import { initQuiz } from './quiz.js?v=2026081428';
+import { initDarkMode } from './darkmode.js?v=2026081428';
+import { initMobileNav } from './mobile-nav.js?v=2026081428';
+import { initHomepageInnovation } from './homepage.js?v=2026081428';
+import { loadVenues } from './venue-store.js?v=2026081428';
+import { initActionDelegate } from './action-delegate.js?v=2026081428';
+import { initEntranceAnimation } from './entrance-animation.js?v=2026081428';
+import { initHeroCarousel } from './hero-carousel.js?v=2026081428';
+import { loadLayout } from './layout-loader.js?v=2026081428';
+import { getBasePath, isHomePage } from './utils.js?v=2026081428';
 
 /* ---------- 国旗视频：仅桌面大屏自动播放，且尊重"减少动效" ---------- */
 function initFlagVideo() {
@@ -86,6 +86,11 @@ async function boot() {
   }
   // 初始化完成标志（供 smoke 冒烟测试 waitForFunction 等待，替代固定 sleep 赌时序）
   window.__shanhexuBooted = true;
+
+  // Service Worker：离线可用 + 静态资源缓存（不阻塞初始化；浏览器不支持或注册失败则静默）
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register(getBasePath() + 'sw.js').catch(() => { });
+  }
 }
 
 if (document.readyState === 'loading') {

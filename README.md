@@ -20,6 +20,7 @@
 | 字体 | 弘雷卓书（CDN）+ 系统字体 |
 | 动效 | Canvas 入场动画 + 双层帷幕切换 + View Transitions API |
 | 音频 | Web Audio API（背景音乐播放器） |
+| PWA | Service Worker 离线缓存 + manifest 可安装 |
 | 部署 | GitHub Pages 静态托管 |
 
 ## 功能模块

@@ -29,7 +29,7 @@ fs.rmSync(SITE, { recursive: true, force: true });
 fs.mkdirSync(SITE, { recursive: true });
 
 // 1) 根目录固定文件
-for (const f of ['index.html', 'favicon.png', 'manifest.json', '.nojekyll']) {
+for (const f of ['index.html', 'favicon.png', 'manifest.json', '.nojekyll', 'sw.js']) {
   if (fs.existsSync(path.join(ROOT, f))) {
     fs.copyFileSync(path.join(ROOT, f), path.join(SITE, f));
   }

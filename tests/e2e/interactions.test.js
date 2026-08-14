@@ -68,7 +68,8 @@ after(async () => {
 
 /** 新开独立 context 页面（storage 隔离），避免测试间串状态 */
 async function newPage() {
-  const ctx = await browser.newContext();
+  // block Service Worker：交互测试测的是当前构建产物，避免 SW 缓存旧资源干扰
+  const ctx = await browser.newContext({ serviceWorkers: 'block' });
   return ctx.newPage();
 }
 
