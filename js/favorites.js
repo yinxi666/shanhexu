@@ -4,7 +4,7 @@
    约束：只依赖 utils.js，被 renderers.js / action-delegate.js 引用
    ============================================================ */
 
-import { safeStorage } from './utils.js?v=2026081428';
+import { safeStorage } from './utils.js?v=2026081429';
 
 // 模块级缓存：卡片渲染期间 isFavorite 高频调用（导览网格每张卡），避免每次 JSON.parse localStorage
 let _favCache = null;

@@ -139,34 +139,57 @@ main:not(#cz-main) {
 .venue-card,
 .policy-card,
 .practice-card,
-.message-card,
-.feature-card {
+.message-card {
   animation: pageFadeIn var(--duration-normal) cubic-bezier(0.2, 0, 0.0, 1) backwards;
 }
+/* feature-card 不用 pageFadeIn：首页 feature-grid 走滚动驱动的 3D 翻入（见下方 scroll-3d） */
 
-/* 卡片弹入按 0.1s 逐级延迟（与 .scroll-animate-delay-* 阶梯惯例一致） */
-.venue-card:nth-child(1),
-.feature-card:nth-child(1) {
+/* 卡片弹入按 0.1s 逐级延迟（与 .scroll-animate-delay-* 阶梯惯例一致）；
+   feature-card 已走 scroll-3d 的 transition-delay stagger，不再参与 animation-delay */
+.venue-card:nth-child(1) {
   animation-delay: 0.1s;
 }
 
-.venue-card:nth-child(2),
-.feature-card:nth-child(2) {
+.venue-card:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.venue-card:nth-child(3),
-.feature-card:nth-child(3) {
+.venue-card:nth-child(3) {
   animation-delay: 0.3s;
 }
 
-.venue-card:nth-child(4),
-.feature-card:nth-child(4) {
+.venue-card:nth-child(4) {
   animation-delay: 0.4s;
 }
 
 .venue-card:nth-child(5) {
   animation-delay: 0.5s;
+}
+
+/* ============================================================
+   滚动驱动 3D 翻入（豆包 stage 切换手法的轻量版，首页 feature-grid 用）
+   .feature-grid 保持 .scroll-animate（IO 加 .visible 整体进入），
+   卡默认 3D 隐藏态，grid 可见后逐张翻入（nth-child transition-delay stagger）
+   ============================================================ */
+.feature-grid .feature-card {
+  opacity: 0;
+  transform: perspective(700px) rotateY(16deg) translateZ(-34px);
+  /* duration 走令牌刻度（--duration-normal=0.6s）；stagger 用 transition-delay 单独属性（不受 duration 校验） */
+  transition: opacity var(--duration-normal) var(--ease-cinematic), transform var(--duration-normal) var(--ease-cinematic);
+  will-change: transform, opacity;
+}
+.feature-grid.visible .feature-card {
+  opacity: 1;
+  transform: perspective(700px) rotateY(0deg) translateZ(0);
+}
+.feature-grid .feature-card:nth-child(2) { transition-delay: 0.08s; }
+.feature-grid .feature-card:nth-child(3) { transition-delay: 0.16s; }
+.feature-grid .feature-card:nth-child(4) { transition-delay: 0.24s; }
+@media (prefers-reduced-motion: reduce) {
+  .feature-grid .feature-card {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ============================================================
