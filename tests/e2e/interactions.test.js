@@ -72,14 +72,6 @@ async function newPage() {
   return ctx.newPage();
 }
 
-/** 访问首页前先标记"入场已看过"，跳过 6.4s 入场遮罩 */
-async function gotoNoEntrance(page, url) {
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.evaluate(() => sessionStorage.setItem('entrance_done_v2', '1'));
-  await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(1200); // 等 boot + 页面初始化
-}
-
 test('实践点赞：点击自增 + 刷新后高亮与计数持久', async () => {
   const page = await newPage();
   try {
@@ -369,10 +361,15 @@ test('深色切换：热力图保留用户缩放（MutationObserver 不重置视
     await page.evaluate(() => sessionStorage.setItem('entrance_done_v2', '1'));
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
-    // ECharts 从 CDN 加载，失败走 SVG 降级（无 chart 可测）——等不到就跳过
-    try { await page.waitForFunction('window.echarts && window.__homeHeatmapChart', null, { timeout: 8000 }); } catch (e) { /* 跳过 */ }
-    const hasChart = await page.evaluate(() => !!window.__homeHeatmapChart);
-    if (!hasChart) return;
+    // ECharts 从 CDN 加载：能加载则验证 zoom 保留（回归守护点）；CDN 不可达时应用按设计走 SVG 降级，
+    // 断言降级路径存在后跳过——不把外网可达性当作硬失败阈值（避免离线/弱网 CI flake）
+    const hasEcharts = await page.evaluate(() => typeof window.echarts !== 'undefined');
+    if (!hasEcharts) {
+      const svgFallback = await page.waitForSelector('#home-heatmap .mini-map-svg', { timeout: 18000 }).catch(() => null);
+      assert.ok(svgFallback, 'ECharts CDN 不可达时热力图应降级为内联 SVG（.mini-map-svg）');
+      return;
+    }
+    await page.waitForFunction('window.__homeHeatmapChart', null, { timeout: 15000 });
     await page.waitForTimeout(1200);
     // 放大
     await page.click('[data-zoom="in"]');

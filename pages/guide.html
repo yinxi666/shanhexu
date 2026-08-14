@@ -15,22 +15,22 @@
   <meta property="og:url" content="https://yinxi666.github.io/shanhexu/pages/guide.html">
   <meta property="og:image" content="https://yinxi666.github.io/shanhexu/assets/icons/icon-512.png">
   <link rel="canonical" href="https://yinxi666.github.io/shanhexu/pages/guide.html">
-  <link rel="icon" type="image/png" href="../favicon.png?v=2026081320">
+  <link rel="icon" type="image/png" href="../favicon.png?v=2026081427">
   <link rel="manifest" href="../manifest.json">
   <title>全国红色场馆导览 - 赓续血脉・数绘红旅</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="../css/base.css?v=2026081320">
-  <link rel="stylesheet" href="../css/home.css?v=2026081320">
-  <link rel="stylesheet" href="../css/components.css?v=2026081320">
-  <link rel="stylesheet" href="../css/pages.css?v=2026081320">
-  <link rel="stylesheet" href="../css/widgets.css?v=2026081320">
-  <link rel="stylesheet" href="../css/effects.css?v=2026081320">
-  <link rel="stylesheet" href="../css/dark.css?v=2026081320">
+  <link rel="stylesheet" href="../css/base.css?v=2026081427">
+  <link rel="stylesheet" href="../css/home.css?v=2026081427">
+  <link rel="stylesheet" href="../css/components.css?v=2026081427">
+  <link rel="stylesheet" href="../css/pages.css?v=2026081427">
+  <link rel="stylesheet" href="../css/widgets.css?v=2026081427">
+  <link rel="stylesheet" href="../css/effects.css?v=2026081427">
+  <link rel="stylesheet" href="../css/dark.css?v=2026081427">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cn-fontsource-hong-lei-zhuo-shu-regular@1.0.6/font.min.css">
   <!-- Leaflet 自托管（assets/leaflet/，BSD-2-Clause）：不依赖 unpkg CDN，国内/离线均可加载；
        integrity/crossorigin 为 CDN 场景的完整性校验，本地同源加载无需 -->
-  <link rel="stylesheet" href="../assets/leaflet/leaflet.css?v=2026081320">
-  <script defer src="../assets/leaflet/leaflet.js?v=2026081320"></script>
+  <link rel="stylesheet" href="../assets/leaflet/leaflet.css?v=2026081427">
+  <script defer src="../assets/leaflet/leaflet.js?v=2026081427"></script>
 </head>
 
 <body>
@@ -59,7 +59,7 @@
       <div class="search-toolbar">
         <div class="search-box">
           <input type="text" id="search-input" placeholder="输入场馆名称、地区或关键词…" aria-label="搜索场馆">
-          <button id="guide-search-btn" type="button">搜索</button>
+          <button id="guide-search-btn" type="button" data-action="guide-search">搜索</button>
         </div>
         <select id="filter-province" aria-label="按地区筛选">
           <option value="all">全部地区</option>
@@ -67,7 +67,7 @@
         <select id="filter-category" aria-label="按类别筛选">
           <option value="all">全部类别</option>
         </select>
-        <button class="btn secondary small btn-map-toggle is-hidden" id="toggle-view-btn" title="切换地图/列表视图"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4l6 2.5L20 5v15l-5 1.5L9 19l-5 1.5v-15z"/><path d="M9 4v15M14 6.5v15"/></svg>
+        <button class="btn secondary small btn-map-toggle is-hidden" id="toggle-view-btn" title="切换地图/列表视图" data-action="guide-toggle-view"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4l6 2.5L20 5v15l-5 1.5L9 19l-5 1.5v-15z"/><path d="M9 4v15M14 6.5v15"/></svg>
           地图视图</button>
       </div>
 
@@ -82,7 +82,7 @@
         </div>
         <div class="guide-map">
           <div class="guide-map-sticky">
-            <div id="map-container"></div>
+            <div id="map-container" role="region" aria-label="全国红色场馆分布地图"></div>
           </div>
         </div>
       </div>
@@ -102,7 +102,7 @@
   <!-- ===== 页脚（由 js/layout-loader.js 注入共享模板） ===== -->
   <div id="site-footer"></div>
 
-  <script type="module" src="../js/app.js?v=2026081320"></script>
+  <script type="module" src="../js/app.js?v=2026081427"></script>
 
 </body>
 

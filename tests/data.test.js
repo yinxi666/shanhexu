@@ -107,3 +107,41 @@ test('别名全被消费：venue-aliases 中每个别名都是候选 standardNam
     assert.ok(candidateStdNames.has(a), `别名 ${a} 未对应任何候选（死别名）`);
   }
 });
+
+test('venue-details / policies / practices / reflections 基本形状', () => {
+  const details = JSON.parse(readFile('data/venue-details.json'));
+  assert.ok(details && typeof details === 'object' && !Array.isArray(details), 'venue-details 应为 name→{history,education} 对象');
+  assert.ok(Object.keys(details).length >= 32, 'venue-details 应覆盖全部 32 场馆，实际 ' + Object.keys(details).length);
+  Object.values(details).forEach((d, i) => {
+    assert.ok(d && typeof d.history === 'string' && d.history.length > 0, `venue-details 第${i}条缺 history`);
+    assert.ok(typeof d.education === 'string' && d.education.length > 0, `venue-details 第${i}条缺 education`);
+  });
+
+  const practices = JSON.parse(readFile('data/practices.json'));
+  assert.ok(Array.isArray(practices) && practices.length > 0, 'practices 应为非空数组');
+  const pIds = new Set();
+  practices.forEach((p, i) => {
+    assert.ok(p && typeof p.id === 'string' && /^practice-\d+$/.test(p.id), `practices[${i}] id 非法`);
+    assert.ok(!pIds.has(p.id), `practices id 重复：${p.id}`);
+    pIds.add(p.id);
+    ['title', 'team', 'summary', 'image', 'createdAt'].forEach(k => assert.ok(p[k], `practices[${i}] 缺 ${k}`));
+    assert.strictEqual(typeof p.likes, 'number', `practices[${i}] likes 应为数字`);
+  });
+
+  const policies = JSON.parse(readFile('data/policies.json'));
+  assert.ok(Array.isArray(policies) && policies.length === 10, 'policies 应恰为 10 条');
+  const polDates = [];
+  policies.forEach((p, i) => {
+    ['id', 'title', 'source', 'publishedAt', 'summary', 'url'].forEach(k => assert.ok(p[k], `policies[${i}] 缺 ${k}`));
+    polDates.push(p.publishedAt);
+  });
+  // 渲染层按日期倒序（最新在前，pages.js initPolicyPage），数组与之对应（2026-08 已重排为日期倒序）
+  const sortedDates = [...polDates].sort().reverse();
+  assert.deepStrictEqual(polDates, sortedDates, 'policies 应按 publishedAt 倒序排列');
+
+  const reflections = JSON.parse(readFile('data/reflections.json'));
+  assert.ok(Array.isArray(reflections) && reflections.length === 15, 'reflections 应恰为 15 条');
+  reflections.forEach((r, i) => {
+    ['id', 'title', 'author', 'content'].forEach(k => assert.ok(r[k], `reflections[${i}] 缺 ${k}`));
+  });
+});

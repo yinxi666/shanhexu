@@ -60,8 +60,9 @@ if (!versionMatch) {
     }
   });
   // JS 模块 import 上的 ?v= 同样须与 ASSET_VERSION 一致（先剥注释，防注释文本干扰）
+  // 排除 scripts/（CommonJS，无 ?v=）与 tests/（测试字面量，非交付物）
   walk(ROOT, (f) => {
-    if (!f.endsWith('.js') || f.startsWith(path.join(ROOT, 'scripts'))) return;
+    if (!f.endsWith('.js') || f.startsWith(path.join(ROOT, 'scripts')) || f.startsWith(path.join(ROOT, 'tests'))) return;
     jsChecked++;
     const content = stripComments(fs.readFileSync(f, 'utf8'));
     for (const m of content.matchAll(VERSION_RE)) {
@@ -156,10 +157,15 @@ walk(ROOT, (f) => {
   for (const m of content.matchAll(/url\((['"]?)([^'")]+)\1\)/g)) refs.push(m[2]);
   for (let ref of refs) {
     ref = ref.split('?')[0].trim(); // 去掉 ?v= 缓存破击后缀
-    // 跳过外链 / 锚点 / 协议内联 / 根绝对路径；%23 为 URL 编码的 #（SVG 滤镜片段引用）
+    // 跳过外链 / 锚点 / 协议内联；%23 为 URL 编码的 #（SVG 滤镜片段引用）
     if (!ref || ref.startsWith('http') || ref.startsWith('mailto') || ref.startsWith('tel')
       || ref.startsWith('data:') || ref.startsWith('blob:') || ref.startsWith('//')
-      || ref.startsWith('#') || ref.startsWith('%23') || ref.startsWith('/')) continue;
+      || ref.startsWith('#') || ref.startsWith('%23')) continue;
+    // 根绝对路径（/xxx）：GitHub Pages 子路径部署下解析到域名根，线上必然 404——报错而非放行
+    if (ref.startsWith('/')) {
+      errors.push(`根绝对路径引用（子路径部署会 404，应用 {{BASE}} 或相对路径）：${path.relative(ROOT, f)} 引用 ${ref}`);
+      continue;
+    }
     // BASE 混在路径中间（非常规）跳过，避免误报
     if (ref.includes('{{BASE}}') && !ref.startsWith('{{BASE}}')) continue;
     const target = resolveRef(ref, fileDir);

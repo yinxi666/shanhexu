@@ -65,9 +65,9 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 只暴露站点内容：拒绝 .git / node_modules 与任意 dotfile，避免整仓（含版本控制元数据）被局域网可读
+  // 只暴露站点内容：拒绝 .git / node_modules（含任意深度的嵌套）与任意 dotfile，避免整仓被局域网可读
   const rel = path.relative(ROOT, filePath).split(path.sep);
-  if (rel.some((seg) => seg.startsWith('.')) || rel[0] === 'node_modules') {
+  if (rel.some((seg) => seg.startsWith('.') || seg === 'node_modules')) {
     res.writeHead(404);
     res.end('Not found');
     return;
@@ -84,6 +84,10 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, {
         'Content-Type': contentType,
         'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'SAMEORIGIN',          // 防点击劫持（旧浏览器兜底）
+        'Referrer-Policy': 'same-origin',         // 防跨源泄漏完整 URL
+        'X-XSS-Protection': '0',                  // 现代标准：禁用过时的 XSS 过滤器
+        'Content-Security-Policy': "object-src 'none'; frame-ancestors 'self'",  // 只收紧 object/frame，不动脚本样式，零误伤
         'Cache-Control': 'no-cache'
       });
       res.end(data);

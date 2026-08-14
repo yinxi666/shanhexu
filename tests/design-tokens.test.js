@@ -73,7 +73,14 @@ test('transition 时长只取令牌刻度（0.25s/0.3s/0.6s，含 ms 写法）',
     if (isReducedMotion(r)) continue;
     for (const [prop, val] of Object.entries(r.decls)) {
       if (!/^transition(-duration)?$/.test(prop)) continue;
-      for (const t of extractTimes(val)) {
+      // transition 简写：第一个时间值为 duration，其后为 delay（豁免，与 converge 脚本的 delay 保护一致）；
+      // 此前把所有时间值都当 duration 校验，会误伤合法的 delay 位
+      // transition 简写：逗号分隔的每组第一个时间值为 duration，其后为 delay（豁免，与 converge 脚本的 delay 保护一致）；
+      // 不能整条 slice(0,1)，否则逗号多组的后续 duration 会逃逸令牌校验
+      const times = prop === 'transition'
+        ? val.split(',').map(seg => extractTimes(seg)[0]).filter(Boolean)
+        : extractTimes(val);
+      for (const t of times) {
         if (!VALID_DURATIONS.has(t.norm)) {
           offenders.push(`${r.file} 「${r.selector.trim()}」 ${prop}: ${val} 时长 ${t.raw}（=${t.norm}）`);
         }
@@ -90,9 +97,9 @@ test('animation 时长：≤0.6s 必须取令牌刻度（>0.6s 装饰动画豁�
     if (isReducedMotion(r)) continue;
     for (const [prop, val] of Object.entries(r.decls)) {
       if (prop !== 'animation-duration' && prop !== 'animation') continue;
-      /* animation 简写：第一个时间值是 duration，其后为 delay（豁免） */
+      /* animation 简写：逗号分隔的每组第一个时间值是 duration，其后为 delay（豁免） */
       const times = prop === 'animation'
-        ? extractTimes(val).slice(0, 1)
+        ? val.split(',').map(seg => extractTimes(seg)[0]).filter(Boolean)
         : extractTimes(val);
       for (const t of times) {
         if (t.sec <= 0.6 && !VALID_DURATIONS.has(t.norm)) {

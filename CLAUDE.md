@@ -45,7 +45,7 @@
 
 ## 交互：data-action 委托（禁止内联 onclick）
 
-全站交互走 `[data-action='值']` + document 级委托（`js/action-delegate.js` 单一 switch，现 16 个 case：含 `open-practice-video`/`close-practice-video` 实践视频弹窗）。
+全站交互走 `[data-action='值']` + document 级委托（`js/action-delegate.js` 单一 switch，现 18 个 case：含 `open-practice-video`/`close-practice-video` 实践视频弹窗、`guide-search`/`guide-toggle-view` 导览页搜索与视图切换）。
 **新增交互三步：① 元素加 data-action + 所需 data-* 属性 → ② switch 加对应 case → ③ 逻辑实现放进所属模块（页面私有动作如 copy-share-link 实现在 pages.js，委托只分派）。** 漏加 case 会让 `tests/data-action.test.js` 静态扫描红。
 
 ## 模块依赖方向（单向无环，禁 import app.js）
@@ -107,7 +107,7 @@
 - 长征 17 站中 13 站无"探访"链接（合并 32 场馆中无同名馆，按钮静默不渲染）。
 - AI 聊天"离线可用"名不副实（venuesCache 空时所有问题回"场馆数据正在加载中…"）。
 - 场馆坐标无 WGS-84→GCJ-02 转换，画在高德瓦片/导航上约 200-500m 偏移。
-- 音乐跨页"续播"实为按位置重载（新 Audio 需重新缓冲 + 自动播放策略）。
+- 音乐跨页"续播"仍按位置重载（浏览器自动播放策略限制，跨页无法无手势自动播放）；2026-08-14 已优化为预加载 + 无手势试播 + 被拦截时恢复横幅引导（`.music-resume-hint`），但"完全无缝持续播放"需 SPA 化，未做。
 
 ## 已知坑速查
 
@@ -126,3 +126,4 @@
 - 服务端路径：`data/` JSON、`assets/`、`templates/` 必须随部署一起带上（CI 的 _site 打包已包含）。
 - 首页纪念卡走 `renderHomeCard`（剪纸「赓续血脉」版），详情页/长征入口走 `renderCard`（证书版）——按 `currentVenueName` 是否为空分流，改卡面别动错分支。
 - hero 背景轮播图清单单源在页面容器 `[data-hero-images]`（首页 + 全国导览 + 实践成果页），改轮播图改该属性即可。
+- music.js 跨页续播恢复系统：`_autoResumeTried`/`_resumeBanner` 等 `let` 状态**必须在 `initBgMusic` 函数顶部声明**（2026-08-14 踩坑：放函数中部时，`attemptAutoResume()` 在 `if (wasPlaying)` 分支早期调用触发 TDZ ReferenceError，中断整个播放器初始化——按钮/滑条/手势监听全失效，页面看似正常）。改恢复逻辑时不要把这些 `let` 挪回函数中部。

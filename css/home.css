@@ -584,7 +584,8 @@
   width: 160px;
   height: 16px;
   border-radius: var(--radius-md);
-  background: linear-gradient(to right, #ffeb3b, #ff9800, #f44336, #c62828, #8b0000);
+  /* 与 js/heatmap.js visualMap 配色一致，避免图例误导 */
+  background: linear-gradient(to right, #fef3c7, #fde68a, #fca5a5, #f87171, #ef4444, #b91c1c);
 }
 
 .stat-item .stat-label {

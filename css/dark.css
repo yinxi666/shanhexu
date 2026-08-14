@@ -92,14 +92,6 @@ html.dark .nav-links li a.active {
   background: var(--light-red);
 }
 
-html.dark ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #6b7280, #4b5563, #374151);
-}
-
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #9ca3af, #6b7280, #4b5563);
-}
-
 html.dark .site-footer {
   background: #020617;
 }
@@ -148,7 +140,7 @@ html.dark .message-list {
   border-color: #5c4a20;
 }
 html.dark .message-card {
-  background: #232b3b;
+  background: var(--bg);  /* 与浅色 pages.css 同源令牌，消除双源硬编码 */
 }
 
 html.dark .sidebar-card .official-link {

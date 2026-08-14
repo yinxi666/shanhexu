@@ -56,8 +56,8 @@ function walk(dir, callback) {
     const fullPath = path.join(dir, entry);
     const stat = fs.statSync(fullPath);
     if (stat.isDirectory()) {
-      // 跳过构建产物/版本库/内部文档/代理缓存目录，避免误改或误伤
-      if (entry === 'node_modules' || entry === '.git' || entry === '_site' || entry === 'docs' || entry === '.claude' || entry === '_claude') continue;
+      // 跳过构建产物/版本库/内部文档/代理缓存/tests（测试字面量非交付物），避免误改或误伤
+      if (entry === 'node_modules' || entry === '.git' || entry === '_site' || entry === 'docs' || entry === '.claude' || entry === '_claude' || entry === 'tests') continue;
       walk(fullPath, callback);
     } else if (stat.isFile() && entry.endsWith('.html')) {
       callback(fullPath, 'html');

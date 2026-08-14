@@ -871,7 +871,7 @@
 }
 
 .message-card {
-  background: #fefcf7;
+  background: var(--bg);
   border: none;
   border-radius: var(--radius-xs);
   padding: 24px 28px 20px;

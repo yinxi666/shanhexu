@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-08-14 · v2026081426 — 全站代码审查修复 + 背景音乐续播优化 + 黄麻起义主图更换
+
+**全面代码审查修复（12 批次 56 文件，契约测试 40→41 项）**：
+- 数据：15 条核心场馆 summary 从开发者备注改为用户向文案；红旗渠渡槽 152→151（权威数据）；九一八史实表述修正；practices 错别字；policies 重排日期倒序
+- 聊天引擎：compare 正则贪心吞左操作数、类别查询示例落空、知识库 4 条缺场馆后缀否定（均实测复现修复）；pumpReplies 队列 try/finally；恢复链接强制 rel=noopener
+- 长征页：cz-sound 首次开启不 resume（iOS/Safari 无声）、resize 印章 active 丢失、Escape 空态拦截、纪念卡代际防"重开旧卡"、粒子去每帧径向渐变 + 运行期响应 reduced-motion
+- 导览地图：userMoved 被首次 fitBounds 污染、Leaflet 未就绪重试、marker 颜色令牌化
+- 页面层：导览页搜索/视图切换改走 data-action 委托（16→18 case）、留言存储篡改不再静默丢、heatmap fetch 超时 + MutationObserver 节流
+- 无障碍：答题反馈 aria-live、点赞/收藏 aria-pressed、图库键盘可达、focus-trap 排除 visibility:hidden
+- 性能/安全：favorites 缓存、hero-carousel 无配置页不注册监听、server.js 拦截嵌套 node_modules + 补安全头
+- 测试工具链：design-tokens transition delay 误判修正、emoji-clean 补 U+23F3 区段并扫 json/css、audit 根绝对报错 + 排除 tests、e2e 热力图不再假通过、data.test 新增 4 个 JSON 形状契约
+
+**背景音乐续播优化**：跨页改为预加载（currentTime 定位 + load() 预缓冲）+ 无手势自动试播；被浏览器拦截时弹恢复横幅（`.music-resume-hint`）引导一键恢复，替代此前静默失败；修复恢复系统 `let` 状态 TDZ ReferenceError（函数中部声明会中断播放器整体初始化）
+
+**黄麻起义主图**：详情页主图更换为「黄麻起义额外图片.webp」
+
 ## 2026-08-13 · v2026081320 — 长征终点成就弹窗 + 音乐按钮移动端适配
 
 - **长征终点成就弹窗（`.cz-complete`）**：此前零移动端适配——184px 大圆像 + 长段落 + 按钮内容 ~670px 高，超过 URL 栏收起的手机有效视口，且弹窗无 `overflow-y`、居中溢出裁顶部，"领取长征纪念卡"按钮被裁且够不到。容器改 `align-items:flex-start` + `overflow-y:auto`，inner 用 `margin:auto` 双轴居中；≤768px 圆像 184→120px、文字/间距收紧。实测：844px 全可见；390×560 短视口可滚动、按钮可达
