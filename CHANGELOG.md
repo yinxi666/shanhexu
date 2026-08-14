@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-08-15 · v2026081515 — 首页时间线「漫漫长路」重设计 + 子页 hero 视觉整理 + 导航栏楷体
+
+- **首页时间线重设计**（告别"一根横线"）：`js/timeline.js` `buildRoute()` 动态生成 SVG 正弦山路（红色 `route-base` + 金色 `route-lit`），节点按同一曲线经 `--tl-off` 上下错落（周期 240px、振幅 13px，reduce-motion 退化水平线）；点击年份「走过之路点亮」——金色路段 `stroke-dasharray` 从起点延伸到激活节点；终点 1964 金星（clip-path 五角星 + 金晕）；画卷底框装裱（宣纸淡底 + 顶部红边 + 金细边 + 圆角）；时间线**退出 feature-stage 3D**（`feature-stage.js` `ITEM_SELECTOR` 仅 `.feature-card`）
+- **子页 hero 去白光**：`.subpage-hero::before` 渐变旧版以 `var(--bg)` 浅色不透明收尾，图片下缘 40% 被盖成大片白光；改黑色系 + 底部金线收边（`.subpage-hero::after`）；压暗经三轮按用户要求取消，金字可读性改由 `.subpage-hero-content::before` 局部暗晕衬托
+- **亮图页轻压暗**：policy/message 页 hero 图 avgLum≈165/179 偏亮，加 `.hero-bright` 类整图 0.25 黑罩；其余暗调子页不加类保持全亮
+- **子页 hero 标题**：1.45→1.75 倍放大，金边光晕提到首页同款（描边 0.35、光晕 8/25/60px、0.7/0.3/0.15）
+- **导航栏楷体**：`KaiTi`/`STKaiti`/`楷体` serif，字号 18/13/17px
+- **卡标题统一深红**：7 处 `--ink`→`--deep-red`（首页功能卡/场馆卡/政策卡/实践卡/详情正文 h2/答题两处），深浅色双 token 自动适配
+
 ## 2026-08-14 · v2026081428 — PWA Service Worker + dark.css 令牌收敛
 
 - **Service Worker（sw.js）**：补全 PWA（manifest 已有，缺离线缓存）。带 `?v=` 的 js/css 缓存优先（版本化 URL 天然隔离新旧版本）；页面导航网络优先、离线回退缓存首页；图片/data JSON stale-while-revalidate；跨源（CDN 字体 / 高德瓦片）不缓存。`build-site.js` 打包 sw.js，`app.js` 注册，e2e 测试 block Service Worker 避免缓存旧资源干扰
