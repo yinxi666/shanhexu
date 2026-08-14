@@ -3,20 +3,20 @@
    职责：统一初始化所有 ES Module 模块，按固定顺序编排引导流程
    ============================================================ */
 
-import * as RedPages from './pages.js?v=2026081430';
-import * as RedCardGen from './cardgen.js?v=2026081430';
-import * as RedLongMarch from './longmarch.js?v=2026081430';
-import { initChatWidget } from './chat.js?v=2026081430';
-import { initQuiz } from './quiz.js?v=2026081430';
-import { initDarkMode } from './darkmode.js?v=2026081430';
-import { initMobileNav } from './mobile-nav.js?v=2026081430';
-import { initHomepageInnovation } from './homepage.js?v=2026081430';
-import { loadVenues } from './venue-store.js?v=2026081430';
-import { initActionDelegate } from './action-delegate.js?v=2026081430';
-import { initEntranceAnimation } from './entrance-animation.js?v=2026081430';
-import { initHeroCarousel } from './hero-carousel.js?v=2026081430';
-import { loadLayout } from './layout-loader.js?v=2026081430';
-import { getBasePath, isHomePage } from './utils.js?v=2026081430';
+import * as RedPages from './pages.js?v=2026081431';
+import * as RedCardGen from './cardgen.js?v=2026081431';
+import * as RedLongMarch from './longmarch.js?v=2026081431';
+import { initChatWidget } from './chat.js?v=2026081431';
+import { initQuiz } from './quiz.js?v=2026081431';
+import { initDarkMode } from './darkmode.js?v=2026081431';
+import { initMobileNav } from './mobile-nav.js?v=2026081431';
+import { initHomepageInnovation } from './homepage.js?v=2026081431';
+import { loadVenues } from './venue-store.js?v=2026081431';
+import { initActionDelegate } from './action-delegate.js?v=2026081431';
+import { initEntranceAnimation } from './entrance-animation.js?v=2026081431';
+import { initHeroCarousel } from './hero-carousel.js?v=2026081431';
+import { loadLayout } from './layout-loader.js?v=2026081431';
+import { getBasePath, isHomePage } from './utils.js?v=2026081431';
 
 /* ---------- 国旗视频：仅桌面大屏自动播放，且尊重"减少动效" ---------- */
 function initFlagVideo() {

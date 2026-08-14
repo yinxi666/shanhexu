@@ -5,8 +5,8 @@
          被 action-delegate.js 引用
    ============================================================ */
 
-import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081430';
-import { icon } from './icons.js?v=2026081430';
+import { showToast, bindImageFallbacks, onOverlayClick } from './ui.js?v=2026081431';
+import { icon } from './icons.js?v=2026081431';
 import {
   getBasePath,
   safeAssetSrc,
@@ -16,9 +16,9 @@ import {
   escapeAttr,
   getLikeCount,
   isPracticeLiked
-} from './utils.js?v=2026081430';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081430';
-import { getPractice } from './data.js?v=2026081430';
+} from './utils.js?v=2026081431';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026081431';
+import { getPractice } from './data.js?v=2026081431';
 
 // 实践中途请求进行中的标记：仅在 await 窗口内占用，防止双开守卫（DOM 守卫在 await 前无效）
 let _openingPracticeId = null;

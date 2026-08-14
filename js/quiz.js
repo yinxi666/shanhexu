@@ -4,11 +4,11 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081430';
-import { $, onOverlayClick } from './ui.js?v=2026081430';
-import { icon } from './icons.js?v=2026081430';
-import { getBasePath } from './utils.js?v=2026081430';
-import { quizData } from './quiz-data.js?v=2026081430';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081431';
+import { $, onOverlayClick } from './ui.js?v=2026081431';
+import { icon } from './icons.js?v=2026081431';
+import { getBasePath } from './utils.js?v=2026081431';
+import { quizData } from './quiz-data.js?v=2026081431';
 
 function initQuiz() {
   if ($('.quiz-fab')) return;

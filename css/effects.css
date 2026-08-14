@@ -167,27 +167,42 @@ main:not(#cz-main) {
 }
 
 /* ============================================================
-   滚动驱动 3D 翻入（豆包 stage 切换手法的轻量版，首页 feature-grid 用）
-   .feature-grid 保持 .scroll-animate（IO 加 .visible 整体进入），
-   卡默认 3D 隐藏态，grid 可见后逐张翻入（nth-child transition-delay stagger）
+   滚动驱动炫酷动效（豆包 stage 手法的安全版）
+   用 CSS scroll-driven animations（animation-timeline）：
+   元素始终可见，滚动进度直接驱动 3D/位移/透明度变换。
+   @supports 检测：不支持 scroll() 的浏览器回退为无动效（元素正常显示），零消失风险。
    ============================================================ */
-.feature-grid .feature-card {
-  /* 卡始终可见（不设 opacity:0，避免依赖滚动触发导致卡片区空白）；
-     滚动进入时从 8° 3D 倾斜翻正，保留"下滑有感觉"的滚动驱动感 */
-  transform: perspective(800px) rotateY(8deg);
-  /* duration 走令牌刻度（--duration-normal=0.6s）；stagger 用 transition-delay 单独属性（不受 duration 校验） */
-  transition: transform var(--duration-normal) var(--ease-cinematic);
-  will-change: transform;
+@supports (animation-timeline: scroll()) {
+  /* 创新功能卡：滚动进入视口时 3D 呈现（rotateY + 上移 + 透明度 0.5→1），
+     nth-child 错开 animation-range 起点实现 stagger（卡依次呈现） */
+  .feature-card {
+    animation: cardScroll3d linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 100%;
+    will-change: transform, opacity;
+  }
+  .feature-card:nth-child(2) { animation-range: entry 8% entry 100%; }
+  .feature-card:nth-child(3) { animation-range: entry 16% entry 100%; }
+  .feature-card:nth-child(4) { animation-range: entry 24% entry 100%; }
+
+  /* 首页 hero：滚动离开时轻微视差上移 + 微透明 */
+  .cinematic-hero {
+    animation: heroParallax linear both;
+    animation-timeline: scroll();
+    animation-range: 0% 40%;
+  }
 }
-.feature-grid.visible .feature-card {
-  transform: perspective(800px) rotateY(0deg);
+@keyframes cardScroll3d {
+  from { transform: perspective(800px) rotateY(14deg) translateY(30px); opacity: 0.5; }
+  to { transform: perspective(800px) rotateY(0deg) translateY(0); opacity: 1; }
 }
-.feature-grid .feature-card:nth-child(2) { transition-delay: 0.08s; }
-.feature-grid .feature-card:nth-child(3) { transition-delay: 0.16s; }
-.feature-grid .feature-card:nth-child(4) { transition-delay: 0.24s; }
+@keyframes heroParallax {
+  to { transform: translateY(-90px); opacity: 0.7; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .feature-grid .feature-card {
-    transform: none;
+  .feature-card,
+  .cinematic-hero {
+    animation: none !important;
   }
 }
 
