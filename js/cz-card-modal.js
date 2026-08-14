@@ -4,15 +4,14 @@
    依赖：utils/ui/icons/cardgen/focus-trap/cz-content
    ============================================================ */
 
-import { getBasePath, isTouchDevice } from './utils.js?v=2026081515';
-import { $, showToast, onOverlayClick } from './ui.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
-import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081515';
-import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081515';
-import { CZ_CARD_BGS } from './cz-content.js?v=2026081515';
+import { getBasePath, isTouchDevice } from './utils.js?v=2026081516';
+import { $, showToast, onOverlayClick } from './ui.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
+import { SPIRITS as CZ_SPIRITS, renderCard as czRenderCard, downloadDataUrl, shareDataUrl, buildBgGrid } from './cardgen.js?v=2026081516';
+import { trapFocus, lockBodyScroll, closeModal } from './focus-trap.js?v=2026081516';
+import { CZ_CARD_BGS } from './cz-content.js?v=2026081516';
 
 // 精神词列表复用 cardgen 的 SPIRITS（静态 import 恒为数组，无需兜底副本）
-const CZ_CARD_SPIRITS = CZ_SPIRITS;
 const czCardModal = $('#cz-card-modal');
 const czCardBgs = $('#cz-card-bgs');
 const czCardSpirits = $('#cz-card-spirits');
@@ -39,7 +38,7 @@ function buildCardModal() {
   }, 'cz-card-bg');
   // 精神 chips：首次构建后缓存；再次打开只恢复高亮（真实 <button>，键盘天然可达）
   if (czCardSpirits.children.length === 0) {
-    czCardSpirits.innerHTML = CZ_CARD_SPIRITS.map((s, i) =>
+    czCardSpirits.innerHTML = CZ_SPIRITS.map((s, i) =>
       `<button type="button" class="cz-card-chip${i === 0 ? ' selected' : ''}" data-i="${i}" aria-pressed="${i === 0}">${s}</button>`
     ).join('');
     czCardSpirits.querySelectorAll('.cz-card-chip').forEach(el => {
@@ -87,7 +86,7 @@ function generateLongMarchCard() {
   if (genBtn) { genBtn.disabled = true; genBtn.innerHTML = '正在盖章…'; }
   const resetBtn = () => { if (genBtn) { genBtn.disabled = false; genBtn.innerHTML = icon('sparkle') + ' 生成纪念卡'; } };
   const name = (czCardName && czCardName.value.trim()) || '同学';
-  const spirit = CZ_CARD_SPIRITS[_czCardSpirit] || '长征';
+  const spirit = CZ_SPIRITS[_czCardSpirit] || '长征';
   const bg = CZ_CARD_BGS[_czCardBg] || CZ_CARD_BGS[0];
   const img = new Image();
   // 背景图挂起时 8 秒超时复位按钮，避免长期禁用（句柄存模块级，弹窗关闭时可清除）

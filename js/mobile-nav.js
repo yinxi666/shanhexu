@@ -4,21 +4,22 @@
    约束：依赖 utils(getBasePath)；被 app.js 初始化（所有页面）
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081515';
-import { $ } from './ui.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
+import { getBasePath } from './utils.js?v=2026081516';
+import { $ } from './ui.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
 
 function initMobileNav() {
   if ($('.mobile-nav')) return;
 
   const bp = getBasePath();
-  const current = location.pathname.replace(/\/$/, '');
 
   function isActive(page) {
-    // 根路径 pathname 去掉末尾 / 后是 ''，需单独判空
-    if (page === 'index' && (current === '' || current.endsWith('index.html'))) return 'active';
-    if (current.includes(page + '.html')) return 'active';
-    if (page === 'guide' && current.includes('detail.html')) return 'active';
+    // 站点根(/)与部署子路径根(/shanhexu/)都是首页；子页取 pathname 末段文件名比对
+    const pathname = location.pathname;
+    const file = pathname.split('/').pop() || '';
+    if (page === 'index' && (pathname === '/' || pathname.endsWith('/') || file === 'index.html')) return 'active';
+    if (file === page + '.html') return 'active';
+    if (page === 'guide' && file === 'detail.html') return 'active';
     return '';
   }
 

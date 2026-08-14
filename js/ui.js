@@ -5,8 +5,8 @@
    约束：只依赖 utils.js，被 pages/music/modals/cardgen/longmarch/action-delegate 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
+import { getBasePath } from './utils.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
@@ -35,6 +35,8 @@ function showToast(message, duration = 2500) {
   if (!toast) {
     toast = document.createElement('div');
     toast.className = 'toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
     document.body.appendChild(toast);
   }
   /* innerHTML：支持图标 SVG；调用方均为常量文案（无用户输入注入面） */
@@ -56,7 +58,14 @@ function initNavigation() {
       navToggle.textContent = isOpen ? '✕' : '☰';
     });
     navLinks.addEventListener('click', (e) => {
-      if (e.target.tagName === 'A') navLinks.classList.remove('open');
+      if (e.target.tagName !== 'A') return;
+      // 点链接（含 Ctrl/meta 新开、锚点等不立即导航场景）后同步复位按钮状态，避免 aria 状态失真
+      if (navLinks.classList.contains('open')) {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-label', '展开导航');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.textContent = '☰';
+      }
     });
   }
   // 当前页高亮（含 aria-current、详情页→导览）由 layout-loader.setActiveNav 注入共享页头时统一处理，
@@ -143,11 +152,15 @@ function initViewTransitions() {
 function initHeaderScroll() {
   const header = document.querySelector('.site-header');
   if (!header) return;
+  // rAF 节流，与 initBackToTop 对齐：滚动事件高频触发，避免每事件直接 DOM 写
+  let ticking = false;
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 100) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        header.classList.toggle('scrolled', window.scrollY > 100);
+        ticking = false;
+      });
+      ticking = true;
     }
   }, { passive: true });
 }

@@ -89,6 +89,7 @@
 - 深色模式：`html.dark` 类（documentElement 非 body）+ localStorage `redguide_dark` + 每页 head 反 FOUC 内联脚本。dark.css 必须最后加载。
 - 新增令牌 = base.css `:root` 定义 + dark.css `html.dark` 同名覆盖**双份**（含 changzheng 的 `--cz-*`，否则 `changzheng-dark` 测试红）。
 - **红底文字用 `--on-primary`，禁用 `--white`**（深色下 `--white` = #1e293b 表面色）。
+- **深色下红字/标题用 `--red-text`**（深色 `#f87171`，对 card-bg 5.30:1；浅色 `#b91c1c`），**勿用 `--deep-red` 作文字色**——深色下 `--deep-red`=#991b1b 对 card-bg 仅 1.76:1 不可读（2026-08-15 踩坑，8 处卡标题深色下已改用 --red-text）。
 
 ## 测试契约（改数据/样式前先读对应测试）
 
@@ -128,6 +129,6 @@
 - hero 背景轮播图清单单源在页面容器 `[data-hero-images]`（首页 + 全国导览 + 实践成果页），改轮播图改该属性即可。
 - music.js 跨页续播恢复系统：`_autoResumeTried`/`_resumeBanner` 等 `let` 状态**必须在 `initBgMusic` 函数顶部声明**（2026-08-14 踩坑：放函数中部时，`attemptAutoResume()` 在 `if (wasPlaying)` 分支早期调用触发 TDZ ReferenceError，中断整个播放器初始化——按钮/滑条/手势监听全失效，页面看似正常）。改恢复逻辑时不要把这些 `let` 挪回函数中部。
 - sw.js（Service Worker，2026-08-14 新增）：离线可用 + 资源缓存。带 `?v=` 的 js/css 缓存优先、导航网络优先离线回退首页、图片/data stale-while-revalidate、跨源（CDN 字体/高德瓦片）不缓存。**版本由资源 URL 的 `?v=` 驱动，无需 bump 同步 sw.js**（它不在 js/ 下、不挂 `?v=`）。e2e 测试（smoke/interactions）已 block Service Worker 避免缓存旧资源干扰。
-- 首页时间线「漫漫长路」（2026-08-15 重设计，告别"一根横线"）：`.tl-route` SVG 蜿蜒山路由 `js/timeline.js` 的 `buildRoute()` 动态生成（红色 `route-base` + 金色 `route-lit` 两层 path），节点按同一条正弦曲线经 `--tl-off` 变量定 Y 偏移（波形参数在 buildRoute：`baseY=28`/`amp=13`/`wavelength=240`，改波形改那里；reduce-motion 时 amp=0 退化水平线）。「走过之路点亮」靠 `route-lit` 的 `stroke-dasharray` 从起点延伸到激活节点（`litTo(idx)`，showEvent 内调用）；resize 跨 860px 断点会重建。终点 1964 金星（`.tl-node:last-child .tl-dot` clip-path 五角星）。时间线已**退出 feature-stage 3D**（`feature-stage.js` 的 `ITEM_SELECTOR` 只含 `.feature-card`，勿把 `.timeline-scroll` 加回去）。画卷底框在 `.timeline-scroll`（红金边框/宣纸淡底/圆角）。
+- 首页时间线「漫漫长路」（2026-08-15 重设计，告别"一根横线"）：`.tl-route` SVG 蜿蜒山路由 `js/timeline.js` 的 `buildRoute()` 动态生成（红色 `route-base` + 金色 `route-lit` 两层 path），节点按同一条正弦曲线经 `--tl-off` 变量定 Y 偏移（波形参数在 buildRoute：`baseY=7`/`amp=13`/`wavelength=240`，改波形改那里；baseY=7 是 dot 半高，20px 顶内距在 .timeline-scroll 不进 track 坐标系，曾误设 28 致山路错位 21px；reduce-motion 时 amp=0 退化水平线）。「走过之路点亮」靠 `route-lit` 的 `stroke-dasharray` 从起点延伸到激活节点（`litTo(idx)`，showEvent 内调用）；resize 跨 860px 断点会重建。终点 1964 金星（`.tl-node:last-child .tl-dot` clip-path 五角星）。时间线已**退出 feature-stage 3D**（`feature-stage.js` 的 `ITEM_SELECTOR` 只含 `.feature-card`，勿把 `.timeline-scroll` 加回去）。画卷底框在 `.timeline-scroll`（红金边框/宣纸淡底/圆角）。
 - 子页 hero 白色渐变陷阱（2026-08-15）：`.subpage-hero::before` 渐变终点若用 `var(--bg)` 浅色不透明收尾，会把图片下缘整片盖成白光（曾踩坑）。**渐变终点只能用黑色系或 transparent，不能用浅色**；标题贴底（`flex-end`）需压暗时用黑色半透明罩。用户已取消整图压暗，金字可读性靠 `.subpage-hero-content::before` 局部暗晕衬托（radial-gradient 暗底）。
 - 亮色调 hero 图（policy/message 页，avgLum≈165/179）：hero 加 `hero-bright` 类整图 0.25 黑罩（`.subpage-hero.hero-bright::before`）。新增页面若 hero 图偏亮（avgLum>150）须加此类，暗调图不用。

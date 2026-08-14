@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-08-15 · v2026081516 — 全面审查修复（26 项）
+
+- **深色标题可读性**：新增 `--red-text` 令牌（base `#b91c1c` / dark `#f87171`），8 处卡标题深色下改用它（对 card-bg 5.30:1，原 --deep-red 深色仅 1.76:1 不可读）；`dark-mode.test` 新增标题对比度 ≥4.5 断言防回归
+- **时间线「漫漫长路」对齐**：`baseY` 28→7（SVG 与节点同用 track 坐标系、dot 半高 7），山路精确穿过路碑圆点（实测 diff=0）+ viewBox 上界 -12 修正
+- **功能卡 hover 回归**：feature-stage 归位后清空内联 transform，hover 上浮恢复
+- **逻辑/深色**：移动端底部导航首页高亮适配部署子路径；音量滑条裸 hex→`--red`/`--line` 令牌（--vol 变量）；聊天路线推荐统一 `findVenue` 匹配器；年份回复去重复前缀「1935年1935年」；入场动画每帧 2×getImageData→遮罩一次性烘焙+`destination-in`；入场 header/footer inert 死分支改类选择器；dark.css `nav-links` 无条件背景删除（桌面不再出现深色矩形块）
+- **安全/健壮性**：`sanitizeBotHtml` 堵 `srcset/ping/referrerpolicy` 外联跟踪面；答题断点 `qs` 索引类型校验（防篡改死锁）；留言 `avatarColor` String 强转（防整列表渲染崩溃）
+- **无障碍**：toast `role=status`、聊天 `role=log`、音量滑条 `:focus-within` 展开、marker `title/alt`、热力图 `role=img`、fav-btn `aria-label`、导航链接点击后 aria 状态复位、header scroll rAF 节流
+- **清理/性能**：删 `tests/measure-timeline.js`；时间线死包装 `.feature-stage/.feature-pin` div；`CZ_CARD_SPIRITS` 冗余别名；`render(true,false)` 死参；`cz-note` 米色底渐变并入 background-image 首层（原被 7 层金点整体覆盖，笺纸无实心底色）；`cz-stamp` 重复 opacity；hero 轮播图预加载（慢网不闪）；miniRoute 换站缓存；highlightMarker 增量高亮；`route-lit` 时长走令牌；`page-exit` 失实注释修正
+
 ## 2026-08-15 · v2026081515 — 首页时间线「漫漫长路」重设计 + 子页 hero 视觉整理 + 导航栏楷体
 
 - **首页时间线重设计**（告别"一根横线"）：`js/timeline.js` `buildRoute()` 动态生成 SVG 正弦山路（红色 `route-base` + 金色 `route-lit`），节点按同一曲线经 `--tl-off` 上下错落（周期 240px、振幅 13px，reduce-motion 退化水平线）；点击年份「走过之路点亮」——金色路段 `stroke-dasharray` 从起点延伸到激活节点；终点 1964 金星（clip-path 五角星 + 金晕）；画卷底框装裱（宣纸淡底 + 顶部红边 + 金细边 + 圆角）；时间线**退出 feature-stage 3D**（`feature-stage.js` `ITEM_SELECTOR` 仅 `.feature-card`）

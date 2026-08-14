@@ -4,9 +4,9 @@
    约束：依赖 utils(getBasePath) / ui(showToast)；被 pages.initCommon 调用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081515';
-import { showToast } from './ui.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
+import { getBasePath } from './utils.js?v=2026081516';
+import { showToast } from './ui.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
 
 let bgMusic = null;
 
@@ -86,10 +86,9 @@ function initBgMusic() {
     }
   });
 
-  // 更新滑条填充色
+  // 更新滑条填充色：只写 --vol 变量，渐变走 CSS 令牌（var(--red)/var(--line)），深色模式自动适配
   function updateSliderFill() {
-    const v = slider.value;
-    slider.style.background = 'linear-gradient(to right, #b91c1c 0%, #b91c1c ' + v + '%, #e6dccf ' + v + '%, #e6dccf 100%)';
+    slider.style.setProperty('--vol', slider.value + '%');
   }
 
   // 音量调节

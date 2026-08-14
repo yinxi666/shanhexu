@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { getBasePath, safeStorage } from './utils.js?v=2026081515';
-import { $, $$ } from './ui.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
-import { generateReply } from './chat-engine.js?v=2026081515';
+import { getBasePath, safeStorage } from './utils.js?v=2026081516';
+import { $, $$ } from './ui.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
+import { generateReply } from './chat-engine.js?v=2026081516';
 
 /* 相对路径重定向到当前页 base：聊天历史跨页恢复时，首页生成的 'pages/…' 在 /pages/ 子页会解析成
    /pages/pages/… 404；把开头 '../' 剥成根相对再拼当前 base（http/锚点/根绝对 原样保留） */
@@ -37,6 +37,8 @@ function sanitizeBotHtml(html) {
         const name = attr.name.toLowerCase();
         const val = attr.value.trim().toLowerCase();
         if (name === 'style' || name === 'srcdoc' || name.indexOf('on') === 0) { node.removeAttribute(attr.name); return; }
+        // 外联/跟踪类属性一律剔除：srcset/sizes 可加载外部图泄露访客 IP/UA、ping 发跟踪 POST、referrerpolicy 剥 Referer
+        if (name === 'srcset' || name === 'sizes' || name === 'ping' || name === 'referrerpolicy') { node.removeAttribute(attr.name); return; }
         if (name === 'href' || name === 'src') {
           // href/src 协议白名单（与 utils.sanitizeUrl 同口径）：http(s)/mailto/tel、站内相对路径、assets/images/uploads/pages/data 前缀；
           // 其余一律剔除——堵住 javascript:/vbscript:/data: 各种子 scheme（含 data:image/svg+xml 这类黑名单漏网）
@@ -119,6 +121,9 @@ function initChatWidget() {
   const sendBtn = $('#chat-send');
   const messages = $('#chat-messages');
   const quickBtns = $('#chat-quick-btns');
+  // 动态追加的回复对读屏播报：role=log + aria-live（输入框保持焦点时也能收到新回复）
+  messages.setAttribute('role', 'log');
+  messages.setAttribute('aria-live', 'polite');
 
   fab.addEventListener('click', () => {
     const opening = !panel.classList.contains('open');

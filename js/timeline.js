@@ -5,11 +5,11 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath, escapeHtml } from './utils.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
-import { getVenues } from './venue-store.js?v=2026081515';
-import { findVenueByName } from './data.js?v=2026081515';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081515';
+import { getBasePath, escapeHtml } from './utils.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
+import { getVenues } from './venue-store.js?v=2026081516';
+import { findVenueByName } from './data.js?v=2026081516';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081516';
 
 function prefersReduce() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -27,9 +27,9 @@ function buildRoute() {
   if (nodes.length < 2) return null;
 
   const ns = 'http://www.w3.org/2000/svg';
-  // 波形参数：中心线对齐路碑中心（track padding-top 20 + dot 半高 8），
-  // 周期 240px = 两个节点一个峰一个谷，相邻节点上下交错
-  const baseY = 28;
+  // 波形参数：中心线对齐路碑中心（.tl-dot 是 track 内 flex 项顶部子元素，14px dot 半高 7，
+  // SVG 相对 track 定位，故基线取 7；20px 顶内距在 .timeline-scroll 上、不进 track 坐标系）
+  const baseY = 7;
   const amp = prefersReduce() ? 0 : 13;
   const wavelength = 240;
   const waveY = (x) => baseY + amp * Math.sin((2 * Math.PI * x) / wavelength);
@@ -47,7 +47,8 @@ function buildRoute() {
   svg.setAttribute('preserveAspectRatio', 'none');
   svg.setAttribute('width', '100%');
   svg.setAttribute('height', '100%');
-  svg.setAttribute('viewBox', '0 0 ' + track.scrollWidth + ' ' + track.offsetHeight);
+  // viewBox 上界取 -12：波形（7±13）会越过 y=0，负区间须纳入可视盒，否则山路顶部被裁
+  svg.setAttribute('viewBox', '0 -12 ' + track.scrollWidth + ' ' + (track.offsetHeight + 12));
   track.prepend(svg);
 
   // 路从 track 左缘起，蜿蜒穿过所有节点，终点略延伸（金星之下）

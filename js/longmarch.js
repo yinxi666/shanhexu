@@ -3,20 +3,20 @@
  *  核心：用户纵向scroll → 横向手卷 translateX 展开
  *  双卷轴木杆旋转 + 17站朱砂印章 + 飘落笺纸 + mood切换
  * ============================================================ */
-import * as RedData from './data.js?v=2026081515';
-import { getBasePath } from './utils.js?v=2026081515';
-import { $ } from './ui.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
+import * as RedData from './data.js?v=2026081516';
+import { getBasePath } from './utils.js?v=2026081516';
+import { $ } from './ui.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
 
 /* ---------- 17站长征关键节点 ---------- */
-import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081515';
-import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081515';
-import * as czSound from './cz-sound.js?v=2026081515';
-import { stampSvg } from './cz-stamps.js?v=2026081515';
-import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081515';
-import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081515';
-import { showTheater, theaterLock } from './cz-theater.js?v=2026081515';
-import { initAtmosphere } from './cz-atmosphere.js?v=2026081515';
+import { STATIONS, TOTAL_MILES, STATION_PHOTOS, VENUE_LOOKUP, buildSmoothPath } from './cz-stations.js?v=2026081516';
+import { RELIC_MAP, POEM_MOMENTS } from './cz-content.js?v=2026081516';
+import * as czSound from './cz-sound.js?v=2026081516';
+import { stampSvg } from './cz-stamps.js?v=2026081516';
+import { openCardModal, closeCardModal, isCardModalOpen, initCardModalUI } from './cz-card-modal.js?v=2026081516';
+import { openRelicDetail, closeRelic, showComplete, closeComplete, isRelicOpen, isCompleteOpen, initModalsUI } from './cz-modals.js?v=2026081516';
+import { showTheater, theaterLock } from './cz-theater.js?v=2026081516';
+import { initAtmosphere } from './cz-atmosphere.js?v=2026081516';
 
 /* 共享 reduced-motion 检测（动态响应系统设置变化）。
    兼容旧浏览器：MediaQueryList.addEventListener 是 Safari 14 才引入，
@@ -414,6 +414,10 @@ function updateMiniRoute(progress) {
   // 当前站点激活 + marker 定位
   if (!state.activeStationId) return;
   const id = state.activeStationId;
+  // active/passed 只随换站变化：缓存上一帧站 id，未变则跳过 17 次 classList + marker 重设
+  //（本函数由 onScroll 每帧调用，绝大多数帧站点不变）
+  if (state._lastMiniRouteId === id) return;
+  state._lastMiniRouteId = id;
   const dotEls = state._miniDotEls;
   if (dotEls && dotEls.length) {
     for (let i = 0; i < dotEls.length; i++) {

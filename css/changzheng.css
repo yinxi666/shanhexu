@@ -334,7 +334,6 @@
   height: 76px;
   /* 未激活印章 3D 侧倾 + 稍暗；滚动到达时翻正 + 放大（盖章落印感） */
   transform: translate(-50%, -50%) perspective(500px) rotateY(28deg) scale(0.78);
-  opacity: 0.7;
   z-index: 4;
   transition: transform var(--duration-normal) var(--ease-cinematic),
     filter var(--duration-normal) ease,
@@ -405,8 +404,6 @@
   position: absolute;
   width: 430px;
   max-width: 42vw;
-  background:
-    radial-gradient(ellipse at 20% 10%, rgba(255, 248, 220, 0.92) 0%, #f7ecc9 55%, #efe0b2 100%);
   padding: 16px 24px 16px;
   border-radius: var(--radius-xs);
   box-shadow:
@@ -423,8 +420,10 @@
   z-index: 5;
   pointer-events: none;
   /* 不挡下面印章点击 */
-  /* 洒金笺效果：金色小点随机分布 */
+  /* 米色底渐变 + 洒金点：底渐变必须是 background-image 第一层——旧 background 简写会被
+     background-image（7 层金点）整体替换，笺纸只剩金点、无实心底色（透出手卷纸面） */
   background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 248, 220, 0.92) 0%, #f7ecc9 55%, #efe0b2 100%),
     radial-gradient(circle 1.5px at 12% 22%, rgba(212, 158, 60, 0.55), transparent 60%),
     radial-gradient(circle 1px at 36% 78%, rgba(212, 158, 60, 0.45), transparent 60%),
     radial-gradient(circle 2px at 68% 34%, rgba(230, 180, 80, 0.5), transparent 60%),

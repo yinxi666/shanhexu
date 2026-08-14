@@ -4,8 +4,8 @@
    依赖：utils / icons（收藏态由调用方经 isFav 参数传入，渲染层不读 favorites 存储）
    ============================================================ */
 
-import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
+import { getBasePath, safeAssetSrc, fallbackSrc, escapeHtml, escapeAttr, getLikeCount, isPracticeLiked } from './utils.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
 
 // 收藏态由调用方（页面控制器）通过 isFav 参数传入，渲染层不再直接依赖 favorites 存储
 function renderVenueCard(venue, basePath, isFav = false) {
@@ -36,7 +36,7 @@ function renderVenueCard(venue, basePath, isFav = false) {
         <div class="card-footer">
           <span>${esc(venue.officialVerificationStatus || '')}</span>
           <span>
-            <button class="fav-btn ${favClass}" title="收藏场馆" aria-pressed="${favActive}" data-action="toggle-favorite" data-id="${esc(venue.id)}">${favIcon}</button>
+            <button class="fav-btn ${favClass}" title="收藏场馆" aria-label="${favActive === 'true' ? '取消收藏' : '收藏场馆'}" aria-pressed="${favActive}" data-action="toggle-favorite" data-id="${esc(venue.id)}">${favIcon}</button>
             <span class="card-link">查看详情 →</span>
           </span>
         </div>
@@ -87,6 +87,8 @@ function renderPracticeCard(practice, basePath) {
  * 根据名字 hash 生成稳定的头像颜色
  */
 function avatarColor(name) {
+  // 留言 author 可被篡改为非字符串（数组/数字等），String() 强转防 charCodeAt TypeError 拖垮整列表渲染
+  name = String(name == null ? '' : name);
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);

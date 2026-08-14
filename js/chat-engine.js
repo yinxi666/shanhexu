@@ -5,11 +5,11 @@
    说明：与 chat.js（悬浮 UI 组件）分离，本模块可在无 DOM 环境直接单元测试。
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081515';
-import * as RedData from './data.js?v=2026081515';
-import { getVenues } from './venue-store.js?v=2026081515';
-import { knowledge } from './chat-knowledge.js?v=2026081515';
-import { HISTORY_EVENTS } from './red-history.js?v=2026081515';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, stripProvinceSuffix } from './utils.js?v=2026081516';
+import * as RedData from './data.js?v=2026081516';
+import { getVenues } from './venue-store.js?v=2026081516';
+import { knowledge } from './chat-knowledge.js?v=2026081516';
+import { HISTORY_EVENTS } from './red-history.js?v=2026081516';
 
 export function generateReply(query) {
   const q = query.trim();
@@ -324,9 +324,13 @@ function getHelp() {
 }
 
 function getYearEvents(year) {
-  // 年份叙述来自单一知识源 red-history.js（首页时间线共用，消除重复）
+  // 年份叙述来自单一知识源 red-history.js（首页时间线共用，消除重复）；
+  // desc 本身以「年份年」开头，去掉该前缀再统一加粗，避免「1935年1935年1月」重复
   const ev = HISTORY_EVENTS[year];
-  if (ev) return ` <b>${year}年</b>${ev.desc}`;
+  if (ev) {
+    const desc = ev.desc.replace(new RegExp('^' + year + '年'), '');
+    return ` <b>${year}年</b>${desc}`;
+  }
   return ` <b>${year}年</b>的具体红色历史事件我还在整理中。<br><br>目前已收录：${Object.keys(HISTORY_EVENTS).join('、')} 年的重要事件。<br><i> 输入具体事件名如「长征」「开国大典」了解更多</i>`;
 }
 
@@ -368,7 +372,8 @@ function recommendRoute(q) {
     html += '<div class="ai-card">';
     html += '<b>' + r.name + '</b><br> ' + r.desc + '<br>';
     html += ' ' + r.venues.map(function (vn) {
-      const v = venues.find(function (x) { return (x.name || '').indexOf(vn) >= 0; });
+      // 统一委托 data.js 的单一场馆匹配器（findVenue），与搜索/时间线共用，避免另写一套匹配
+      const v = findVenue(vn);
       return v ? '<a class="ai-card-link" href="' + escapeAttr(getBasePath()) + 'pages/detail.html?id=' + encodeURIComponent(v.id) + '">' + escapeHtml(vn) + '</a>' : escapeHtml(vn);
     }).join(' → ');
     html += '</div>';

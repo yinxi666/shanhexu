@@ -3,7 +3,7 @@
    原 index.html 内联脚本提取，职责：首页 entrance-canvas 全屏叙事动画
    ============================================================ */
 
-import { resolveAssetPath } from './utils.js?v=2026081515';
+import { resolveAssetPath } from './utils.js?v=2026081516';
 
 export function initEntranceAnimation() {
   // sessionStorage 访问防护（Safari 隐私模式等会抛异常，避免开场黑屏卡死）
@@ -19,10 +19,12 @@ export function initEntranceAnimation() {
   // 只在首页存在 entrance-overlay 时初始化，避免非首页直接调用报错
   if (!document.getElementById('entrance-overlay')) return;
   // 背景页面对键盘焦点不设防：开场期间把主体内容标为 inert（真正挡 Tab 焦点）+
-  // aria-hidden 作旧引擎回退，焦点只落在遮罩内（skip 已 autofocus）
+  // aria-hidden 作旧引擎回退，焦点只落在遮罩内（skip 已 autofocus）。
+  // 注意：layout-loader 注入后是 header.site-header/footer.site-footer（class），
+  // 占位 div#site-header/#site-footer 已被移除，须用类选择器（否则恒 null 变死分支）
   const _entranceMain = document.querySelector('main');
-  const _entranceHeader = document.getElementById('site-header');
-  const _entranceFooter = document.getElementById('site-footer');
+  const _entranceHeader = document.querySelector('header.site-header');
+  const _entranceFooter = document.querySelector('footer.site-footer');
   if (_entranceMain) { _entranceMain.setAttribute('inert', ''); _entranceMain.setAttribute('aria-hidden', 'true'); }
   if (_entranceHeader) { _entranceHeader.setAttribute('inert', ''); _entranceHeader.setAttribute('aria-hidden', 'true'); }
   if (_entranceFooter) { _entranceFooter.setAttribute('inert', ''); _entranceFooter.setAttribute('aria-hidden', 'true'); }
@@ -204,6 +206,7 @@ export function initEntranceAnimation() {
       octx.putImageData(imgData, 0, 0);
       tiananmenCanvas = oc;
       tiananmenReady = true;
+      bakeTiananmenMask();
     } catch (e) {
       tiananmenReady = true;
     }
@@ -215,6 +218,24 @@ export function initEntranceAnimation() {
   taFireCanvas.setAttribute('aria-hidden', 'true');
   let taFireCtx = taFireCanvas.getContext('2d', { willReadFrequently: true });
   let taEmbers = [];
+
+  // 天安门 alpha 遮罩：onload 时一次性烘焙成 mask canvas，每帧 drawImage 缩放 + destination-in
+  // 裁剪火焰，替代旧实现每帧 2 次 getImageData + 逐像素重算遮罩（GPU→CPU 同步回读，低端机掉帧源）
+  let taMaskCanvas = document.createElement('canvas');
+  taMaskCanvas.setAttribute('aria-hidden', 'true');
+  function bakeTiananmenMask() {
+    if (!tiananmenCanvas) return;
+    taMaskCanvas.width = tiananmenCanvas.width;
+    taMaskCanvas.height = tiananmenCanvas.height;
+    let mc = taMaskCanvas.getContext('2d');
+    mc.clearRect(0, 0, taMaskCanvas.width, taMaskCanvas.height);
+    let sd = tiananmenCanvas.getContext('2d').getImageData(0, 0, tiananmenCanvas.width, tiananmenCanvas.height).data;
+    let md = mc.createImageData(taMaskCanvas.width, taMaskCanvas.height);
+    for (let i = 0; i < sd.length; i += 4) {
+      md.data[i + 3] = sd[i + 3];
+    }
+    mc.putImageData(md, 0, 0);
+  }
 
   function drawTiananmen(cx, baseY, scale, alpha, time) {
     let s = scale;
@@ -238,12 +259,6 @@ export function initEntranceAnimation() {
       fc.clearRect(0, 0, taFireCanvas.width, taFireCanvas.height);
       fc.drawImage(tiananmenCanvas, 0, 0, taFireCanvas.width, taFireCanvas.height);
 
-      let taAlphaData = fc.getImageData(0, 0, taFireCanvas.width, taFireCanvas.height);
-      let taAlpha = new Uint8ClampedArray(taAlphaData.data.length / 4);
-      for (let ai = 0; ai < taAlphaData.data.length; ai += 4) {
-        taAlpha[ai / 4] = taAlphaData.data[ai + 3];
-      }
-
       fc.globalCompositeOperation = 'lighter';
       let srcX = taFireCanvas.width / 2;
       let srcY = taFireCanvas.height;
@@ -266,14 +281,11 @@ export function initEntranceAnimation() {
         }
       }
 
+      // 用烘焙的天安门 alpha 遮罩裁剪火焰（destination-in 保留与天安门 alpha 的交集），
+      // 替代旧实现每帧 getImageData/putImageData + 逐像素 Math.min
+      fc.globalCompositeOperation = 'destination-in';
+      fc.drawImage(taMaskCanvas, 0, 0, taFireCanvas.width, taFireCanvas.height);
       fc.globalCompositeOperation = 'source-over';
-      let currentData = fc.getImageData(0, 0, taFireCanvas.width, taFireCanvas.height);
-      let cd = currentData.data;
-      for (let ci = 0; ci < cd.length; ci += 4) {
-        let idx2 = ci / 4;
-        cd[ci + 3] = Math.min(cd[ci + 3], taAlpha[idx2]);
-      }
-      fc.putImageData(currentData, 0, 0);
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';

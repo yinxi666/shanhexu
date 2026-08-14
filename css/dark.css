@@ -15,6 +15,9 @@ html.dark body {
 }
 html.dark {
   --red: #ef4444;
+  /* 深色下红字用更亮红：--red(#ef4444) 对 card-bg(#1e293b) 仅 3.84:1，不达 4.5 ——
+     --red-text(#f87171) 5.30:1，供标题/强调文字在深色下使用 */
+  --red-text: #f87171;
   --gold: #fbbf24;
   --light-gold: #3d3000;
   --ink: #f1f5f9;
@@ -88,9 +91,8 @@ html.dark .site-header {
   background: rgba(15, 23, 42, 0.95);
 }
 
-html.dark .nav-links {
-  background: var(--card-bg);
-}
+/* 移动端下拉菜单背景来自 widgets.css .nav-links { background: var(--white) }，
+   深色下 --white 已是 #1e293b，无需此处再覆盖；此处无断点限定会把桌面透明行也涂成块 */
 
 html.dark .nav-links li a {
   color: var(--nav-link-fg);
@@ -120,10 +122,20 @@ html.dark .map-placeholder {
   background: var(--placeholder-bg);
 }
 
-/* --deep-red 同时被用作文字颜色（章节标题/表单标题）——深色下 #991b1b 在深底上对比度不足，改回亮红 */
+/* --deep-red 同时被用作文字颜色（章节标题/表单标题/卡标题/答题/时间线标签）——
+   深色下 #991b1b 在深底上对比度不足，统一改 --red-text（#f87171，对 card-bg 5.30:1） */
 html.dark .section-heading h2,
-html.dark .message-form-card h3 {
-  color: var(--red);
+html.dark .message-form-card h3,
+html.dark .feature-card h3,
+html.dark .venue-card .card-body h3,
+html.dark .detail-main .detail-body h2,
+html.dark .policy-card .policy-info h3,
+html.dark .practice-card .practice-body h3,
+html.dark .quiz-start h3,
+html.dark .quiz-question h3,
+html.dark .tl-node:hover .tl-label,
+html.dark .tl-node.active .tl-label {
+  color: var(--red-text);
 }
 
 /* 硬编码浅色图片占位背景在深色下的残留修复 */

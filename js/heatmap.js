@@ -5,9 +5,9 @@
    约束：依赖 utils(getBasePath) / version(ASSET_VERSION)；被 pages.initHomePage 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026081515';
-import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081515';
-import { ASSET_VERSION } from './version.js?v=2026081515';
+import { getBasePath } from './utils.js?v=2026081516';
+import { OFFICIAL_ATTRACTIONS, PROVINCE_NAMES } from './heatmap-data.js?v=2026081516';
+import { ASSET_VERSION } from './version.js?v=2026081516';
 
 /* 读取 CSS 令牌（含深色覆盖后的计算值），供 ECharts/SVG 主题适配 */
 function cssVar(name, fallback) {
@@ -84,6 +84,9 @@ async function initECharts(container, provinceData) {
 
     const exist = echarts.getInstanceByDom(container);
     if (exist) exist.dispose();
+    // ECharts canvas 无文本替代：给容器声明 role=img + 数据概述，读屏可感知
+    container.setAttribute('role', 'img');
+    container.setAttribute('aria-label', '全国红色旅游经典景区分布热力图：据官方名录共 300 处，覆盖 31 个省级行政区，颜色深浅表示景区数量多少');
     const chart = echarts.init(container);
     try { window.__homeHeatmapChart = chart; } catch (e) { }  // 供 e2e 交互测试读取缩放/中心状态
     applyHeatmapOption(chart, chartData, provinceData);

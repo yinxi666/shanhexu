@@ -34,6 +34,12 @@ export function initHeroCarousel() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     started = true;
 
+    // 预取全部轮播图：避免切图那一刻才 fetch 数百 KB 大图，交叉淡入露出空白/旧图（慢网闪烁）
+    images.forEach(function (src) {
+      const im = new Image();
+      im.src = src;
+    });
+
     timer = setInterval(function () {
       current = (current + 1) % images.length;
       next.src = images[current];

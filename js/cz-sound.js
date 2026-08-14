@@ -5,7 +5,7 @@
    - getStation：返回当前站点的回调（用于确定 mood）
    ============================================================ */
 
-import { icon } from './icons.js?v=2026081515';
+import { icon } from './icons.js?v=2026081516';
 
 let _audioCtx = null;
 let _soundMaster = null;

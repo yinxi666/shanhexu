@@ -797,21 +797,25 @@
   background: var(--light-red);
 }
 
-/* 音量滑条 — 横向，hover 时在按钮左侧滑出 */
+/* 音量滑条 — 横向，hover 或键盘聚焦时在按钮左侧滑出（focus-within 保证 Tab 可达） */
 .music-volume {
   -webkit-appearance: none;
   appearance: none;
   width: 0;
   height: 6px;
   border-radius: var(--radius-xs);
-  background: var(--line);
+  /* 填充比例走 --vol（music.js 写），颜色走令牌，深色模式自动适配 */
+  background: linear-gradient(to right,
+      var(--red) 0%, var(--red) var(--vol, 0%),
+      var(--line) var(--vol, 0%), var(--line) 100%);
   outline: none;
   cursor: pointer;
   opacity: 0;
   transition: width var(--duration-fast) ease, opacity var(--duration-fast) ease;
 }
 
-.music-player:hover .music-volume {
+.music-player:hover .music-volume,
+.music-player:focus-within .music-volume {
   width: 90px;
   opacity: 1;
   margin-right: 12px;

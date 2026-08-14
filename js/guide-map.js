@@ -5,7 +5,7 @@
          以 <script defer> 静态加载（自托管 assets/leaflet/，window.L）
    ============================================================ */
 
-import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081515';
+import { escapeHtml, escapeAttr, getBasePath } from './utils.js?v=2026081516';
 
 export function createGuideMap(mapContainer) {
   let leafletMap = null;
@@ -76,7 +76,7 @@ export function createGuideMap(mapContainer) {
     const hlIcon = makeIcon(true);
 
     withCoords.forEach(function (v) {
-      const marker = L.marker([v.coordinates.lat, v.coordinates.lng], { icon: defIcon })
+      const marker = L.marker([v.coordinates.lat, v.coordinates.lng], { icon: defIcon, title: v.name, alt: v.name })
         .bindPopup('<b>' + escapeHtml(v.name) + '</b><br>' + escapeHtml(v.province) + ' ' + escapeHtml(v.city || '') + '<br><a href="' + escapeAttr(getBasePath() + 'pages/detail.html?id=' + encodeURIComponent(v.id)) + '">查看详情 →</a>');
       marker.addTo(leafletMap);
       venueMarkerMap[String(v.id)] = { marker: marker, def: defIcon, hl: hlIcon };
@@ -89,12 +89,16 @@ export function createGuideMap(mapContainer) {
     }
   }
 
+  let _hlId = null; // 当前高亮 marker id（hover 高频调用时缓存，未变即跳过，避免每次全量 setIcon）
   function highlightMarker(venueId) {
-    Object.keys(venueMarkerMap).forEach(function (k) {
-      venueMarkerMap[k].marker.setIcon(venueMarkerMap[k].def);
-      venueMarkerMap[k].marker.setZIndexOffset(0);
-    });
-    const entry = venueMarkerMap[String(venueId)];
+    const key = String(venueId);
+    if (_hlId === key) return;
+    if (_hlId !== null && venueMarkerMap[_hlId]) {
+      venueMarkerMap[_hlId].marker.setIcon(venueMarkerMap[_hlId].def);
+      venueMarkerMap[_hlId].marker.setZIndexOffset(0);
+    }
+    _hlId = key;
+    const entry = venueMarkerMap[key];
     if (entry) {
       entry.marker.setIcon(entry.hl);
       entry.marker.setZIndexOffset(1000);

@@ -78,3 +78,34 @@ test('聊天快速回复按钮：深色模式下文字/背景对比度 ≥ 4.5 (
   const ratio = quickReplyContrast(cssMap, 'dark');
   assert.ok(ratio >= 4.5, `深色对比度不足: ${ratio.toFixed(2)}:1`);
 });
+
+/* ---------------- 卡标题深色对比度（防 --deep-red 作文字色回归） ---------------- */
+
+test('深色模式：卡标题文字对 card-bg 对比度 ≥ 4.5 (WCAG AA)', () => {
+  const darkSelectors = [
+    '.feature-card h3',
+    '.venue-card .card-body h3',
+    '.detail-main .detail-body h2',
+    '.policy-card .policy-info h3',
+    '.practice-card .practice-body h3',
+    '.quiz-start h3',
+    '.quiz-question h3',
+    '.tl-node:hover .tl-label',
+    '.tl-node.active .tl-label',
+  ];
+  const darkRules = findRules(cssMap['dark.css'], /^html\.dark/);
+  const tokens = tokenMap(cssMap, /^html\.dark$/);
+
+  // 1) 这些标题在深色下都有 html.dark 覆盖，且颜色引用 --red-text（而非裸 #991b1b）
+  const covered = darkSelectors.every(sel =>
+    darkRules.some(r => r.selector.includes(sel) && /--red-text/.test(r.decls.color || ''))
+  );
+  assert.ok(covered, '深色模式下卡标题应被 html.dark 规则覆盖为 --red-text');
+
+  // 2) --red-text 对 --card-bg 对比度 ≥ 4.5（#f87171 on #1e293b 实测 5.30）
+  const cardBg = parseColor(resolveVars('var(--card-bg)', tokens));
+  const text = parseColor(resolveVars('var(--red-text)', tokens));
+  assert.ok(cardBg && text, '无法解析 --card-bg / --red-text');
+  const ratio = contrastRatio(text, cardBg);
+  assert.ok(ratio >= 4.5, `深色标题 --red-text 对 card-bg 对比度不足: ${ratio.toFixed(2)}:1`);
+});

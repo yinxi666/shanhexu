@@ -4,11 +4,11 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081515';
-import { $, onOverlayClick } from './ui.js?v=2026081515';
-import { icon } from './icons.js?v=2026081515';
-import { getBasePath } from './utils.js?v=2026081515';
-import { quizData } from './quiz-data.js?v=2026081515';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026081516';
+import { $, onOverlayClick } from './ui.js?v=2026081516';
+import { icon } from './icons.js?v=2026081516';
+import { getBasePath } from './utils.js?v=2026081516';
+import { quizData } from './quiz-data.js?v=2026081516';
 
 function initQuiz() {
   if ($('.quiz-fab')) return;
@@ -120,7 +120,10 @@ function initQuiz() {
       if (!raw) return null;
       const s = JSON.parse(raw);
       if (!s || !Array.isArray(s.qs) || !Array.isArray(s.answers)) return null;
-      const gq = s.qs.map(i => quizData[i]).filter(Boolean);
+      // 校验 qs 是合法题号数组：篡改 "constructor" 会经 quizData[key] 取到函数/数字（truthy 通过
+      // filter），随后 renderQuestion 的 item.opts.map 抛未捕获 TypeError，问答弹窗整体死锁
+      if (!s.qs.every(i => Number.isInteger(i) && i >= 0 && i < quizData.length)) return null;
+      const gq = s.qs.map(i => quizData[i]);
       if (gq.length === 0 || gq.length !== s.answers.length) return null; // 数据损坏则丢弃
       // 校验 currentQ 边界（非负整数且 < 题数）：越界/负数的损坏存储会触发 gameQuestions[-1] 未捕获异常，
       // 且已在完成态(>=length)的陈旧断点在此被丢弃，避免每次打开重复读取
