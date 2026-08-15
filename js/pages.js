@@ -5,13 +5,13 @@
          依赖 data/renderers/utils；被 app.js（autoInit）与 action-delegate.js（likePractice）引用
    ============================================================ */
 
-import * as RedData from './data.js?v=2026080502';
-import * as RedRenderers from './renderers.js?v=2026080502';
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080502';
-import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080502';
-import { initBgMusic } from './music.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
-import { initHomeHeatmap } from './heatmap.js?v=2026080502';
+import * as RedData from './data.js?v=2026080503';
+import * as RedRenderers from './renderers.js?v=2026080503';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, safeStorage } from './utils.js?v=2026080503';
+import { showToast, bindImageFallbacks, initNavigation, initBackToTop, initCurtainTransition, initViewTransitions, initHeaderScroll, initScrollProgress, initScrollAnimations, initContextMenuBlock } from './ui.js?v=2026080503';
+import { initBgMusic } from './music.js?v=2026080503';
+import { icon } from './icons.js?v=2026080503';
+import { initHomeHeatmap } from './heatmap.js?v=2026080503';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
@@ -238,12 +238,57 @@ async function initCommon() {
   initCurtainTransition();
   initViewTransitions();
   initHeaderScroll();
+  initScrollProgress();
   initScrollAnimations();
   // 长征沉浸页自带环境音开关（cz-sound-toggle），跳过全局背景音乐，避免双音频控件并存
   if (!location.pathname.includes('changzheng')) {
     initBgMusic();
   }
   initContextMenuBlock();
+}
+
+/* ---------- 统计数字滚动（克制：cubic ease-out；尊重减少动效 + 开场动画节奏） ---------- */
+function animateCount(el, target, suffix) {
+  if (!el) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = target + suffix;
+    return;
+  }
+
+  const run = () => {
+    const duration = 1100;
+    const start = performance.now();
+    (function tick(now) {
+      const t = Math.min(1, (now - start) / duration);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3))) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+    })(start);
+  };
+
+  let entranceDone = !document.documentElement.classList.contains('entrance-active');
+  let visible = false;
+  let started = false;
+  const maybeRun = () => {
+    if (!started && entranceDone && visible) { started = true; run(); }
+  };
+
+  if (!entranceDone) {
+    window.addEventListener('entranceFinished', () => { entranceDone = true; maybeRun(); }, { once: true });
+    // 兜底：即便入场事件因异常未触发，也在合理时间后启动
+    setTimeout(() => { entranceDone = true; maybeRun(); }, 7000);
+  }
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { visible = true; io.disconnect(); maybeRun(); }
+      });
+    }, { threshold: 0.2 });
+    io.observe(el);
+  } else {
+    visible = true;
+  }
+  maybeRun();
 }
 
 /* ---------- 页面控制器 ---------- */
@@ -276,10 +321,10 @@ async function initHomePage() {
   const statPractices = $('#stat-practices');
   const statReflections = $('#stat-reflections');
 
-  if (statProvinces) statProvinces.textContent = provinceCount > 0 ? provinceCount + '+' : '0';
-  if (statCategories) statCategories.textContent = categoryCount > 0 ? categoryCount : '0';
-  if (statPractices) statPractices.textContent = practiceCount > 0 ? practiceCount + '+' : '0';
-  if (statReflections) statReflections.textContent = reflectionCount > 0 ? reflectionCount + '+' : '0';
+  if (statProvinces) animateCount(statProvinces, provinceCount > 0 ? provinceCount : 0, '+');
+  if (statCategories) animateCount(statCategories, categoryCount > 0 ? categoryCount : 0, '');
+  if (statPractices) animateCount(statPractices, practiceCount > 0 ? practiceCount : 0, '+');
+  if (statReflections) animateCount(statReflections, reflectionCount > 0 ? reflectionCount : 0, '+');
 
   // 初始化热力图
   initHomeHeatmap(venues);

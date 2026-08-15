@@ -888,7 +888,7 @@
   inset: -38px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 140, 70, 0.3) 0%, transparent 65%);
-  animation: cz-complete-glow 2var(--transition) ease-in-out infinite;
+  animation: cz-complete-glow 2.4s ease-in-out infinite;
   pointer-events: none;
 }
 .cz-complete-portrait img {

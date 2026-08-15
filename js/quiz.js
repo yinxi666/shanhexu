@@ -4,8 +4,8 @@
    约束：依赖 focus-trap；被 app.js（初始化）与 action-delegate.js（openQuiz）引用
    ============================================================ */
 
-import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
+import { trapFocus, releaseFocus } from './focus-trap.js?v=2026080503';
+import { icon } from './icons.js?v=2026080503';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 

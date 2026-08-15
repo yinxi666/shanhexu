@@ -51,7 +51,11 @@
   /* 红金主渐变与印章红：多处重复的硬编码颜色收敛 */
   --grad-primary: linear-gradient(135deg, #c0392b, #8b1a1a);
   --seal-red: #c0392b;
-  --transition: 0.25s ease;
+  /* 注意：--transition 必须是「纯时长」，不可带 ease 等缓动关键字。
+     它会被同时用于 transition 简写、transition-delay、animation-delay 等
+     单值场景；带缓动关键字会导致后者解析失败（动画失效）。
+     缓动统一走下方 --ease-* 令牌。 */
+  --transition: 0.25s;
   --max-width: 1180px;
 
   /* ============================================================
@@ -188,15 +192,15 @@ p {
   }
 
   25% {
-    transform: scale(1.05) translate(-1%, -1%);
+    transform: scale(1.03) translate(-0.4%, -0.4%);
   }
 
   50% {
-    transform: scale(1.08) translate(1%, 0.5%);
+    transform: scale(1.05) translate(0.4%, 0.3%);
   }
 
   75% {
-    transform: scale(1.05) translate(-0.5%, 1%);
+    transform: scale(1.03) translate(-0.3%, 0.4%);
   }
 
   100% {
@@ -207,7 +211,7 @@ p {
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(26px);
   }
 
   to {
@@ -269,7 +273,7 @@ p {
 /* 滚动触发动画 */
 .scroll-animate {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translateY(26px);
   transition: opacity var(--duration-normal) var(--ease-cinematic), transform var(--duration-normal) var(--ease-cinematic);
 }
 
@@ -278,12 +282,13 @@ p {
   transform: translateY(0);
 }
 
+/* 错峰延迟：统一 0.1s 步进，保证卡片/统计逐次浮现的连贯节奏 */
 .scroll-animate-delay-1 {
-  transition-delay: 0.var(--duration-normal);
+  transition-delay: 0.1s;
 }
 
 .scroll-animate-delay-2 {
-  transition-delay: var(--transition);
+  transition-delay: 0.2s;
 }
 
 .scroll-animate-delay-3 {
@@ -291,11 +296,11 @@ p {
 }
 
 .scroll-animate-delay-4 {
-  transition-delay: var(--duration-fast);
+  transition-delay: 0.4s;
 }
 
 .scroll-animate-delay-5 {
-  transition-delay: var(--duration-normal);
+  transition-delay: 0.5s;
 }
 
 
@@ -323,5 +328,39 @@ p {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   顶部阅读进度条（细红金渐变，随滚动平滑推进）
+   JS（ui.js initScrollProgress）写入 transform: scaleX(...)
+   ============================================================ */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red) 0%, var(--gold) 100%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  z-index: 601;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* ============================================================
+   移动端动效收敛（双端体验一致 + 降低 GPU 负担 / 防眩晕）
+   装饰性循环动画在小屏下降级，交互态动画保留
+   ============================================================ */
+@media (max-width: 860px) {
+  /* 聊天头部斜向扫光：小屏全宽面板下过于抢眼，收敛为静态 */
+  .chat-header::after {
+    animation: none;
+  }
+
+  /* 首页 Ken Burns 推拉进一步放缓，减少长时间注视的眩晕感 */
+  .animate-ken-burns {
+    animation-duration: 40s;
   }
 }

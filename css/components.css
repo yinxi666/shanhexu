@@ -143,7 +143,7 @@
 
 .search-toolbar .search-box button:active {
   transform: translateY(0) scale(0.97);
-  transition: all 0.var(--duration-normal) ease;
+  transition: all 0.12s ease;
 }
 
 /* ---- 筛选下拉框 ---- */

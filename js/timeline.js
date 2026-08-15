@@ -4,9 +4,9 @@
    约束：依赖 utils(getBasePath) / venue-store(getVenues)；被 homepage.js 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
-import { getVenues } from './venue-store.js?v=2026080502';
+import { getBasePath } from './utils.js?v=2026080503';
+import { icon } from './icons.js?v=2026080503';
+import { getVenues } from './venue-store.js?v=2026080503';
 
 function initTimeline() {
   if (!(location.pathname.endsWith('/') || location.pathname.endsWith('index.html'))) return;

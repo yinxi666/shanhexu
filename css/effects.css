@@ -129,7 +129,7 @@ main {
   animation: pageFadeIn var(--duration-normal) cubic-bezier(0.2, 0, 0.0, 1);
 }
 
-/* 卡片弹入（全浏览器通用） */
+/* 卡片弹入（全浏览器通用）：统一 0.06s 步进错峰，避免跳号 */
 .venue-card,
 .policy-card,
 .practice-card,
@@ -148,13 +148,13 @@ main {
 .venue-card:nth-child(2),
 .feature-card:nth-child(2),
 .stat-item:nth-child(2) {
-  animation-delay: var(--transition);
+  animation-delay: 0.12s;
 }
 
 .venue-card:nth-child(3),
 .feature-card:nth-child(3),
 .stat-item:nth-child(3) {
-  animation-delay: var(--transition);
+  animation-delay: 0.18s;
 }
 
 .venue-card:nth-child(4),
@@ -164,7 +164,7 @@ main {
 }
 
 .venue-card:nth-child(5) {
-  animation-delay: 0.30s;
+  animation-delay: 0.3s;
 }
 
 /* ---------- 分享按钮 ---------- */
@@ -778,18 +778,18 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 }
 
 .red-star-marker.marker-highlight .rsm-inner {
-  animation: marker-pulse 1var(--transition) ease-in-out infinite;
+  animation: marker-pulse 1.6s ease-in-out infinite;
 }
 
 @keyframes marker-pulse {
 
   0%,
   100% {
-    transform: scale(1.2);
+    transform: scale(1.12);
   }
 
   50% {
-    transform: scale(1.45);
+    transform: scale(1.28);
   }
 }
 
@@ -1008,7 +1008,7 @@ html[data-vt-dir="back"]::view-transition-new(root) {
 
 .ai-thinking-dots span {
   display: inline-block;
-  animation: ai-dots 1var(--transition) infinite;
+  animation: ai-dots 1.2s infinite;
 }
 
 .ai-thinking-dots span:nth-child(2) {

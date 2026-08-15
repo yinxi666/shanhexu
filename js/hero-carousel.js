@@ -20,6 +20,8 @@
   let started = false;
 
   function startCarousel() {
+    // 尊重系统"减少动效"：不启动背景轮播，仅保留首张静态背景
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (timer) return; // 已经启动
     active = document.querySelector('.hero-bg-active');
     next = document.querySelector('.hero-bg-next');

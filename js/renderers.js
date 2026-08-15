@@ -4,9 +4,9 @@
    依赖：RedData 数据层
    ============================================================ */
 
-import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
-import { isFavorite as checkFavorite } from './favorites.js?v=2026080502';
+import { getBasePath, resolveAssetPath, fallbackSrc, escapeHtml, escapeAttr, sanitizeUrl, getLikeCount } from './utils.js?v=2026080503';
+import { icon } from './icons.js?v=2026080503';
+import { isFavorite as checkFavorite } from './favorites.js?v=2026080503';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 

@@ -5,8 +5,8 @@
    约束：只依赖 utils.js，被 pages/music/modals/cardgen/longmarch/action-delegate 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080502';
-import { icon } from './icons.js?v=2026080502';
+import { getBasePath } from './utils.js?v=2026080503';
+import { icon } from './icons.js?v=2026080503';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 
@@ -149,11 +149,49 @@ function initHeaderScroll() {
   }, { passive: true });
 }
 
+/* ---------- 顶部阅读进度条（克制、连贯、不眩晕） ---------- */
+function initScrollProgress() {
+  // 尊重系统"减少动效"：进度条本身是信息提示，仍保留，但不做逐帧动画（直接走一次初始值即可）
+  const bar = document.createElement('div');
+  bar.id = 'scroll-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+
+  let ticking = false;
+  const update = () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - window.innerHeight;
+    const p = max > 0 ? window.scrollY / max : 0;
+    bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, p)) + ')';
+    ticking = false;
+  };
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
+}
+
 /* ---------- Intersection Observer 滚动动画 ---------- */
 let _scrollObserver = null;
 
 function initScrollAnimations() {
   if (_scrollObserver) _scrollObserver.disconnect();
+
+  // 尊重系统"减少动效"：直接全部显示，不做滚动触发
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.scroll-animate').forEach(el => el.classList.add('visible'));
+    return;
+  }
+  // IntersectionObserver 不可用时的兜底：确保内容不被永久隐藏
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.scroll-animate').forEach(el => el.classList.add('visible'));
+    return;
+  }
+
   _scrollObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -201,6 +239,7 @@ export {
   initCurtainTransition,
   initViewTransitions,
   initHeaderScroll,
+  initScrollProgress,
   initScrollAnimations,
   initContextMenuBlock,
   copyShareLink

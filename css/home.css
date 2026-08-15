@@ -58,8 +58,8 @@
 }
 
 /* Hero 入场动画延迟（替代内联 style） */
-.animate-fade-in-up[data-delay="var(--transition)"] { animation-delay: var(--transition); }
-.animate-fade-in-up[data-delay="var(--duration-fast)"] { animation-delay: var(--duration-fast); }
+.animate-fade-in-up[data-delay="0.2s"] { animation-delay: 0.2s; }
+.animate-fade-in-up[data-delay="0.4s"] { animation-delay: 0.4s; }
 .animate-fade-in-up[data-delay="0.6s"] { animation-delay: 0.6s; }
 .animate-fade-in-up[data-delay="0.8s"] { animation-delay: 0.8s; }
 
