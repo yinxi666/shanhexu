@@ -98,22 +98,16 @@
   font-weight: 900;
   line-height: 1.35;
   margin-bottom: 1rem;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.03em;
   color: var(--hero-text);
-  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.25);
-  text-shadow:
-    0 0 8px rgba(255, 215, 0, 0.7),
-    0 0 25px rgba(255, 180, 0, 0.3),
-    0 0 60px rgba(255, 150, 0, 0.15);
+  -webkit-text-stroke: 0.5px rgba(255, 215, 0, 0.22);
+  text-shadow: 0 2px 18px rgba(255, 180, 0, 0.28);
 }
 
 .hero-title .accent {
-  color: #ff3333;
-  -webkit-text-stroke: 1px rgba(255, 80, 80, 0.25);
-  text-shadow:
-    0 0 8px rgba(255, 60, 60, 0.7),
-    0 0 25px rgba(220, 30, 30, 0.3),
-    0 0 60px rgba(180, 20, 20, 0.15);
+  color: var(--bright-red);
+  -webkit-text-stroke: 0.5px rgba(255, 120, 120, 0.2);
+  text-shadow: 0 2px 16px rgba(220, 38, 38, 0.35);
 }
 
 .hero-subtitle {
@@ -193,8 +187,8 @@
 /* 子页面Hero区域 */
 .subpage-hero {
   position: relative;
-  height: 50vh;
-  height: 50dvh;
+  height: 65vh;
+  height: 65dvh;
   min-height: 300px;
   display: flex;
   align-items: flex-end;
@@ -237,13 +231,10 @@
   font-weight: 900;
   line-height: 1.35;
   margin-bottom: 0.5rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.03em;
   color: var(--hero-text);
-  -webkit-text-stroke: 1px rgba(255, 215, 0, 0.15);
-  text-shadow:
-    0 0 6px rgba(255, 215, 0, 0.6),
-    0 0 20px rgba(255, 180, 0, 0.25),
-    0 0 45px rgba(255, 150, 0, 0.1);
+  -webkit-text-stroke: 0.5px rgba(255, 215, 0, 0.15);
+  text-shadow: 0 2px 14px rgba(255, 180, 0, 0.22);
 }
 
 .subpage-hero-subtitle {
@@ -420,9 +411,9 @@
 
 .section-heading .eyebrow {
   margin: 0 0 8px;
-  color: var(--gold);
+  color: var(--gold-ink);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 3px;
   text-transform: uppercase;
 }

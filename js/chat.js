@@ -5,10 +5,10 @@
          被 app.js（初始化）与 action-delegate.js（openChat）引用
    ============================================================ */
 
-import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, safeStorage } from './utils.js?v=2026080503';
-import * as RedData from './data.js?v=2026080503';
-import { getVenues } from './venue-store.js?v=2026080503';
-import { icon } from './icons.js?v=2026080503';
+import { escapeHtml, escapeAttr, sanitizeUrl, getBasePath, resolveAssetPath, safeStorage } from './utils.js?v=2026080504';
+import * as RedData from './data.js?v=2026080504';
+import { getVenues } from './venue-store.js?v=2026080504';
+import { icon } from './icons.js?v=2026080504';
 
 const $ = (s, c) => (c || document).querySelector(s);
 const $$ = (s, c) => [...(c || document).querySelectorAll(s)];

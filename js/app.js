@@ -3,18 +3,18 @@
    职责：统一初始化所有 ES Module 模块，按固定顺序编排引导流程
    ============================================================ */
 
-import * as RedPages from './pages.js?v=2026080503';
-import * as RedCardGen from './cardgen.js?v=2026080503';
-import * as RedLongMarch from './longmarch.js?v=2026080503';
-import { initChatWidget } from './chat.js?v=2026080503';
-import { initQuiz } from './quiz.js?v=2026080503';
-import { initDarkMode } from './darkmode.js?v=2026080503';
-import { initMobileNav } from './mobile-nav.js?v=2026080503';
-import { initHomepageInnovation } from './homepage.js?v=2026080503';
-import { loadVenues } from './venue-store.js?v=2026080503';
-import { initActionDelegate } from './action-delegate.js?v=2026080503';
-import { initEntranceAnimation } from './entrance-animation.js?v=2026080503';
-import { loadLayout } from './layout-loader.js?v=2026080503';
+import * as RedPages from './pages.js?v=2026080504';
+import * as RedCardGen from './cardgen.js?v=2026080504';
+import * as RedLongMarch from './longmarch.js?v=2026080504';
+import { initChatWidget } from './chat.js?v=2026080504';
+import { initQuiz } from './quiz.js?v=2026080504';
+import { initDarkMode } from './darkmode.js?v=2026080504';
+import { initMobileNav } from './mobile-nav.js?v=2026080504';
+import { initHomepageInnovation } from './homepage.js?v=2026080504';
+import { loadVenues } from './venue-store.js?v=2026080504';
+import { initActionDelegate } from './action-delegate.js?v=2026080504';
+import { initEntranceAnimation } from './entrance-animation.js?v=2026080504';
+import { loadLayout } from './layout-loader.js?v=2026080504';
 
 /* ---------- 国旗视频：仅桌面大屏自动播放，且尊重"减少动效" ---------- */
 function initFlagVideo() {

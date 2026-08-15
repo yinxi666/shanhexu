@@ -23,6 +23,10 @@
    ============================================================ */
 /* ---------- CSS Variables ---------- */
 :root {
+  /* 红金主色阶（美术基准）：
+     --red        主红（文字/按钮/描边）   --deep-red  深红（悬停/底）
+     --bright-red 亮红（强调字）           --gold      主金（装饰/描边）
+     --gold-ink   深金（浅底文字，保证对比度）   --light-gold 浅金底 */
   --red: #b91c1c;
   --deep-red: #7f1d1d;
   --bright-red: #dc2626;
@@ -362,5 +366,29 @@ p {
   /* 首页 Ken Burns 推拉进一步放缓，减少长时间注视的眩晕感 */
   .animate-ken-burns {
     animation-duration: 40s;
+  }
+}
+
+/* ============================================================
+   触屏按压反馈：移动端没有 :hover，用 :active 提供即时物理手感
+   （仅限触屏设备；桌面端保持原有 hover 抬升效果）
+   ============================================================ */
+@media (hover: none) and (pointer: coarse) {
+
+  .venue-card:active,
+  .feature-card:active,
+  .practice-card:active,
+  .policy-card:active,
+  .stat-item:active {
+    transform: translateY(1px) scale(0.985);
+  }
+
+  .btn:active,
+  .hero-btn:active,
+  .chat-fab:active,
+  .quiz-fab:active,
+  .dark-toggle:active,
+  .fav-btn:active {
+    transform: translateY(1px) scale(0.97);
   }
 }

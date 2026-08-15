@@ -52,6 +52,11 @@
     flex-shrink: 1;
   }
 
+  /* 小屏隐藏「红」印章方块：只保留学院 logo + 两行标题，避免品牌区三元素拥挤 */
+  .brand-mark {
+    display: none;
+  }
+
   .brand img {
     height: 22px !important;
     max-width: 70px !important;

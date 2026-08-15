@@ -5,8 +5,8 @@
    约束：只依赖 utils.js，被 pages/music/modals/cardgen/longmarch/action-delegate 引用
    ============================================================ */
 
-import { getBasePath } from './utils.js?v=2026080503';
-import { icon } from './icons.js?v=2026080503';
+import { getBasePath } from './utils.js?v=2026080504';
+import { icon } from './icons.js?v=2026080504';
 
 const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 

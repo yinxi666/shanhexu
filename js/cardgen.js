@@ -2,10 +2,10 @@
    红色纪念卡 — Canvas 合成红色文创纪念卡，可下载 / 分享
    纯前端实现：本地同源图片 + 系统字体，无后端、无依赖
    ============================================================ */
-import { getBasePath, resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026080503';
-import { showToast } from './ui.js?v=2026080503';
-import { icon } from './icons.js?v=2026080503';
-import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026080503';
+import { getBasePath, resolveAssetPath, escapeHtml, escapeAttr, isTouchDevice } from './utils.js?v=2026080504';
+import { showToast } from './ui.js?v=2026080504';
+import { icon } from './icons.js?v=2026080504';
+import { trapFocus, releaseFocus, lockBodyScroll, unlockBodyScroll } from './focus-trap.js?v=2026080504';
 
 const $ = (s, c) => (c || document).querySelector(s);
 function toast(msg) {
